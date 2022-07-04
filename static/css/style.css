@@ -1,0 +1,126 @@
+/**
+ * Copyright 2022 ilotterytea
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Manrope:wght@500;600;700&display=swap');
+ :root {
+    --bg-color-main: #0f0f0f;
+    --text-color: #ddd;
+
+    --bg-color-submit-button: #649b44;
+    --bg-color-sec-submit-button: #75b450;
+    --bg-color-submit-button-na: #555;
+    --bg-color-submit-button-na-2: #333;
+    --border-color-submit-button: #a5df84;
+    --border-color-submit-button-highlight: #d3f3c0;
+    --border-color-submit-button-na: #888;
+    --text-color-submit-button: #ddd;
+    --text-color-submit-button-na: #aaa;
+    --text-color-submit-button-highlight: #fff;
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+body {
+    background: var(--bg-color-main);
+    color: var(--text-color);
+    font-family: "Inter", sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    margin: 0 30px;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 0;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.content section {
+    padding: 14px;
+}
+
+h1,h2,h3 {
+    font-family: "Manrope", sans-serif;
+}
+
+input[type=submit]  {
+    background: linear-gradient(0deg, var(--bg-color-sec-submit-button), var(--bg-color-submit-button));
+    padding: 2px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color-submit-button);
+    color: var(--text-color-submit-button);
+}
+
+input[type=submit]:hover {
+    background: linear-gradient(0deg, var(--bg-color-submit-button), var(--bg-color-sec-submit-button));
+    border: 1px solid var(--border-color-submit-button-highlight);
+    color: var(--text-color-submit-button-highlight);
+    cursor: pointer;
+}
+input[type=submit]:disabled {
+    background: linear-gradient(0deg, var(--bg-color-submit-button-na-2), var(--bg-color-submit-button-na));
+    color: var(--text-color-submit-button-na);
+    border: 1px solid var(--border-color-submit-button-na);
+}
+
+input[type=submit]:disabled:hover {
+    cursor: not-allowed;
+}
+
+input[type=file]::file-selector-button {
+    background: linear-gradient(0deg, var(--bg-color-sec-submit-button), var(--bg-color-submit-button));
+    padding: 2px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color-submit-button);
+    color: var(--text-color-submit-button);
+}
+
+input[type=file]::file-selector-button:hover {
+    background: linear-gradient(0deg, var(--bg-color-submit-button), var(--bg-color-sec-submit-button));
+    border: 1px solid var(--border-color-submit-button-highlight);
+    color: var(--text-color-submit-button-highlight);
+    cursor: pointer;
+}
+
+a img:hover {
+    opacity: 0.75;
+}
+
+#i_preview {
+    padding: 16px 0;
+}
+#preview {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#footer {
+    align-items: center;
+    justify-content: center;
+    justify-items: center;
+}
