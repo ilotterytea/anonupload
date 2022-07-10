@@ -43,9 +43,9 @@ A small file hoster on ExpressJS.
 1. [ <img src="https://camo.githubusercontent.com/6ca305d42786c9dbd0b76f5ade013601b080d71a598e881b4349dff2eafae6c7/68747470733a2f2f666f757274662e636f6d2f696d672f63686174746572696e6f2d69636f6e2d36342e706e67" width=24> Chatterino 2 (by fourtf, pajlada, and more...)](https://github.com/chatterino/chatterino2):
     1. Go to `Settings -> External Tools -> Image Uploader` and paste the values in the relevant fields:
 
-    | Field | Value |
-    | ---- | ----- |
-    | Request URL: | `<YOUR_DOMAIN>`/dank_upload |
+    | Field | Value | Example |
+    | ---- | ------ | ------- |
+    | Request URL: | `<YOUR_DOMAIN>`/dank_upload | https://hmmtodayiwill.ru/i/dank_upload
     | Form field: | file |
-    | Extra Headers: | no-redirect: true |
-    | Image Link: | `<YOUR_DOMAIN>`/i/{name} |
+    | Extra Headers: | no-redirect: true | 
+    | Image Link: | `<YOUR_DOMAIN>`/i/{name} | https://hmmtodayiwill.ru/i/{file}
