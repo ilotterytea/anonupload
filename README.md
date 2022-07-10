@@ -48,4 +48,4 @@ A small file hoster on ExpressJS.
     | Request URL: | `<YOUR_DOMAIN>`/dank_upload | https://hmmtodayiwill.ru/i/dank_upload
     | Form field: | file |
     | Extra Headers: | no-redirect: true | 
-    | Image Link: | `<YOUR_DOMAIN>`/i/{name} | https://hmmtodayiwill.ru/i/{file}
+    | Image Link: | `<YOUR_DOMAIN>`/i/{name} | https://hmmtodayiwill.ru/i/{name}
