@@ -26,6 +26,7 @@ import ProfileRouter from "./routers/Profile";
 import AuthRouter from "./routers/Auth";
 import ImageRouter from "./routers/Image";
 import { PrismaClient } from "@prisma/client";
+import { readFileSync } from "fs";
 
 const log: Logger = new Logger({name: "main"});
 
@@ -56,18 +57,18 @@ function Main(dirPath: string, cfg: {[key: string]: any}, cli_options?: {[key: s
                     
         if (!cli_options.noSsl) {
             if (
-                !cfg.Certificate.Key ||
-                !cfg.Certificate.Cert ||
-                !cfg.Certificate.Ca
+                cfg.Certificate.Key == "" ||
+                cfg.Certificate.Cert == "" ||
+                cfg.Certificate.Ca == ""
             ) {
                 log.error("No paths for certificate provided.");
                 process.exit(1);
             }
 
             const credentials = {
-                key: cfg.Certificate.Key,
-                cert: cfg.Certificate.Cert,
-                ca: cfg.Certificate.Ca
+                key: readFileSync(cfg.Certificate.Key, {encoding: "utf-8"}),
+                cert: readFileSync(cfg.Certificate.Cert, {encoding: "utf-8"}),
+                ca: readFileSync(cfg.Certificate.Ca, {encoding: "utf-8"})
             }
 
             httpsc = https.createServer(credentials, App);
