@@ -49,12 +49,12 @@ function Main(dirPath: string, cfg: {[key: string]: any}, cli_options?: {[key: s
     App.use(express.static(`${dirPath}/static`));
 
     if (cli_options) {
+        httpc = http.createServer(App);
+        httpc.listen(parseInt(cfg.Ports.HTTP), () => {
+            log.info("Image hoster is running on port", cfg.Ports.HTTP);
+        });
+                    
         if (!cli_options.noSsl) {
-            httpc = http.createServer(App);
-            httpc.listen(parseInt(cfg.Ports.HTTP), () => {
-                log.info("Image hoster is running on port", cfg.Ports.HTTP);
-            });
-        } else {
             if (
                 !cfg.Certificate.Key ||
                 !cfg.Certificate.Cert ||
