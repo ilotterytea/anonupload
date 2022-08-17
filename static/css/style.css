@@ -13,114 +13,289 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Manrope:wght@500;600;700&display=swap');
- :root {
-    --bg-color-main: #0f0f0f;
-    --text-color: #ddd;
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Manrope:wght@500;600;700&family=SourceCodePro:wght@500,600,700&display=swap');
+ @import url('https://use.fontawesome.com/releases/v6.1.2/css/all.css');
 
-    --bg-color-submit-button: #649b44;
-    --bg-color-sec-submit-button: #75b450;
-    --bg-color-submit-button-na: #555;
-    --bg-color-submit-button-na-2: #333;
-    --border-color-submit-button: #a5df84;
-    --border-color-submit-button-highlight: #d3f3c0;
-    --border-color-submit-button-na: #888;
-    --text-color-submit-button: #ddd;
-    --text-color-submit-button-na: #aaa;
-    --text-color-submit-button-highlight: #fff;
-}
-html, body {
+ :root {
+    --text-black: #151515;
+    --text-white: #fff;
+    --button-0: #7aa751;
+    --button-1: #84b458;
+    --button-border: #63a62f;
+    --button-text-shadow: #4c9021;
+ }
+
+ html, body, h1, h2, h3, p {
     margin: 0;
     padding: 0;
-    min-height: 100vh;
-}
-body {
-    background: var(--bg-color-main);
-    color: var(--text-color);
+ }
+
+ body {
     font-family: "Inter", sans-serif;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
+    font-size: 14px;
+    background: var(--text-black);
+    color: var(--text-white);
+ }
 
-.container {
-    margin: 0 30px;
-    display: flex;
-    flex-grow: 1;
-    flex-direction: column;
-    justify-content: center;
-    padding: 40px 0;
-}
-
-.content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.content section {
-    padding: 14px;
-}
-
-h1,h2,h3 {
+ h1,h2,h3 {
     font-family: "Manrope", sans-serif;
-}
+ }
 
-input[type=submit]  {
-    background: linear-gradient(0deg, var(--bg-color-sec-submit-button), var(--bg-color-submit-button));
-    padding: 2px 12px;
-    border-radius: 5px;
-    border: 1px solid var(--border-color-submit-button);
-    color: var(--text-color-submit-button);
-}
-
-input[type=submit]:hover {
-    background: linear-gradient(0deg, var(--bg-color-submit-button), var(--bg-color-sec-submit-button));
-    border: 1px solid var(--border-color-submit-button-highlight);
-    color: var(--text-color-submit-button-highlight);
-    cursor: pointer;
-}
-input[type=submit]:disabled {
-    background: linear-gradient(0deg, var(--bg-color-submit-button-na-2), var(--bg-color-submit-button-na));
-    color: var(--text-color-submit-button-na);
-    border: 1px solid var(--border-color-submit-button-na);
-}
-
-input[type=submit]:disabled:hover {
-    cursor: not-allowed;
-}
-
-input[type=file]::file-selector-button {
-    background: linear-gradient(0deg, var(--bg-color-sec-submit-button), var(--bg-color-submit-button));
-    padding: 2px 12px;
-    border-radius: 5px;
-    border: 1px solid var(--border-color-submit-button);
-    color: var(--text-color-submit-button);
-}
-
-input[type=file]::file-selector-button:hover {
-    background: linear-gradient(0deg, var(--bg-color-submit-button), var(--bg-color-sec-submit-button));
-    border: 1px solid var(--border-color-submit-button-highlight);
-    color: var(--text-color-submit-button-highlight);
-    cursor: pointer;
-}
-
-a img:hover {
-    opacity: 0.75;
-}
-
-#i_preview {
-    padding: 16px 0;
-}
-#preview {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-#footer {
-    align-items: center;
+ .container {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
     justify-content: center;
-    justify-items: center;
+    align-items: center;
+ }
+
+ .wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+ }
+
+ .wrapper section {
+    margin: 8px 0;
+    padding: 8px;
+    min-width: 384px;
+ }
+/* NAVIGATION */
+nav {
+   width: 100%;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   flex-direction: row;
+}
+
+
+nav a.button img {
+   width: 16px;
+   height: auto;
+   border-radius: 4px;
+   margin-right: 8px;
+}
+
+/* MAIN PAGE */
+section#brand {
+   display: flex;
+   flex-direction: row;
+   justify-content: center;
+}
+section#brand #logo img {
+   width: 64px;
+   height: 64px;
+   transform: rotate(-45deg);
+}
+section#brand #summary {
+   margin: 0 16px;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   flex-direction: column;
+}
+section#brand #summary p#name {
+   font-size: 32px;
+   line-height: 0px;
+   margin: 0;
+}
+
+form#uploadform {
+
+}
+
+form#uploadform button#submit {
+   float:right;
+}
+form#uploadform input[type="file"]::file-selector-button {
+   background: linear-gradient(0deg, var(--button-0), var(--button-1));
+   border: var(--button-border) solid 1px;
+   font-family: "Source Code Pro", monospace;
+   color: var(--text-white);
+   text-shadow: 0 -1px 0 var(--button-text-shadow);
+   text-align: center;
+   text-decoration: none;
+   border-radius: 5px;
+   padding: 2px 6px;
+}
+
+form#uploadform input[type="file"]::file-selector-button:hover {
+   background: linear-gradient(180deg, var(--button-0), var(--button-1));
+   cursor: pointer;
+}
+
+/* LINK SECTION */
+.link {
+   display: flex;
+   flex-direction: row;
+}
+.link #link {
+   background: #ddd;
+   overflow-x: scroll;
+   text-overflow: ellipsis;
+   display: table;
+   margin: 0 auto;
+   max-width: 50%;
+}
+ /* ME SECTION */
+ .infoblock {
+    background: linear-gradient(0deg, #000, #222);
+    border: #222 solid 1px;
+    display: flex;
+    flex-direction: column;
+    vertical-align: middle;
+    border-radius: 5px;
+    width: 512px;
+ }
+
+ .infoblock .user_summary {
+    display: flex;
+    flex-direction: row;
+ }
+
+ .summary p#desc {
+    text-align: justify;
+ }
+
+ .summary #name {
+    margin: 12px 0;
+ }
+
+ .infoblock .user_summary div {
+    margin: 5px;
+ }
+
+ .infoblock .user_summary .pfp {
+    display: flex;
+    justify-content: center;
+ }
+
+ .pfp img {
+    width: auto;
+    height: 64px;
+    border-radius: 5px;
+ }
+
+ .infoblock .action_buttons {
+    display: flex;
+    flex-direction: row-reverse;
+ }
+
+ .infoblock .action_buttons a.button {
+    margin: 0 4px;
+ }
+
+ /* ME/IMAGES SECTION! */
+
+ #images h2#name {
+    padding: 6px;
+ }
+
+ .items {
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    max-height: 512px;
+    background: #222;
+    border: #444 solid 1px;
+    border-radius: 4px;
+ }
+
+ .item {
+   background: #525252;
+   border-radius: 4px;
+   padding: 5px;
+   margin: 5px;
+   display: flex;
+   flex-direction: column;
+ }
+
+ .item #info {
+   display: flex;
+   flex-direction: row;
+ }
+
+ .item #info div {
+   margin: 5px;
+ }
+
+ .item #info #numeration {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   font-family: "Manrope", sans-serif;
+   font-weight: 800;
+   font-size: 18px;
+ }
+
+ .item #info #summary {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+ }
+
+ .item #info #summary #timestamp {
+   color: #d7ccff;
+ }
+
+ .item #info #thumbnail img {
+   width: 64px;
+   height: auto;
+ }
+
+ .item #info #actions {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-content: center;
+ }
+
+ /* AUTHENTICATION SECTION */
+ .infoblock#authk .action_buttons {
+   display: flex;
+   flex-direction: row;
+ }
+ .infoblock#authk .action_buttons button {
+   flex-grow: 1;
+   margin: 2px;
+ }
+ /* BUTTONS */
+ .button {
+    background: linear-gradient(0deg, var(--button-0), var(--button-1));
+    border: var(--button-border) solid 1px;
+    font-family: "Source Code Pro", monospace;
+    color: var(--text-white);
+    text-shadow: 0 -1px 0 var(--button-text-shadow);
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    padding: 2px 6px;
+ }
+
+ .button:hover {
+    background: linear-gradient(180deg, var(--button-0), var(--button-1));
+    cursor: pointer;
+ }
+ .button.twitch {
+   font-family: "Inter", sans-serif;
+   padding: 6px;
+   margin: 8px;
+   vertical-align: middle;
+   display: flex;
+   flex-direction: row;
+   background: linear-gradient(0deg, #5f1481, #821ab3);
+   border: #66158b solid 1px;
+   text-shadow: 0 -1px 0 #691591;
+}
+.button.twitch:hover {
+   background: linear-gradient(180deg, #5f1481, #821ab3);
+}
+
+/* SOON (tm) */
+soontm {
+   color: #444;
+   text-decoration: wavy;
+   font-style: italic;
 }

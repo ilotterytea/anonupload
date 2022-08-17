@@ -129,5 +129,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-static/i
-options.json
+# Picturebin
+*.ini
+static/images
+prisma/migrations
+*.db

@@ -1,0 +1,81 @@
+<!--
+ Copyright 2022 NotDankEnough (ilotterytea)
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Picbin</title>
+        <%- include("../partials/meta") %>
+        
+    </head>
+    <body>
+        <nav>
+            <% if (!user) {%>
+            <a href="https://id.twitch.tv/oauth2/authorize?response_type=code&redirect_uri=<%= uri %>&client_id=<%= cid %>" class="button twitch">
+                <span class="fa-brands fa-twitch" style="margin-right:8px;"></span> 
+                <p>Log in with Twitch</p>
+            </a>
+            <% } else { %>
+            <a href="/me" class="button twitch">
+                <img src="<%= user.pic %>">
+                <p><%= user.name %></p>
+            </a>
+            <button onclick="logout()" class="button twitch">
+                <span class="fa-solid fa-arrow-right-from-bracket"></span>
+            </button>
+            <% } %>
+
+            <a href="https://github.com/notdankenough/picbin" class="button twitch">
+                <span class="fa-brands fa-github"></span>
+            </a>
+        </nav>
+        <div class="container">
+            <div class="wrapper">
+                <section id="brand">
+                    <div id="logo">
+                        <img src="../img/favicon.png">
+                    </div>
+                    <div id="summary">
+                        <p id="name"><span style="font-weight:800;font-family:'Manrope', sans-serif;">Pic</span>ture<span style="font-weight:800;font-family:'Manrope',sans-serif;">Bin</span></p>
+                    </div>
+                </section>
+                <section id="form">
+                    <form action="/upload" method="post" id="uploadform">
+                        <label>Select file to upload:</label><br>
+                        <input accept="image/*" type="file" name="file" id="file">
+                        <button type="submit" id="submit" class="button">Upload!</button>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://malsup.github.io/jquery.form.js"></script>
+    <script type="text/javascript">
+        function logout() {
+            document.cookie = "id=;Max-Age=-999999";
+            document.cookie = "key=;Max-Age=-999999";
+            window.location.reload();
+        }
+
+        $("#uploadform").ajaxForm({
+            dataType: "text",
+            success: (response) => {
+                window.location.replace(response.split('/')[response.split('/').length - 1]);
+            }
+        });
+    </script>
+</html>
