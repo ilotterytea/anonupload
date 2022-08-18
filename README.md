@@ -66,6 +66,4 @@ $ npm run start
     | ---- | ------ | ------- |
     | Request URL: | `<YOUR_DOMAIN>`/upload | https://i.hmmtodayiwill.ru/upload
     | Form field: | file |
-    | Extra Headers: | `Authorization: <some Base64 shit>` | Authorization: SUZZT1VTRUVUSElTVklWT05aVUxVTA==
-
-> * If you want to upload pictures under your account, you need to log in with your Twitch account [here](https://i.hmmtodayiwill.ru/).
+    | Extra Headers: | *(If you want to upload pictures under your account, you need to log in with your Twitch Account [here](https://i.hmmtodayiwill.ru/) and get your auth key from your profile)* `Authorization: <AUTH KEY>` | Authorization: SUZZT1VTRUVUSElTVklWT05aVUxVTA==
