@@ -28,14 +28,8 @@ if (cli.init) {
             ClientSecret: "",
             RedirectURI: ""
         },
-        Certificate: {
-            Key: "",
-            Cert: "",
-            Ca: ""
-        },
-        Ports: {
-            HTTP: "80",
-            HTTPS: "443"
+        Server: {
+            Port: "8033"
         }
     }
 

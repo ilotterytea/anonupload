@@ -17,9 +17,6 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 
-import http from "http";
-import https from "https";
-
 import { Logger } from "tslog";
 
 import ProfileRouter from "./routers/Profile";
@@ -34,9 +31,6 @@ function Main(dirPath: string, cfg: {[key: string]: any}, cli_options?: {[key: s
     const App: express.Express = express();
     const prisma: PrismaClient = new PrismaClient();
 
-    var httpc: http.Server | null = null;
-    var httpsc: https.Server | null = null;
-
     App.set("view engine", "ejs");
     App.set("views", `${dirPath}/static/ejs`);
 
@@ -50,32 +44,9 @@ function Main(dirPath: string, cfg: {[key: string]: any}, cli_options?: {[key: s
     App.use(express.static(`${dirPath}/static`));
 
     if (cli_options) {
-        httpc = http.createServer(App);
-        httpc.listen(parseInt(cfg.Ports.HTTP), () => {
+        App.listen(parseInt(cfg.Ports.HTTP), () => {
             log.info("Image hoster is running on port", cfg.Ports.HTTP);
         });
-                    
-        if (!cli_options.noSsl) {
-            if (
-                cfg.Certificate.Key == "" ||
-                cfg.Certificate.Cert == "" ||
-                cfg.Certificate.Ca == ""
-            ) {
-                log.error("No paths for certificate provided.");
-                process.exit(1);
-            }
-
-            const credentials = {
-                key: readFileSync(cfg.Certificate.Key, {encoding: "utf-8"}),
-                cert: readFileSync(cfg.Certificate.Cert, {encoding: "utf-8"}),
-                ca: readFileSync(cfg.Certificate.Ca, {encoding: "utf-8"})
-            }
-
-            httpsc = https.createServer(credentials, App);
-            httpsc.listen(parseInt(cfg.Ports.HTTPS), () => {
-                log.info("Image hoster is running on port", cfg.Ports.HTTPS, "(SSL)");
-            });
-        }
     } else {
         log.error("NO CLI OPTIONS PROVIDED!!!")
         process.exit(1);
