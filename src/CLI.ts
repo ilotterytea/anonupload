@@ -22,7 +22,6 @@ function CLI(): Record<string, string | boolean> {
     const Program = new Command();
 
     Program.option("--init", "Generate the neccessary files.", false);
-    Program.option("--no-ssl", "Run application in debug mode. Port for HTTP connection is \"8080\" instead of standard \"80\".", false);
 
     Program.parse(process.argv);
     return Program.opts();
