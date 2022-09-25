@@ -6,8 +6,8 @@
   "scripts": {
     "test": "ts-node index.ts --debug",
     "build": "tsc",
-    "init": "node dist/index.js --init",
-    "start": "node dist/index.js"
+    "init": "node index.js --init",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
