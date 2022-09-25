@@ -44,8 +44,8 @@ function Main(dirPath: string, cfg: {[key: string]: any}, cli_options?: {[key: s
     App.use(express.static(`${dirPath}/static`));
 
     if (cli_options) {
-        App.listen(parseInt(cfg.Ports.HTTP), () => {
-            log.info("Image hoster is running on port", cfg.Ports.HTTP);
+        App.listen(parseInt(cfg.Server.Port), () => {
+            log.info("Image hoster is running on port", cfg.Server.Port);
         });
     } else {
         log.error("NO CLI OPTIONS PROVIDED!!!")
