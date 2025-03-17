@@ -33,7 +33,7 @@ $accepted_mime_types = implode(', ', $accepted_mime_types);
                 <p>File Upload</p>
             </div>
             <div class="content">
-                <form action="/upload.php" method="post" enctype="multipart/form-data" column="column gap-8">
+                <form action="/upload.php" method="post" enctype="multipart/form-data" class="column gap-8">
                     <input type="file" name="file" required accept="<?= $accepted_mime_types ?>">
                     <button type="submit">Upload</button>
                 </form>
