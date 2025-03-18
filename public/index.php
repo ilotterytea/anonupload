@@ -57,6 +57,8 @@ $accepted_mime_types = implode(', ', $accepted_mime_types);
     });
 
     const formUploadWrapper = document.getElementById('form-upload-wrapper');
+    formUploadWrapper.style.display = 'block';
+    
     const formSubmitButton = document.querySelector('#form-upload button[type=submit]');
 
     const formFile = document.getElementById('form-file');
