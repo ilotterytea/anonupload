@@ -1,20 +1,6 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
-
-$accepted_mime_types = [];
-
-foreach (FILE_ACCEPTED_MIME_TYPES as $k => $v) {
-    $m = [];
-
-    foreach ($v as $z) {
-        array_push($m, "$k/$z");
-    }
-
-    array_push($accepted_mime_types, implode(', ', $m));
-}
-
-$accepted_mime_types = implode(', ', $accepted_mime_types);
 ?>
 <html>
 
@@ -36,7 +22,9 @@ $accepted_mime_types = implode(', ', $accepted_mime_types);
             <div class="content">
                 <form class="column gap-8" action="/upload.php" method="post" enctype="multipart/form-data"
                     id="form-upload">
-                    <input type="file" name="file" accept="<?= $accepted_mime_types ?>" id="form-file">
+                    <input type="file" name="file"
+                        accept="<?= implode(', ', array_unique(array_values(FILE_ACCEPTED_MIME_TYPES))) ?>"
+                        id="form-file">
 
                     <button type="button" id="form-upload-wrapper" style="display: none">
                         <h1>Click here to start upload</h1>
@@ -58,7 +46,7 @@ $accepted_mime_types = implode(', ', $accepted_mime_types);
 
     const formUploadWrapper = document.getElementById('form-upload-wrapper');
     formUploadWrapper.style.display = 'block';
-    
+
     const formSubmitButton = document.querySelector('#form-upload button[type=submit]');
 
     const formFile = document.getElementById('form-file');
