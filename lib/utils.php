@@ -9,7 +9,7 @@ function json_response(mixed $data, string|null $message, int $code = 200)
         'status_code' => $code,
         'message' => $message,
         'data' => $data
-    ]);
+    ], JSON_UNESCAPED_SLASHES);
 }
 
 function generate_random_char_sequence(array $chars, int $length): string
