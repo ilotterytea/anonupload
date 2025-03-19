@@ -1,4 +1,6 @@
 <?php
+include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
+
 function json_response(mixed $data, string|null $message, int $code = 200)
 {
     http_response_code($code);
@@ -8,4 +10,15 @@ function json_response(mixed $data, string|null $message, int $code = 200)
         'message' => $message,
         'data' => $data
     ]);
+}
+
+function generate_random_char_sequence(array $chars, int $length): string
+{
+    $o = "";
+
+    for ($i = 0; $i < $length; $i++) {
+        $o .= $chars[random_int(0, count($chars) - 1)];
+    }
+
+    return $o;
 }
