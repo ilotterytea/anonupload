@@ -54,8 +54,9 @@ try {
 
     json_response([
         'id' => $file_id,
-        'ext' => $file_ext,
-        'mime' => FILE_ACCEPTED_MIME_TYPES[$file_ext]
+        'extension' => $file_ext,
+        'mime' => FILE_ACCEPTED_MIME_TYPES[$file_ext],
+        'size' => $file['size']
     ], null, 201);
 } catch (RuntimeException $e) {
     json_response(null, $e->getMessage(), 400);

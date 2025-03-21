@@ -91,6 +91,14 @@ button[type=submit]:hover {
     flex-grow: 1;
 }
 
+.grid {
+    display: grid;
+}
+
+.grid-3 {
+    grid-template-columns: auto auto auto;
+}
+
 .justify-center {
     justify-content: center;
 }
@@ -105,4 +113,8 @@ button[type=submit]:hover {
 
 .gap-8 {
     gap: 8px;
+}
+
+.gap-4 {
+    gap: 4px;
 }

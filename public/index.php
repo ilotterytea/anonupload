@@ -34,10 +34,20 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
                 </form>
             </div>
         </section>
+
+        <section class="box column" style="display:none">
+            <div class="tab">
+                <p>Uploaded files<span title="Your file ownership is stored locally." style="cursor:help">*</span></p>
+            </div>
+            <div class="content grid grid-3 gap-8" id="uploaded-files">
+            </div>
+        </section>
     </main>
 </body>
 
 <script>
+    const uploadedFiles = document.getElementById('uploaded-files');
+
     const formUpload = document.getElementById('form-upload');
     formUpload.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -87,8 +97,65 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
                     return;
                 }
 
-                alert(`File ID: ${json.data.id}`);
+                uploadedFiles.innerHTML = addUploadedFile(json.data) + uploadedFiles.innerHTML;
+                uploadedFiles.parentElement.style.display = 'flex';
+
+                // saving file
+                let files = getUploadedFiles();
+                files.unshift(json.data);
+                localStorage.setItem('uploaded_files', JSON.stringify(files));
             });
+    }
+
+    function addUploadedFile(file) {
+        return `
+        <div class="box item column gap-4 pad-4">
+            <div class="column align-center justify-center grow">
+                <div style="max-width: 128px; max-height:128px;">
+                    <img src="/userdata/${file.id}.${file.extension}" alt="${file.id}.${file.extension}" style="max-width:100%; max-height: 100%;">
+                </div>
+            </div>
+            <h2>${file.id}.${file.extension}</h2>
+            <div>
+                <p>${file.mime}</p>
+                <p title="${file.size} B">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+            </div>
+            <div class="row gap-8">
+                <a href="/${file.id}.${file.extension}">
+                    <button>Open</button>
+                </a>
+            </div>
+        </div>
+        `;
+    }
+
+    // loading already existing uploaded files
+    function loadUploadedFiles() {
+        let files = getUploadedFiles();
+
+        let html = '';
+
+        for (const file of files) {
+            html += addUploadedFile(file);
+        }
+
+        if (html.length > 0) {
+            uploadedFiles.parentElement.style.display = 'flex';
+        }
+
+        uploadedFiles.innerHTML = html;
+
+        localStorage.setItem('uploaded_files', JSON.stringify(files));
+    }
+
+    loadUploadedFiles();
+
+    function getUploadedFiles() {
+        let files = localStorage.getItem("uploaded_files");
+        if (!files) {
+            files = '[]';
+        }
+        return JSON.parse(files);
     }
 </script>
 
