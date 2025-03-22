@@ -15,3 +15,21 @@ function html_big_navbar()
     </section>
     <?php ;
 }
+
+function html_footer()
+{
+    $files = glob(FILE_DIRECTORY . "/*.*");
+    $file_size = 0;
+
+    foreach ($files as $file) {
+        $file_size += filesize($file);
+    }
+
+    $file_size /= 1024 * 1024;
+
+    echo '' ?>
+    <footer class="column justify-center align-center gap-8">
+        <p>Serving <?= count($files) ?> files and <?= sprintf("%.2f", $file_size) ?>MB of active content</p>
+    </footer>
+    <?php ;
+}

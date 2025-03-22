@@ -42,6 +42,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
             <div class="content grid grid-3 gap-8" id="uploaded-files">
             </div>
         </section>
+
+        <?php html_footer() ?>
     </main>
 </body>
 

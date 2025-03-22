@@ -34,6 +34,11 @@ main {
     gap: 8px;
 }
 
+footer {
+    border-top: 1px solid var(--box-border);
+    padding-top: 4px;
+}
+
 /** FORM */
 button[type=submit] {
     background: linear-gradient(0deg, var(--box-tab-background), var(--background));
