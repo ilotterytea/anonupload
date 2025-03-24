@@ -26,9 +26,28 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
                         accept="<?= implode(', ', array_unique(array_values(FILE_ACCEPTED_MIME_TYPES))) ?>"
                         id="form-file">
 
-                    <button type="button" id="form-upload-wrapper" style="display: none">
-                        <h1>Click here to start upload</h1>
-                    </button>
+                    <div class="column gap-8" id="form-upload-wrapper">
+                        <button type="button">
+                            <h1>Click here to start upload</h1>
+                        </button>
+                        <?php if (FILEEXT_ENABLED): ?>
+                            <div class="row gap-8">
+                                <p>URL:</p>
+                                <div class="column grow">
+                                    <input type="url" name="url" id="form-url"
+                                        placeholder="Instagram, YouTube and other links">
+                                    <ul class="row gap-8 font-small" style="list-style:none">
+                                        <li>
+                                            <p>Max duration: <b><?= FILEEXT_MAX_DURATION / 60 ?> minutes</b></p>
+                                        </li>
+                                        <li><a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md"
+                                                target="_blank">Supported
+                                                platforms</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
 
                     <button type="submit">Upload</button>
                 </form>
@@ -49,15 +68,30 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
 
 <script>
     const uploadedFiles = document.getElementById('uploaded-files');
+    <?php if (FILEEXT_ENABLED): ?>
+        const fileURL = document.getElementById('form-url');
+    <?php endif; ?>
 
     const formUpload = document.getElementById('form-upload');
     formUpload.addEventListener('submit', (event) => {
         event.preventDefault();
-        fileUpload();
+        <?php if (FILEEXT_ENABLED): ?>
+            fileUpload(fileURL.value.length != 0);
+        <?php else: ?>
+            fileUpload(false);
+        <?php endif; ?>
     });
 
-    const formUploadWrapper = document.getElementById('form-upload-wrapper');
-    formUploadWrapper.style.display = 'block';
+    const fileUploadWrapper = document.querySelector('#form-upload-wrapper>button');
+    fileUploadWrapper.style.display = 'block';
+
+    <?php if (FILEEXT_ENABLED): ?>
+        const fileURLWrapper = document.querySelector('#form-upload-wrapper>div');
+        fileURL.addEventListener('change', () => {
+            fileUploadWrapper.style.display = fileURL.value.length == 0 ? 'block' : 'none';
+            formSubmitButton.style.display = fileURL.value.length == 0 ? 'none' : 'block';
+        });
+    <?php endif; ?>
 
     const formSubmitButton = document.querySelector('#form-upload button[type=submit]');
 
@@ -66,21 +100,31 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
     formFile.addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (file) {
-            formUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
+            fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
             formSubmitButton.style.display = 'block';
+            <?php if (FILEEXT_ENABLED): ?>
+                fileURLWrapper.style.display = 'none';
+            <?php endif; ?>
         }
     });
 
-    formUploadWrapper.addEventListener("click", () => formFile.click());
+    fileUploadWrapper.addEventListener("click", () => formFile.click());
 
     formSubmitButton.style.display = 'none';
 
-    function fileUpload() {
-        formUploadWrapper.innerHTML = `<h1>Uploading ${formFile.files[0].name}...</h1><p>This might take a while...</p>`;
+    function fileUpload(is_url) {
+        const form = new FormData(formUpload);
+
+        fileUploadWrapper.innerHTML = is_url ? `<h1>Uploading ${fileURL.value}</h1><p>This might take a while...</p>` : `<h1>Uploading ${formFile.files[0].name}...</h1><p>This might take a while...</p>`;
+        fileUploadWrapper.style.display = 'block';
+        <?php if (FILEEXT_ENABLED): ?>
+            fileURLWrapper.style.display = 'none';
+            fileURL.value = '';
+        <?php endif; ?>
         formSubmitButton.style.display = 'none';
 
         fetch(formUpload.getAttribute('action'), {
-            'body': new FormData(formUpload),
+            'body': form,
             'method': 'POST',
             'headers': {
                 'Accept': 'application/json'
@@ -89,10 +133,18 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
             .catch((err) => {
                 console.error(err);
                 alert('Failed to send a file. More info in the console...');
+                <?php if (FILEEXT_ENABLED): ?>
+                    fileURLWrapper.style.display = 'flex';
+                <?php endif; ?>
+                fileUploadWrapper.style.display = 'block';
             })
             .then((r) => r.json())
             .then((json) => {
-                formUploadWrapper.innerHTML = '<h1>Click here to start upload</h1>';
+                fileUploadWrapper.innerHTML = '<h1>Click here to start upload</h1>';
+                <?php if (FILEEXT_ENABLED): ?>
+                    fileURLWrapper.style.display = 'flex';
+                <?php endif; ?>
+                fileUploadWrapper.style.display = 'block';
 
                 if (json.status_code != 201) {
                     alert(`${json.message} (${json.status_code})`);

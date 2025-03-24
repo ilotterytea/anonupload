@@ -52,14 +52,14 @@ button[type=submit]:hover {
     cursor: pointer;
 }
 
-#form-upload-wrapper {
+#form-upload-wrapper>button {
     background: var(--background-2);
     padding: 32px 0;
     color: var(--foreground);
     border: 4px dashed var(--box-border);
 }
 
-#form-upload-wrapper:hover {
+#form-upload-wrapper>button:hover {
     background: var(--background);
     cursor: pointer;
 }
@@ -116,10 +116,18 @@ button[type=submit]:hover {
     padding: 4px;
 }
 
+.gap-16 {
+    gap: 16px;
+}
+
 .gap-8 {
     gap: 8px;
 }
 
 .gap-4 {
     gap: 4px;
+}
+
+.font-small {
+    font-size: 10px;
 }
