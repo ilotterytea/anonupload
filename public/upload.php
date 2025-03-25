@@ -19,7 +19,7 @@ try {
 
     if (FILEEXT_ENABLED && isset($url) && !empty($url)) {
         $output = [];
-        exec('yt-dlp --get-filename -o "%(filesize_approx)s %(ext)s %(duration)s" ' . escapeshellarg($url) . '', $output);
+        exec('yt-dlp -f "worst" --get-filename -o "%(filesize_approx)s %(ext)s %(duration)s" ' . escapeshellarg($url) . '', $output);
         if (empty($output)) {
             throw new RuntimeException('Bad URL');
         }
@@ -87,7 +87,7 @@ try {
         $output = [];
 
         exec(sprintf(
-            'yt-dlp -o "%s/%s.%s" %s 2>&1',
+            'yt-dlp -f "worst" -o "%s/%s.%s" %s 2>&1',
             FILE_DIRECTORY,
             $file_id,
             $file_data['extension'],
