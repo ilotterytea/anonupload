@@ -82,7 +82,7 @@ try {
     $file_id = generate_random_char_sequence(FILE_ID_CHARACTERS, FILE_ID_LENGTH);
     $file_data['id'] = $file_id;
 
-    if (isset($url)) {
+    if (isset($url) && !empty($url)) {
         $result = 0;
         $output = [];
 
