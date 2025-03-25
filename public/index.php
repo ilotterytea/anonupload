@@ -27,8 +27,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
                         id="form-file">
 
                     <div class="column gap-8" id="form-upload-wrapper">
-                        <button type="button">
-                            <h1>Click here to start upload</h1>
+                        <button type="button" style="display: none;">
+                            <h1>Click, or drop files here</h1>
                         </button>
                         <?php if (FILEEXT_ENABLED): ?>
                             <div class="row gap-8">
@@ -67,6 +67,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
 </body>
 
 <script>
+    let file = null;
+
     const uploadedFiles = document.getElementById('uploaded-files');
     <?php if (FILEEXT_ENABLED): ?>
         const fileURL = document.getElementById('form-url');
@@ -98,7 +100,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
     const formFile = document.getElementById('form-file');
     formFile.style.display = 'none';
     formFile.addEventListener("change", (e) => {
-        const file = e.target.files[0];
+        file = e.target.files[0];
         if (file) {
             fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
             formSubmitButton.style.display = 'block';
@@ -109,18 +111,56 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
     });
 
     fileUploadWrapper.addEventListener("click", () => formFile.click());
+    fileUploadWrapper.addEventListener("drop", (e) => {
+        e.preventDefault();
+        if (e.dataTransfer.items) {
+            for (const item of e.dataTransfer.items) {
+                if (item.kind === "file") {
+                    file = item.getAsFile();
+                    fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
+                    formSubmitButton.style.display = 'block';
+                    <?php if (FILEEXT_ENABLED): ?>
+                        fileURLWrapper.style.display = 'none';
+                    <?php endif; ?>
+                    break;
+                }
+            }
+        }
+    });
+    fileUploadWrapper.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        fileUploadWrapper.innerHTML = '<h1>Drop files here</h1>';
+        <?php if (FILEEXT_ENABLED): ?>
+            fileURLWrapper.style.display = 'none';
+        <?php endif; ?>
+    });
+    fileUploadWrapper.addEventListener("dragleave", (e) => {
+        if (file) {
+            fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
+            return;
+        }
+        fileUploadWrapper.innerHTML = '<h1>Click, or drop files here</h1>';
+        <?php if (FILEEXT_ENABLED): ?>
+            fileURLWrapper.style.display = 'flex';
+        <?php endif; ?>
+
+    });
 
     formSubmitButton.style.display = 'none';
 
     function fileUpload(is_url) {
         const form = new FormData(formUpload);
+        if (file) {
+            form.set('file', file);
+        }
 
-        fileUploadWrapper.innerHTML = is_url ? `<h1>Uploading ${fileURL.value}</h1><p>This might take a while...</p>` : `<h1>Uploading ${formFile.files[0].name}...</h1><p>This might take a while...</p>`;
+        fileUploadWrapper.innerHTML = is_url ? `<h1>Uploading ${fileURL.value}</h1><p>This might take a while...</p>` : `<h1>Uploading ${file.name}...</h1><p>This might take a while...</p>`;
         fileUploadWrapper.style.display = 'block';
         <?php if (FILEEXT_ENABLED): ?>
             fileURLWrapper.style.display = 'none';
             fileURL.value = '';
         <?php endif; ?>
+        file = null;
         formSubmitButton.style.display = 'none';
 
         fetch(formUpload.getAttribute('action'), {
@@ -137,10 +177,11 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
                     fileURLWrapper.style.display = 'flex';
                 <?php endif; ?>
                 fileUploadWrapper.style.display = 'block';
+                fileUploadWrapper.innerHTML = '<h1>Click, or drop files here</h1>';
             })
             .then((r) => r.json())
             .then((json) => {
-                fileUploadWrapper.innerHTML = '<h1>Click here to start upload</h1>';
+                fileUploadWrapper.innerHTML = '<h1>Click, or drop files here</h1>';
                 <?php if (FILEEXT_ENABLED): ?>
                     fileURLWrapper.style.display = 'flex';
                 <?php endif; ?>
