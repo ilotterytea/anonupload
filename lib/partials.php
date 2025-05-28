@@ -6,7 +6,9 @@ function html_big_navbar()
     echo '' ?>
     <section class="column justify-center align-center navbar">
         <div class="column justify-center grow">
-            <h1><img src="/static/img/brand/big.webp" alt="<?= INSTANCE_NAME ?>"></h1>
+            <a href="/">
+                <h1><img src="/static/img/brand/big.webp" alt="<?= INSTANCE_NAME ?>"></h1>
+            </a>
         </div>
 
         <div class="row justify-center">
@@ -25,7 +27,15 @@ function html_footer()
         $file_size += filesize($file);
     }
 
-    $file_size /= 1024 * 1024;
+    $suffix = 'MB';
+    $file_size /= 1024 * 1024; // MB
+
+    if ($file_size >= 1024) {
+        $file_size /= 1024;
+        $suffix = 'GB';
+    }
+
+    $file_size = sprintf('%.2f%s', $file_size, $suffix);
 
     echo '' ?>
     <footer class="column justify-center align-center gap-8">
@@ -42,7 +52,7 @@ function html_footer()
                 </ul>
             </div>
         <?php endif; ?>
-        <p>Serving <?= count($files) ?> files and <?= sprintf("%.2f", $file_size) ?>MB of active content</p>
+        <p>Serving <?= count($files) ?> files and <?= $file_size ?> of active content</p>
     </footer>
     <?php ;
 }
