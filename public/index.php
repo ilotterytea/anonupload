@@ -15,6 +15,27 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
         <noscript>No JavaScript Mode</noscript>
         <?php html_big_navbar() ?>
 
+        <section class="box">
+            <div class="tab">
+                <p>What is <?= INSTANCE_NAME ?>?</p>
+            </div>
+            <div class="content">
+                <p>
+                    <?= INSTANCE_NAME ?> is a simple, free and anonymous file sharing site.
+                    We do not store anything other than the files you upload.
+                    They are stored publicly until the heat death of the universe, so please encrypt confidential files
+                    or don't upload them at all.
+                    Users do not need an account to start uploading.
+                    <br><br>
+                    Click the button below and share the files with your friends today!
+                    <br>
+                    But, read <a href="/tos.php">TOS</a> and <a href="/privacy.php">Privacy Policy</a> before
+                    interacting with the
+                    website.
+                </p>
+            </div>
+        </section>
+
         <section class="box column">
             <div class="tab">
                 <p>File Upload</p>
