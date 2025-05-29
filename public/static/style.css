@@ -5,6 +5,7 @@
     --box-tab-background: #efc2c2;
     --box-border: #800;
     --box-content-background: #fff;
+    --box-content-background-2: #e6d9d9;
 }
 
 * {
@@ -67,6 +68,7 @@ button[type=submit]:hover {
 
 /** BOX */
 .box {
+    background: var(--box-content-background);
     border: 2px solid var(--box-border);
 }
 
@@ -80,6 +82,10 @@ button[type=submit]:hover {
 .box:has(.tab)>.content {
     background: var(--box-content-background);
     padding: 8px;
+}
+
+.box>.content:has(.box) {
+    background: var(--box-content-background-2);
 }
 
 /** SHORTCUTS */
