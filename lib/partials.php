@@ -52,6 +52,24 @@ function html_footer()
                 </ul>
             </div>
         <?php endif; ?>
+        <?php if (!empty(INSTANCE_DONATIONS) && is_array(INSTANCE_DONATIONS)): ?>
+            <div class="row gap-8">
+                <details>
+                    <summary>Donate</summary>
+
+                    <table class="vertical">
+                        <?php foreach (INSTANCE_DONATIONS as $k => $v): ?>
+                            <tr>
+                                <th><?= $k ?></th>
+                                <td><?= $v ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </table>
+                </details>
+            </div>
+        <?php elseif (!empty(INSTANCE_DONATIONS) && is_string(INSTANCE_DONATIONS)): ?>
+            <p><a href="<?= INSTANCE_DONATIONS ?>">[Donate]</a></p>
+        <?php endif; ?>
         <p>Serving <?= count($files) ?> files and <?= $file_size ?> of active content</p>
     </footer>
     <?php ;
