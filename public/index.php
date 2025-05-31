@@ -77,6 +77,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
                                 </div>
                             </div>
                         <?php endif; ?>
+                        <p class="font-small">Max file size: <b><?= get_cfg_var('upload_max_filesize') ?></b></p>
                     </div>
 
                     <div class="column" id="form-text-upload">
