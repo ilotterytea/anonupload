@@ -37,8 +37,17 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
         </section>
 
         <section class="box column">
-            <div class="tab">
-                <p>File Upload</p>
+            <div class="tabs">
+                <div class="form-upload-tab tab" id="form-tab-file">
+                    <button onclick="showUploadType('file')" class="transparent">
+                        <p>File Upload</p>
+                    </button>
+                </div>
+                <div class="form-upload-tab tab disabled" id="form-tab-text">
+                    <button onclick="showUploadType('text')" class="transparent">
+                        <p>Text</p>
+                    </button>
+                </div>
             </div>
             <div class="content">
                 <form class="column gap-8" action="/upload.php" method="post" enctype="multipart/form-data"
@@ -70,6 +79,10 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
                         <?php endif; ?>
                     </div>
 
+                    <div class="column" id="form-text-upload">
+                        <textarea name="paste" placeholder="Enter your text here..."></textarea>
+                    </div>
+
                     <button type="submit">Upload</button>
                 </form>
             </div>
@@ -88,6 +101,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
 </body>
 
 <script>
+    document.getElementById('form-text-upload').style.display = 'none';
     let file = null;
 
     const uploadedFiles = document.getElementById('uploaded-files');
@@ -110,11 +124,16 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
 
     <?php if (FILEEXT_ENABLED): ?>
         const fileURLWrapper = document.querySelector('#form-upload-wrapper>div');
-        fileURL.addEventListener('change', () => {
+        fileURL.addEventListener('keyup', () => {
             fileUploadWrapper.style.display = fileURL.value.length == 0 ? 'block' : 'none';
             formSubmitButton.style.display = fileURL.value.length == 0 ? 'none' : 'block';
         });
     <?php endif; ?>
+
+    const textArea = document.querySelector('#form-text-upload>textarea');
+    textArea.addEventListener('keyup', () => {
+        formSubmitButton.style.display = textArea.value.length == 0 ? 'none' : 'block';
+    });
 
     const formSubmitButton = document.querySelector('#form-upload button[type=submit]');
 
@@ -169,13 +188,30 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
 
     formSubmitButton.style.display = 'none';
 
+    if (textArea.value.length > 0) {
+        formSubmitButton.style.display = 'block';
+        showUploadType('text');
+    }
+
     function fileUpload(is_url) {
+        if (textArea.value.length > 0) {
+            file = null;
+            formFile.value = null;
+        }
+
         const form = new FormData(formUpload);
+
         if (file) {
             form.set('file', file);
         }
 
-        fileUploadWrapper.innerHTML = is_url ? `<h1>Uploading ${fileURL.value}</h1><p>This might take a while...</p>` : `<h1>Uploading ${file.name}...</h1><p>This might take a while...</p>`;
+        if (is_url) {
+            fileUploadWrapper.innerHTML = `<h1>Uploading ${fileURL.value}</h1><p>This might take a while...</p>`;
+        } else if (file) {
+            fileUploadWrapper.innerHTML = `<h1>Uploading ${file.name}...</h1><p>This might take a while...</p>`;
+        } else {
+            fileUploadWrapper.innerHTML = `<h1>Uploading...</h1>`;
+        }
         fileUploadWrapper.style.display = 'block';
         <?php if (FILEEXT_ENABLED): ?>
             fileURLWrapper.style.display = 'none';
@@ -215,6 +251,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
 
                 uploadedFiles.innerHTML = addUploadedFile(json.data) + uploadedFiles.innerHTML;
                 uploadedFiles.parentElement.style.display = 'flex';
+                textArea.value = '';
 
                 // saving file
                 let files = getUploadedFiles();
@@ -272,6 +309,21 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
             files = '[]';
         }
         return JSON.parse(files);
+    }
+
+    function showUploadType(type) {
+        document.getElementById('form-upload-wrapper').style.display = type == 'text' ? 'none' : 'flex';
+        document.getElementById('form-text-upload').style.display = type == 'text' ? 'flex' : 'none';
+
+        const tabs = document.querySelectorAll('.form-upload-tab');
+
+        for (const tab of tabs) {
+            if (tab.getAttribute('id') == `form-tab-${type}`) {
+                tab.classList.remove('disabled');
+            } else {
+                tab.classList.add('disabled');
+            }
+        }
     }
 </script>
 

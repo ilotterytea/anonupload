@@ -13,6 +13,21 @@
     margin: 0;
 }
 
+button.transparent {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    color: inherit;
+    vertical-align: baseline;
+    background: none;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
 body {
     background: linear-gradient(0deg, var(--background-2), var(--background));
     color: var(--foreground);
@@ -66,21 +81,45 @@ button[type=submit]:hover {
     cursor: pointer;
 }
 
+#form-text-upload>textarea {
+    resize: vertical;
+    height: 256px;
+}
+
 /** BOX */
 .box {
     background: var(--box-content-background);
     border: 2px solid var(--box-border);
 }
 
-.box:has(.content)>.tab {
+.box>.tabs {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.tabs>.tab {}
+
+.box:has(.tabs),
+.box:has(.tab) {
+    background: none;
+    border: none;
+}
+
+.box:has(.content)>.tab,
+.tabs>.tab:not(.disabled) {
     background: var(--box-tab-background);
-    border-bottom: 2px solid var(--box-border);
+    border: 2px solid var(--box-border);
+    border-bottom: none;
     padding: 8px;
     font-weight: bold;
 }
 
-.box:has(.tab)>.content {
+.box:has(.tab)>.content,
+.box:has(.tabs)>.content {
     background: var(--box-content-background);
+    border: 2px solid var(--box-border);
     padding: 8px;
 }
 

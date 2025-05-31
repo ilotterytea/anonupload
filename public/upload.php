@@ -13,9 +13,17 @@ if (!is_dir(FILE_DIRECTORY) && !mkdir(FILE_DIRECTORY, 0777, true)) {
 }
 
 try {
-    $url = $_POST['url'] ?? null;
-    $file = $_FILES['file'] ?? null;
+    $url = isset($_POST['url']) ? $_POST['url'] ?: null : null;
+    $file = isset($_FILES['file']) ? $_FILES['file'] ?: null : null;
+    if (empty($file['tmp_name'])) {
+        $file = null;
+    }
+    $paste = isset($_POST['paste']) ? $_POST['paste'] ?: null : null;
     $file_data = null;
+
+    if (!(isset($file) ^ isset($url) ^ isset($paste)) || (isset($file) && isset($url) && isset($paste))) {
+        throw new RuntimeException('You can upload only one type of content: file, URL or text');
+    }
 
     if (FILEEXT_ENABLED && isset($url) && !empty($url)) {
         $output = [];
@@ -40,6 +48,12 @@ try {
             'size' => intval($output[0]),
             'mime' => FILE_ACCEPTED_MIME_TYPES[$output[1]],
             'extension' => $output[1]
+        ];
+    } else if (isset($paste)) {
+        $file_data = [
+            'size' => strlen($paste),
+            'mime' => 'text/plain',
+            'extension' => 'txt'
         ];
     } else if (isset($file)) {
         if (
@@ -82,7 +96,7 @@ try {
     $file_id = generate_random_char_sequence(FILE_ID_CHARACTERS, FILE_ID_LENGTH);
     $file_data['id'] = $file_id;
 
-    if (isset($url) && !empty($url)) {
+    if (isset($url)) {
         $result = 0;
         $output = [];
 
@@ -98,7 +112,9 @@ try {
             error_log(sprintf("Failed to download a file (URL: %s): %s", $url, implode('\n', $output)));
             throw new RuntimeException('Failed to download a file! Try again later.');
         }
-    } else if (!move_uploaded_file($file['tmp_name'], FILE_DIRECTORY . sprintf('/%s.%s', $file_id, $file_ext))) {
+    } else if (isset($paste) && !file_put_contents(FILE_DIRECTORY . sprintf('/%s.%s', $file_id, $file_data['extension']), $paste)) {
+        throw new RuntimeException('Failed to paste a text! Try again later.');
+    } else if (isset($file) && !move_uploaded_file($file['tmp_name'], FILE_DIRECTORY . sprintf('/%s.%s', $file_id, $file_data['extension']))) {
         throw new RuntimeException("Failed to save the file. Try again later.");
     }
 
