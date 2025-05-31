@@ -118,7 +118,16 @@ try {
         throw new RuntimeException("Failed to save the file. Try again later.");
     }
 
-    json_response($file_data, null, 201);
+    if ($_SERVER['HTTP_ACCEPT'] == 'application/json') {
+        json_response($file_data, null, 201);
+    } else {
+        header("Location: /{$file_data['id']}.{$file_data['extension']}");
+    }
 } catch (RuntimeException $e) {
-    json_response(null, $e->getMessage(), 400);
+    if ($_SERVER['HTTP_ACCEPT'] == 'application/json') {
+        json_response(null, $e->getMessage(), 400);
+    } else {
+        http_response_code(400);
+        echo $e->getMessage();
+    }
 }
