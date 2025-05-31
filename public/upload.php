@@ -1,13 +1,14 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/utils.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/thumbnails.php';
 
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     json_response(null, 'Method not allowed', 405);
     exit;
 }
 
-if (!is_dir(FILE_DIRECTORY) && !mkdir(FILE_DIRECTORY, 0777, true)) {
+if (!is_dir(FILE_UPLOAD_DIRECTORY) && !mkdir(FILE_UPLOAD_DIRECTORY, 0777, true)) {
     json_response(null, 'Failed to create a directory for user files', 500);
     exit();
 }
@@ -102,7 +103,7 @@ try {
 
         exec(sprintf(
             'yt-dlp -f "worst" -o "%s/%s.%s" %s 2>&1',
-            FILE_DIRECTORY,
+            FILE_UPLOAD_DIRECTORY,
             $file_id,
             $file_data['extension'],
             escapeshellarg($url)
@@ -112,10 +113,40 @@ try {
             error_log(sprintf("Failed to download a file (URL: %s): %s", $url, implode('\n', $output)));
             throw new RuntimeException('Failed to download a file! Try again later.');
         }
-    } else if (isset($paste) && !file_put_contents(FILE_DIRECTORY . sprintf('/%s.%s', $file_id, $file_data['extension']), $paste)) {
+    } else if (isset($paste) && !file_put_contents(FILE_UPLOAD_DIRECTORY . sprintf('/%s.%s', $file_id, $file_data['extension']), $paste)) {
         throw new RuntimeException('Failed to paste a text! Try again later.');
-    } else if (isset($file) && !move_uploaded_file($file['tmp_name'], FILE_DIRECTORY . sprintf('/%s.%s', $file_id, $file_data['extension']))) {
+    } else if (isset($file) && !move_uploaded_file($file['tmp_name'], FILE_UPLOAD_DIRECTORY . sprintf('/%s.%s', $file_id, $file_data['extension']))) {
         throw new RuntimeException("Failed to save the file. Try again later.");
+    }
+
+    if (FILE_THUMBNAILS && !is_dir(FILE_THUMBNAIL_DIRECTORY) && !mkdir(FILE_THUMBNAIL_DIRECTORY, 0777, true)) {
+        throw new RuntimeException('Failed to create a directory for thumbnails');
+    }
+
+    if (
+        FILE_THUMBNAILS && (
+            (
+                str_starts_with($file_data['mime'], 'image/') &&
+                $thumbnail_error = generate_image_thumbnail(
+                    FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_data['extension']}",
+                    FILE_THUMBNAIL_DIRECTORY . "/{$file_id}.webp",
+                    FILE_THUMBNAIL_SIZE[0],
+                    FILE_THUMBNAIL_SIZE[1]
+                )
+            ) ||
+            (
+                str_starts_with($file_data['mime'], 'video/') &&
+                $thumbnail_error = generate_video_thumbnail(
+                    FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_data['extension']}",
+                    FILE_THUMBNAIL_DIRECTORY . "/{$file_id}",
+                    FILE_THUMBNAIL_DIRECTORY . "/{$file_id}.webp",
+                    FILE_THUMBNAIL_SIZE[0],
+                    FILE_THUMBNAIL_SIZE[1]
+                )
+            )
+        )
+    ) {
+        throw new RuntimeException("Failed to create a thumbnail (Error code {$thumbnail_error})");
     }
 
     if ($_SERVER['HTTP_ACCEPT'] == 'application/json') {

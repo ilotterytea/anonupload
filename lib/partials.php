@@ -20,7 +20,7 @@ function html_big_navbar()
 
 function html_footer()
 {
-    $files = glob(FILE_DIRECTORY . "/*.*");
+    $files = glob(FILE_UPLOAD_DIRECTORY . "/*.*");
     $file_size = 0;
 
     foreach ($files as $file) {

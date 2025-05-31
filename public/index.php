@@ -263,11 +263,13 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
     function addUploadedFile(file) {
         return `
         <div class="box item column gap-4 pad-4">
+            <?php if (FILE_THUMBNAILS): ?>
             <div class="column align-center justify-center grow">
                 <div style="max-width: 128px; max-height:128px;">
-                    <img src="/userdata/${file.id}.${file.extension}" alt="${file.id}.${file.extension}" style="max-width:100%; max-height: 100%;">
+                    <p><i><img src="<?= FILE_THUMBNAIL_DIRECTORY_PREFIX ?>/${file.id}.webp" alt="No thumbnail." style="max-width:100%; max-height: 100%;"></i></p>
                 </div>
             </div>
+            <?php endif; ?>
             <h2>${file.id}.${file.extension}</h2>
             <div>
                 <p>${file.mime}</p>
