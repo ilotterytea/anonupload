@@ -94,7 +94,16 @@ try {
         throw new RuntimeException('No URL or file specified');
     }
 
-    $file_id = FILE_ID_PREFIX . generate_random_char_sequence(FILE_ID_CHARACTERS, FILE_ID_LENGTH);
+    $file_id_length = FILE_ID_LENGTH;
+    $file_id_gen_attempts = 0;
+    do {
+        $file_id = FILE_ID_PREFIX . generate_random_char_sequence(FILE_ID_CHARACTERS, $file_id_length);
+        if ($file_id_gen_attempts > 20) {
+            $file_id_length++;
+            $file_id_gen_attempts = 0;
+        }
+        $file_id_gen_attempts++;
+    } while (is_file(FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_data['extension']}"));
     $file_data['id'] = $file_id;
 
     if (isset($url)) {
