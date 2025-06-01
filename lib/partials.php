@@ -4,15 +4,20 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 function html_big_navbar()
 {
     echo '' ?>
-    <section class="column justify-center align-center navbar">
+    <section class="column justify-center align-center gap-8 navbar">
         <div class="column justify-center grow">
             <a href="/">
                 <h1><img src="/static/img/brand/big.webp" alt="<?= INSTANCE_NAME ?>"></h1>
             </a>
         </div>
 
-        <div class="row justify-center">
-
+        <div class="row gap-8 justify-center">
+            <a href="/">
+                <button>Home</button>
+            </a>
+            <a href="/uploaders.php">
+                <button>Uploaders</button>
+            </a>
         </div>
     </section>
     <?php ;

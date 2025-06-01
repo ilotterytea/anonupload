@@ -77,7 +77,14 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
                                 </div>
                             </div>
                         <?php endif; ?>
-                        <p class="font-small">Max file size: <b><?= get_cfg_var('upload_max_filesize') ?></b></p>
+                        <ul class="row gap-8 font-small" style="list-style:none">
+                            <li>
+                                <p class="font-small">Max file size:
+                                    <b><?= get_cfg_var(option: 'upload_max_filesize') ?></b></p>
+                            </li>
+                            <li><a href="/uploaders.php#supported-file-extensions" target="_blank">Supported file
+                                    extensions</a></li>
+                        </ul>
                     </div>
 
                     <div class="column" id="form-text-upload">
@@ -262,6 +269,11 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
     }
 
     function addUploadedFile(file) {
+        let file_url = `/${file.id}.${file.extension}`;
+        if (file.urls && file.urls.download_url) {
+            file_url = file.urls.download_url;
+        }
+
         return `
         <div class="box item column gap-4 pad-4">
             <?php if (FILE_THUMBNAILS): ?>
@@ -277,7 +289,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
                 <p title="${file.size} B">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
             </div>
             <div class="row gap-8">
-                <a href="/${file.id}.${file.extension}">
+                <a href="${file_url}">
                     <button>Open</button>
                 </a>
             </div>

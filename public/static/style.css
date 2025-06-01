@@ -56,6 +56,15 @@ footer {
     padding-top: 4px;
 }
 
+code {
+    background: var(--box-tab-background);
+    padding: 4px 8px;
+}
+
+table.vertical {
+    border-spacing: 8px;
+}
+
 /** FORM */
 button[type=submit] {
     background: linear-gradient(0deg, var(--box-tab-background), var(--background));
