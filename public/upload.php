@@ -158,6 +158,10 @@ try {
         throw new RuntimeException("Failed to create a thumbnail (Error code {$thumbnail_error})");
     }
 
+    $file_data['urls'] = [
+        'download_url' => INSTANCE_URL . "/{$file_data['id']}.{$file_data['extension']}"
+    ];
+
     if ($_SERVER['HTTP_ACCEPT'] == 'application/json') {
         json_response($file_data, null, 201);
     } else {
