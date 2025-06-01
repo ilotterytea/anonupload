@@ -94,7 +94,7 @@ try {
         throw new RuntimeException('No URL or file specified');
     }
 
-    $file_id = generate_random_char_sequence(FILE_ID_CHARACTERS, FILE_ID_LENGTH);
+    $file_id = FILE_ID_PREFIX . generate_random_char_sequence(FILE_ID_CHARACTERS, FILE_ID_LENGTH);
     $file_data['id'] = $file_id;
 
     if (isset($url)) {
