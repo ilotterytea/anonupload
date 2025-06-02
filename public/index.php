@@ -1,6 +1,14 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
+
+if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
+    $files = glob(FILE_UPLOAD_DIRECTORY . "/*.*");
+    $file = $files[random_int(0, count($files) - 1)];
+    $filename = basename($file);
+    header("Location: /{$filename}");
+    exit();
+}
 ?>
 <html>
 
@@ -80,7 +88,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
                         <ul class="row gap-8 font-small" style="list-style:none">
                             <li>
                                 <p class="font-small">Max file size:
-                                    <b><?= get_cfg_var(option: 'upload_max_filesize') ?></b></p>
+                                    <b><?= get_cfg_var(option: 'upload_max_filesize') ?></b>
+                                </p>
                             </li>
                             <li><a href="/uploaders.php#supported-file-extensions" target="_blank">Supported file
                                     extensions</a></li>

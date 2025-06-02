@@ -15,6 +15,11 @@ function html_big_navbar()
             <a href="/">
                 <button>Home</button>
             </a>
+            <?php if (FILE_CATALOG_RANDOM): ?>
+                <a href="/?random">
+                    <button>I'm Feeling Lucky</button>
+                </a>
+            <?php endif; ?>
             <a href="/uploaders.php">
                 <button>Uploaders</button>
             </a>
