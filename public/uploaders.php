@@ -75,6 +75,10 @@ foreach (FILE_ACCEPTED_MIME_TYPES as $k => $v) {
                             <th>URL:</th>
                             <td><code class="copy">{json:data.urls.download_url}</code></td>
                         </tr>
+                        <tr>
+                            <th>Deletion URL:</th>
+                            <td><code class="copy">{json:data.urls.deletion_url}</code></td>
+                        </tr>
                     </table>
                     <p>Then, select it via <b>Destinations &rarr; Image uploader &rarr; Custom image
                             uploader</b></p>
@@ -102,6 +106,10 @@ foreach (FILE_ACCEPTED_MIME_TYPES as $k => $v) {
                         <tr>
                             <th>Image link:</th>
                             <td><code class="copy">{data.urls.download_url}</code></td>
+                        </tr>
+                        <tr>
+                            <th>Deletion link:</th>
+                            <td><code class="copy">{data.urls.deletion_url}</code></td>
                         </tr>
                     </table>
                 </section>

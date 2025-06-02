@@ -273,6 +273,10 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
         if (file.urls && file.urls.download_url) {
             file_url = file.urls.download_url;
         }
+        let file_deletion = '';
+        if (file.urls && file.urls.deletion_url) {
+            file_deletion = `<button onclick="deleteUploadedFile('${file.urls.deletion_url}', '${file.id}')">Delete</button>`;
+        }
 
         return `
         <div class="box item column gap-4 pad-4">
@@ -292,9 +296,34 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
                 <a href="${file_url}">
                     <button>Open</button>
                 </a>
+                ${file_deletion}
             </div>
         </div>
         `;
+    }
+
+    function deleteUploadedFile(url, id) {
+        fetch(url, {
+            'headers': {
+                'Accept': 'application/json'
+            },
+            'method': 'DELETE'
+        }).then((r) => r.json())
+            .then((json) => {
+                if (json.status_code != 200) {
+                    alert(`${json.message} (${json.status_code})`);
+                    return;
+                }
+
+                let files = getUploadedFiles();
+                files = files.filter((x) => x.id !== id);
+                localStorage.setItem('uploaded_files', JSON.stringify(files));
+                loadUploadedFiles();
+            })
+            .catch((err) => {
+                alert('Failed to delete the file. Look into the console!');
+                console.error(err);
+            });
     }
 
     // loading already existing uploaded files
@@ -307,13 +336,9 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
             html += addUploadedFile(file);
         }
 
-        if (html.length > 0) {
-            uploadedFiles.parentElement.style.display = 'flex';
-        }
+        uploadedFiles.parentElement.style.display = html.length > 0 ? 'flex' : 'none';
 
         uploadedFiles.innerHTML = html;
-
-        localStorage.setItem('uploaded_files', JSON.stringify(files));
     }
 
     loadUploadedFiles();

@@ -162,10 +162,26 @@ try {
         'download_url' => INSTANCE_URL . "/{$file_data['id']}.{$file_data['extension']}"
     ];
 
+    if (FILE_METADATA && FILE_DELETION) {
+        $file_data['password'] = $_POST['password'] ?? generate_random_char_sequence(FILE_ID_CHARACTERS, FILE_DELETION_KEY_LENGTH);
+        $file_data['urls']['deletion_url'] = INSTANCE_URL . "/delete.php?f={$file_data['id']}.{$file_data['extension']}&key={$file_data['password']}";
+    }
+
     if ($_SERVER['HTTP_ACCEPT'] == 'application/json') {
         json_response($file_data, null, 201);
     } else {
         header("Location: /{$file_data['id']}.{$file_data['extension']}");
+    }
+
+    if (FILE_METADATA) {
+        unset($file_data['urls']);
+        $file_data['password'] = password_hash($file_data['password'], PASSWORD_DEFAULT);
+        if (!is_dir(FILE_METADATA_DIRECTORY) && !mkdir(FILE_METADATA_DIRECTORY, 0777, true)) {
+            throw new RuntimeException('Failed to create a folder for file metadata');
+        }
+        if (!file_put_contents(FILE_METADATA_DIRECTORY . "/{$file_data['id']}.metadata.json", json_encode($file_data, JSON_UNESCAPED_SLASHES))) {
+            throw new RuntimeException('Failed to create a file metadata');
+        }
     }
 } catch (RuntimeException $e) {
     if ($_SERVER['HTTP_ACCEPT'] == 'application/json') {
