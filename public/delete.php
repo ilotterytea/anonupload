@@ -46,13 +46,17 @@ if (!password_verify($password, $metadata['password'])) {
     exit();
 }
 
-if (
-    !unlink(FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_ext}") ||
-    !unlink(FILE_THUMBNAIL_DIRECTORY . "/{$file_id}.webp") ||
-    !unlink(FILE_METADATA_DIRECTORY . "/{$file_id}.metadata.json")
-) {
-    json_response(null, "Failed to delete a file ID {$file_id}", 500);
-    exit();
+$paths = [
+    FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_ext}",
+    FILE_THUMBNAIL_DIRECTORY . "/{$file_id}.webp",
+    FILE_METADATA_DIRECTORY . "/{$file_id}.metadata.json"
+];
+
+foreach ($paths as $path) {
+    if (is_file($path) && !unlink($path)) {
+        json_response(null, "Failed to delete a file ID {$file_id}", 500);
+        exit();
+    }
 }
 
 json_response(
