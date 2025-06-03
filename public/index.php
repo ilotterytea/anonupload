@@ -31,13 +31,14 @@ if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
                 <p>
                     <?= INSTANCE_NAME ?> is a simple, free and anonymous file sharing site.
                     We do not store anything other than the files you upload.
-                    They are stored publicly until the heat death of the universe, so please encrypt confidential files
-                    or don't upload them at all.
+                    They are stored <b>publicly</b> until the heat death of the universe occurs or you hit the DELETE
+                    button.
                     Users do not need an account to start uploading.
                     <br><br>
                     Click the button below and share the files with your friends today!
                     <br>
-                    But, read <a href="/tos.php">TOS</a> and <a href="/privacy.php">Privacy Policy</a> before
+                    But, read <a href="/static/TOS.txt">TOS</a> and <a href="/static/PRIVACY.txt">Privacy Policy</a>
+                    before
                     interacting with the
                     website.
                 </p>
