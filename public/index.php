@@ -12,11 +12,20 @@ if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
 }
 
 $file = null;
+$file_id = null;
 
-if (FILE_CATALOG_FANCY_VIEW && strlen(substr($_SERVER['PHP_SELF'], strlen('/index.php'))) > 0) {
-    $file_id = explode('/', $_SERVER['PHP_SELF']);
-    $file_id = $file_id[count($file_id) - 1];
+if (strlen(substr($_SERVER['PHP_SELF'], strlen('/index.php'))) > 0) {
+    $file_id = basename($_SERVER['PHP_SELF']);
+} else if (!empty(trim($_SERVER['QUERY_STRING']))) {
+    $file_id = basename($_SERVER['QUERY_STRING']);
+}
+
+if (FILE_CATALOG_FANCY_VIEW && $file_id) {
     $file_id = explode('.', $file_id);
+    if (count($file_id) != 2) {
+        http_response_code(404);
+        exit();
+    }
     $file_ext = $file_id[1];
     $file_id = $file_id[0];
 
@@ -28,12 +37,12 @@ if (FILE_CATALOG_FANCY_VIEW && strlen(substr($_SERVER['PHP_SELF'], strlen('/inde
     $file_path = FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_ext}";
     $meta_path = FILE_METADATA_DIRECTORY . "/{$file_id}.metadata.json";
 
-    if (!is_file($file_path)) {
+    if (!file_exists($file_path)) {
         http_response_code(404);
         exit();
     }
 
-    if (is_file($meta_path)) {
+    if (file_exists($meta_path)) {
         $file = json_decode(file_get_contents($meta_path), true);
 
         if (isset($file['views'])) {
