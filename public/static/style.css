@@ -148,6 +148,11 @@ button[type=submit]:hover {
     max-height: 100%;
 }
 
+.file-preview pre {
+    width: 100%;
+    overflow-x: scroll;
+}
+
 /** SHORTCUTS */
 .column {
     display: flex;
