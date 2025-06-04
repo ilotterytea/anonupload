@@ -176,6 +176,8 @@ try {
     if (FILE_METADATA) {
         unset($file_data['urls']);
         $file_data['password'] = password_hash($file_data['password'], PASSWORD_DEFAULT);
+        $file_data['views'] = 0;
+        $file_data['uploaded_at'] = time();
         if (!is_dir(FILE_METADATA_DIRECTORY) && !mkdir(FILE_METADATA_DIRECTORY, 0777, true)) {
             throw new RuntimeException('Failed to create a folder for file metadata');
         }

@@ -136,6 +136,13 @@ button[type=submit]:hover {
     background: var(--box-content-background-2);
 }
 
+/** FILES */
+.file-preview img,
+.file-preview video {
+    width: 100%;
+    max-height: 100%;
+}
+
 /** SHORTCUTS */
 .column {
     display: flex;
@@ -163,8 +170,16 @@ button[type=submit]:hover {
     justify-content: center;
 }
 
+.justify-end {
+    justify-content: end;
+}
+
 .align-center {
     align-items: center;
+}
+
+.align-bottom {
+    align-items: end;
 }
 
 .pad-4 {

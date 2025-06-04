@@ -1,6 +1,7 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/utils.php';
 
 if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
     $files = glob(FILE_UPLOAD_DIRECTORY . "/*.*");
@@ -9,286 +10,448 @@ if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
     header("Location: /{$filename}");
     exit();
 }
+
+$file = null;
+
+if (FILE_CATALOG_FANCY_VIEW && strlen(substr($_SERVER['PHP_SELF'], strlen('/index.php'))) > 0) {
+    $file_id = explode('/', $_SERVER['PHP_SELF']);
+    $file_id = $file_id[count($file_id) - 1];
+    $file_id = explode('.', $file_id);
+    $file_ext = $file_id[1];
+    $file_id = $file_id[0];
+
+    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $file_id) || !preg_match('/^[a-zA-Z0-9]+$/', $file_ext)) {
+        http_response_code(404);
+        exit();
+    }
+
+    $file_path = FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_ext}";
+    $meta_path = FILE_METADATA_DIRECTORY . "/{$file_id}.metadata.json";
+
+    if (!is_file($file_path)) {
+        http_response_code(404);
+        exit();
+    }
+
+    if (is_file($meta_path)) {
+        $file = json_decode(file_get_contents($meta_path), true);
+
+        if (isset($file['views'])) {
+            session_start();
+
+            $viewed_file_ids = $_SESSION['viewed_file_ids'] ?? [];
+
+            if (!in_array($file['id'], $viewed_file_ids)) {
+                $file['views']++;
+                array_push($viewed_file_ids, $file['id']);
+                file_put_contents($meta_path, json_encode($file, JSON_UNESCAPED_SLASHES));
+            }
+
+            $_SESSION['viewed_file_ids'] = $viewed_file_ids;
+
+            session_commit();
+        }
+    } else {
+        $file = [
+            'id' => $file_id,
+            'extension' => $file_ext,
+            'mime' => FILE_ACCEPTED_MIME_TYPES[$file_ext],
+            'size' => filesize($file_path)
+        ];
+    }
+
+    $file['full_url'] = FILE_UPLOAD_DIRECTORY_PREFIX . "/{$file['id']}.{$file['extension']}";
+
+    $size = $file['size'];
+    $size_suffix = 'B';
+    $size_i = 0;
+    do {
+        $size /= 1024;
+        $size_suffix = match ($size_i) {
+            0 => 'B',
+            1 => 'KB',
+            2 => 'MB',
+            3 => 'GB',
+            default => 'TB'
+        };
+        $size_i++;
+    } while ($size > 1024);
+
+    $file['size_formatted'] = sprintf('%.2f%s', $size, $size_suffix);
+    $file['name'] = $file['original_name'] ?? sprintf('%s.%s', $file['id'], $file['extension']);
+
+    if (!isset($file['uploaded_at'])) {
+        $file['uploaded_at'] = filemtime($file_path);
+    }
+
+    if (str_starts_with($file['mime'], 'image/')) {
+        $file['resolution'] = trim(shell_exec('identify -format "%wx%h" ' . escapeshellarg($file_path) . '[0]'));
+    } else if (str_starts_with($file['mime'], 'video/')) {
+        $info = shell_exec('ffprobe -v error -select_streams v:0 -show_entries stream=width,height,duration -of csv=p=0 ' . escapeshellarg($file_path));
+        [$width, $height, $duration] = explode(',', trim($info));
+        $file['resolution'] = sprintf('%sx%s (%s seconds)', $width, $height, round($duration, 2));
+    } else if (str_starts_with($file['mime'], 'audio/')) {
+        $file['resolution'] = round(trim(shell_exec('ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ' . escapeshellarg($file_path))), 2) . ' seconds';
+    } else if (str_starts_with($file['mime'], 'text/')) {
+        $file['resolution'] = trim(shell_exec('wc -l < ' . escapeshellarg($file_path))) . ' lines';
+    }
+}
 ?>
 <html>
 
 <head>
-    <title><?= INSTANCE_NAME ?></title>
+    <?php if ($file): ?>
+        <title><?= $file['name'] ?> - <?= INSTANCE_NAME ?></title>
+    <?php else: ?>
+        <title><?= INSTANCE_NAME ?></title>
+    <?php endif; ?>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
 </head>
 
 <body>
     <main>
-        <noscript>No JavaScript Mode</noscript>
-        <?php html_big_navbar() ?>
-
-        <section class="box">
-            <div class="tab">
-                <p>What is <?= INSTANCE_NAME ?>?</p>
-            </div>
-            <div class="content">
-                <p>
-                    <?= INSTANCE_NAME ?> is a simple, free and anonymous file sharing site.
-                    We do not store anything other than the files you upload.
-                    They are stored <b>publicly</b> until the heat death of the universe occurs or you hit the DELETE
-                    button.
-                    Users do not need an account to start uploading.
-                    <br><br>
-                    Click the button below and share the files with your friends today!
-                    <br>
-                    But, read <a href="/static/TOS.txt">TOS</a> and <a href="/static/PRIVACY.txt">Privacy Policy</a>
-                    before
-                    interacting with the
-                    website.
-                </p>
-            </div>
-        </section>
-
-        <section class="box column">
-            <div class="tabs">
-                <div class="form-upload-tab tab" id="form-tab-file">
-                    <button onclick="showUploadType('file')" class="transparent">
-                        <p>File Upload</p>
-                    </button>
-                </div>
-                <div class="form-upload-tab tab disabled" id="form-tab-text">
-                    <button onclick="showUploadType('text')" class="transparent">
-                        <p>Text</p>
-                    </button>
-                </div>
-            </div>
-            <div class="content">
-                <form class="column gap-8" action="/upload.php" method="post" enctype="multipart/form-data"
-                    id="form-upload">
-                    <input type="file" name="file"
-                        accept="<?= implode(', ', array_unique(array_values(FILE_ACCEPTED_MIME_TYPES))) ?>"
-                        id="form-file">
-
-                    <div class="column gap-8" id="form-upload-wrapper">
-                        <button type="button" style="display: none;">
-                            <h1>Click, or drop files here</h1>
-                        </button>
-                        <?php if (FILEEXT_ENABLED): ?>
-                            <div class="row gap-8">
-                                <p>URL:</p>
-                                <div class="column grow">
-                                    <input type="url" name="url" id="form-url"
-                                        placeholder="Instagram, YouTube and other links">
-                                    <ul class="row gap-8 font-small" style="list-style:none">
-                                        <li>
-                                            <p>Max duration: <b><?= FILEEXT_MAX_DURATION / 60 ?> minutes</b></p>
-                                        </li>
-                                        <li><a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md"
-                                                target="_blank">Supported
-                                                platforms</a></li>
-                                    </ul>
-                                </div>
-                            </div>
+        <?php if ($file): ?>
+            <div class="row">
+                <?php html_mini_navbar() ?>
+                <div class="font-small column grow justify-end align-bottom">
+                    <div class="row gap-8 grow align-bottom">
+                        <p title="<?= $file['size'] ?>B"><?= $file['size_formatted'] ?></p>
+                        <p><?= $file['mime'] ?> &#40;<?= $file['extension'] ?>&#41;</p>
+                        <?php if (isset($file['resolution'])): ?>
+                            <p><?= $file['resolution'] ?></p>
                         <?php endif; ?>
-                        <ul class="row gap-8 font-small" style="list-style:none">
-                            <li>
-                                <p class="font-small">Max file size:
-                                    <b><?= get_cfg_var(option: 'upload_max_filesize') ?></b>
-                                </p>
-                            </li>
-                            <li><a href="/uploaders.php#supported-file-extensions" target="_blank">Supported file
-                                    extensions</a></li>
-                        </ul>
                     </div>
-
-                    <div class="column" id="form-text-upload">
-                        <textarea name="paste" placeholder="Enter your text here..."></textarea>
+                    <div class="row gap-8 grow align-bottom">
+                        <p>Uploaded <?= format_timestamp(time() - $file['uploaded_at']) ?> ago</p>
                     </div>
-
-                    <button type="submit">Upload</button>
-                </form>
+                    <div class="row gap-8 grow align-bottom">
+                        <?php if (FILE_COUNT_VIEWS && isset($file['views'])): ?>
+                            <p><?= $file['views'] ?> views</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
-        </section>
 
-        <section class="box column" style="display:none">
-            <div class="tab">
-                <p>Uploaded files<span title="Your file ownership is stored locally." style="cursor:help">*</span></p>
-            </div>
-            <div class="content grid grid-3 gap-8" id="uploaded-files">
-            </div>
-        </section>
+            <section class="box">
+                <div class="tab row">
+                    <div class="grow">
+                        <?php if (isset($file['original_name'])): ?>
+                            <p><i><?= $file['original_name'] ?></i></p>
+                        <?php else: ?>
+                            <p>File <?= sprintf('%s.%s', $file['id'], $file['extension']) ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <div class="grow row gap-8 justify-end align-center" id="file-tab-buttons">
+                        <a href="<?= $file['full_url'] ?>">
+                            <button>Full size</button>
+                        </a>
+                        <a href="<?= $file['full_url'] ?>" download="<?= $file['name'] ?>">
+                            <button>Download</button>
+                        </a>
+                    </div>
+                </div>
+                <div class="content file-preview">
+                    <?php if (str_starts_with($file['mime'], 'image/')): ?>
+                        <img src="<?= $file['full_url'] ?>" alt="Image file.">
+                    <?php elseif (str_starts_with($file['mime'], 'video/')): ?>
+                        <video controls autoplay>
+                            <source src="<?= $file['full_url'] ?>" type="<?= $file['mime'] ?>">
+                        </video>
+                    <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>
+                        <audio controls autoplay>
+                            <source src="<?= $file['full_url'] ?>" type="<?= $file['mime'] ?>">
+                        </audio>
+                    <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
+                        <pre><?= file_get_contents(FILE_UPLOAD_DIRECTORY . "/{$file['id']}.{$file['extension']}") ?></pre>
+                    <?php else: ?>
+                        <p><i>This file cannot be displayed.</i></p>
+                    <?php endif; ?>
+                </div>
+            </section>
+        <?php else: ?>
+            <noscript>No JavaScript Mode</noscript>
+            <?php html_big_navbar() ?>
 
-        <?php html_footer() ?>
+            <section class="box">
+                <div class="tab">
+                    <p>What is <?= INSTANCE_NAME ?>?</p>
+                </div>
+                <div class="content">
+                    <p>
+                        <?= INSTANCE_NAME ?> is a simple, free and anonymous file sharing site.
+                        We do not store anything other than the files you upload.
+                        They are stored <b>publicly</b> until the heat death of the universe occurs or you hit the DELETE
+                        button.
+                        Users do not need an account to start uploading.
+                        <br><br>
+                        Click the button below and share the files with your friends today!
+                        <br>
+                        But, read <a href="/static/TOS.txt">TOS</a> and <a href="/static/PRIVACY.txt">Privacy Policy</a>
+                        before
+                        interacting with the
+                        website.
+                    </p>
+                </div>
+            </section>
+
+            <section class="box column">
+                <div class="tabs">
+                    <div class="form-upload-tab tab" id="form-tab-file">
+                        <button onclick="showUploadType('file')" class="transparent">
+                            <p>File Upload</p>
+                        </button>
+                    </div>
+                    <div class="form-upload-tab tab disabled" id="form-tab-text">
+                        <button onclick="showUploadType('text')" class="transparent">
+                            <p>Text</p>
+                        </button>
+                    </div>
+                </div>
+                <div class="content">
+                    <form class="column gap-8" action="/upload.php" method="post" enctype="multipart/form-data"
+                        id="form-upload">
+                        <input type="file" name="file"
+                            accept="<?= implode(', ', array_unique(array_values(FILE_ACCEPTED_MIME_TYPES))) ?>"
+                            id="form-file">
+
+                        <div class="column gap-8" id="form-upload-wrapper">
+                            <button type="button" style="display: none;">
+                                <h1>Click, or drop files here</h1>
+                            </button>
+                            <?php if (FILEEXT_ENABLED): ?>
+                                <div class="row gap-8">
+                                    <p>URL:</p>
+                                    <div class="column grow">
+                                        <input type="url" name="url" id="form-url"
+                                            placeholder="Instagram, YouTube and other links">
+                                        <ul class="row gap-8 font-small" style="list-style:none">
+                                            <li>
+                                                <p>Max duration: <b><?= FILEEXT_MAX_DURATION / 60 ?> minutes</b></p>
+                                            </li>
+                                            <li><a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md"
+                                                    target="_blank">Supported
+                                                    platforms</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            <ul class="row gap-8 font-small" style="list-style:none">
+                                <li>
+                                    <p class="font-small">Max file size:
+                                        <b><?= get_cfg_var(option: 'upload_max_filesize') ?></b>
+                                    </p>
+                                </li>
+                                <li><a href="/uploaders.php#supported-file-extensions" target="_blank">Supported file
+                                        extensions</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="column" id="form-text-upload">
+                            <textarea name="paste" placeholder="Enter your text here..."></textarea>
+                        </div>
+
+                        <button type="submit">Upload</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="box column" style="display:none">
+                <div class="tab">
+                    <p>Uploaded files<span title="Your file ownership is stored locally." style="cursor:help">*</span></p>
+                </div>
+                <div class="content grid grid-3 gap-8" id="uploaded-files">
+                </div>
+            </section>
+
+            <?php html_footer() ?>
+        <?php endif; ?>
     </main>
 </body>
 
-<script>
-    document.getElementById('form-text-upload').style.display = 'none';
-    let file = null;
+<?php if ($file): ?>
+    <script>
+        // adding deletion button
+        const files = JSON.parse(localStorage.getItem('uploaded_files') ?? '[]');
+        const file = files.find§((x) => x.id === '<?= $file['id'] ?>');
+        console.log(file);
+        if (file && file.urls && file.urls.deletion_url) {
+            const buttons = document.getElementById('file-tab-buttons');
+            buttons.innerHTML = `<a href='${file.urls.deletion_url}'><button>Delete</button></a>` + buttons.innerHTML;
+        }
+    </script>
+<?php else: ?>
+    <script>
+        document.getElementById('form-text-upload').style.display = 'none';
+        let file = null;
 
-    const uploadedFiles = document.getElementById('uploaded-files');
-    <?php if (FILEEXT_ENABLED): ?>
-        const fileURL = document.getElementById('form-url');
-    <?php endif; ?>
-
-    const formUpload = document.getElementById('form-upload');
-    formUpload.addEventListener('submit', (event) => {
-        event.preventDefault();
+        const uploadedFiles = document.getElementById('uploaded-files');
         <?php if (FILEEXT_ENABLED): ?>
-            fileUpload(fileURL.value.length != 0);
-        <?php else: ?>
-            fileUpload(false);
+            const fileURL = document.getElementById('form-url');
         <?php endif; ?>
-    });
 
-    const fileUploadWrapper = document.querySelector('#form-upload-wrapper>button');
-    fileUploadWrapper.style.display = 'block';
-
-    <?php if (FILEEXT_ENABLED): ?>
-        const fileURLWrapper = document.querySelector('#form-upload-wrapper>div');
-        fileURL.addEventListener('keyup', () => {
-            fileUploadWrapper.style.display = fileURL.value.length == 0 ? 'block' : 'none';
-            formSubmitButton.style.display = fileURL.value.length == 0 ? 'none' : 'block';
+        const formUpload = document.getElementById('form-upload');
+        formUpload.addEventListener('submit', (event) => {
+            event.preventDefault();
+            <?php if (FILEEXT_ENABLED): ?>
+                fileUpload(fileURL.value.length != 0);
+            <?php else: ?>
+                fileUpload(false);
+            <?php endif; ?>
         });
-    <?php endif; ?>
 
-    const textArea = document.querySelector('#form-text-upload>textarea');
-    textArea.addEventListener('keyup', () => {
-        formSubmitButton.style.display = textArea.value.length == 0 ? 'none' : 'block';
-    });
+        const fileUploadWrapper = document.querySelector('#form-upload-wrapper>button');
+        fileUploadWrapper.style.display = 'block';
 
-    const formSubmitButton = document.querySelector('#form-upload button[type=submit]');
+        <?php if (FILEEXT_ENABLED): ?>
+            const fileURLWrapper = document.querySelector('#form-upload-wrapper>div');
+            fileURL.addEventListener('keyup', () => {
+                fileUploadWrapper.style.display = fileURL.value.length == 0 ? 'block' : 'none';
+                formSubmitButton.style.display = fileURL.value.length == 0 ? 'none' : 'block';
+            });
+        <?php endif; ?>
 
-    const formFile = document.getElementById('form-file');
-    formFile.style.display = 'none';
-    formFile.addEventListener("change", (e) => {
-        file = e.target.files[0];
-        if (file) {
-            fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
-            formSubmitButton.style.display = 'block';
+        const textArea = document.querySelector('#form-text-upload>textarea');
+        textArea.addEventListener('keyup', () => {
+            formSubmitButton.style.display = textArea.value.length == 0 ? 'none' : 'block';
+        });
+
+        const formSubmitButton = document.querySelector('#form-upload button[type=submit]');
+
+        const formFile = document.getElementById('form-file');
+        formFile.style.display = 'none';
+        formFile.addEventListener("change", (e) => {
+            file = e.target.files[0];
+            if (file) {
+                fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
+                formSubmitButton.style.display = 'block';
+                <?php if (FILEEXT_ENABLED): ?>
+                    fileURLWrapper.style.display = 'none';
+                <?php endif; ?>
+            }
+        });
+
+        fileUploadWrapper.addEventListener("click", () => formFile.click());
+        fileUploadWrapper.addEventListener("drop", (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.items) {
+                for (const item of e.dataTransfer.items) {
+                    if (item.kind === "file") {
+                        file = item.getAsFile();
+                        fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
+                        formSubmitButton.style.display = 'block';
+                        <?php if (FILEEXT_ENABLED): ?>
+                            fileURLWrapper.style.display = 'none';
+                        <?php endif; ?>
+                        break;
+                    }
+                }
+            }
+        });
+        fileUploadWrapper.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            fileUploadWrapper.innerHTML = '<h1>Drop files here</h1>';
             <?php if (FILEEXT_ENABLED): ?>
                 fileURLWrapper.style.display = 'none';
             <?php endif; ?>
-        }
-    });
-
-    fileUploadWrapper.addEventListener("click", () => formFile.click());
-    fileUploadWrapper.addEventListener("drop", (e) => {
-        e.preventDefault();
-        if (e.dataTransfer.items) {
-            for (const item of e.dataTransfer.items) {
-                if (item.kind === "file") {
-                    file = item.getAsFile();
-                    fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
-                    formSubmitButton.style.display = 'block';
-                    <?php if (FILEEXT_ENABLED): ?>
-                        fileURLWrapper.style.display = 'none';
-                    <?php endif; ?>
-                    break;
-                }
+        });
+        fileUploadWrapper.addEventListener("dragleave", (e) => {
+            if (file) {
+                fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
+                return;
             }
-        }
-    });
-    fileUploadWrapper.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        fileUploadWrapper.innerHTML = '<h1>Drop files here</h1>';
-        <?php if (FILEEXT_ENABLED): ?>
-            fileURLWrapper.style.display = 'none';
-        <?php endif; ?>
-    });
-    fileUploadWrapper.addEventListener("dragleave", (e) => {
-        if (file) {
-            fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
-            return;
-        }
-        fileUploadWrapper.innerHTML = '<h1>Click, or drop files here</h1>';
-        <?php if (FILEEXT_ENABLED): ?>
-            fileURLWrapper.style.display = 'flex';
-        <?php endif; ?>
+            fileUploadWrapper.innerHTML = '<h1>Click, or drop files here</h1>';
+            <?php if (FILEEXT_ENABLED): ?>
+                fileURLWrapper.style.display = 'flex';
+            <?php endif; ?>
 
-    });
+        });
 
-    formSubmitButton.style.display = 'none';
-
-    if (textArea.value.length > 0) {
-        formSubmitButton.style.display = 'block';
-        showUploadType('text');
-    }
-
-    function fileUpload(is_url) {
-        if (textArea.value.length > 0) {
-            file = null;
-            formFile.value = null;
-        }
-
-        const form = new FormData(formUpload);
-
-        if (file) {
-            form.set('file', file);
-        }
-
-        if (is_url) {
-            fileUploadWrapper.innerHTML = `<h1>Uploading ${fileURL.value}</h1><p>This might take a while...</p>`;
-        } else if (file) {
-            fileUploadWrapper.innerHTML = `<h1>Uploading ${file.name}...</h1><p>This might take a while...</p>`;
-        } else {
-            fileUploadWrapper.innerHTML = `<h1>Uploading...</h1>`;
-        }
-        fileUploadWrapper.style.display = 'block';
-        <?php if (FILEEXT_ENABLED): ?>
-            fileURLWrapper.style.display = 'none';
-            fileURL.value = '';
-        <?php endif; ?>
-        file = null;
         formSubmitButton.style.display = 'none';
 
-        fetch(formUpload.getAttribute('action'), {
-            'body': form,
-            'method': 'POST',
-            'headers': {
-                'Accept': 'application/json'
+        if (textArea.value.length > 0) {
+            formSubmitButton.style.display = 'block';
+            showUploadType('text');
+        }
+
+        function fileUpload(is_url) {
+            if (textArea.value.length > 0) {
+                file = null;
+                formFile.value = null;
             }
-        })
-            .catch((err) => {
-                console.error(err);
-                alert('Failed to send a file. More info in the console...');
-                <?php if (FILEEXT_ENABLED): ?>
-                    fileURLWrapper.style.display = 'flex';
-                <?php endif; ?>
-                fileUploadWrapper.style.display = 'block';
-                fileUploadWrapper.innerHTML = '<h1>Click, or drop files here</h1>';
-            })
-            .then((r) => r.json())
-            .then((json) => {
-                fileUploadWrapper.innerHTML = '<h1>Click, or drop files here</h1>';
-                <?php if (FILEEXT_ENABLED): ?>
-                    fileURLWrapper.style.display = 'flex';
-                <?php endif; ?>
-                fileUploadWrapper.style.display = 'block';
 
-                if (json.status_code != 201) {
-                    alert(`${json.message} (${json.status_code})`);
-                    return;
+            const form = new FormData(formUpload);
+
+            if (file) {
+                form.set('file', file);
+            }
+
+            if (is_url) {
+                fileUploadWrapper.innerHTML = `<h1>Uploading ${fileURL.value}</h1><p>This might take a while...</p>`;
+            } else if (file) {
+                fileUploadWrapper.innerHTML = `<h1>Uploading ${file.name}...</h1><p>This might take a while...</p>`;
+            } else {
+                fileUploadWrapper.innerHTML = `<h1>Uploading...</h1>`;
+            }
+            fileUploadWrapper.style.display = 'block';
+            <?php if (FILEEXT_ENABLED): ?>
+                fileURLWrapper.style.display = 'none';
+                fileURL.value = '';
+            <?php endif; ?>
+            file = null;
+            formSubmitButton.style.display = 'none';
+
+            fetch(formUpload.getAttribute('action'), {
+                'body': form,
+                'method': 'POST',
+                'headers': {
+                    'Accept': 'application/json'
                 }
+            })
+                .catch((err) => {
+                    console.error(err);
+                    alert('Failed to send a file. More info in the console...');
+                    <?php if (FILEEXT_ENABLED): ?>
+                        fileURLWrapper.style.display = 'flex';
+                    <?php endif; ?>
+                    fileUploadWrapper.style.display = 'block';
+                    fileUploadWrapper.innerHTML = '<h1>Click, or drop files here</h1>';
+                })
+                .then((r) => r.json())
+                .then((json) => {
+                    fileUploadWrapper.innerHTML = '<h1>Click, or drop files here</h1>';
+                    <?php if (FILEEXT_ENABLED): ?>
+                        fileURLWrapper.style.display = 'flex';
+                    <?php endif; ?>
+                    fileUploadWrapper.style.display = 'block';
 
-                uploadedFiles.innerHTML = addUploadedFile(json.data) + uploadedFiles.innerHTML;
-                uploadedFiles.parentElement.style.display = 'flex';
-                textArea.value = '';
+                    if (json.status_code != 201) {
+                        alert(`${json.message} (${json.status_code})`);
+                        return;
+                    }
 
-                // saving file
-                let files = getUploadedFiles();
-                files.unshift(json.data);
-                localStorage.setItem('uploaded_files', JSON.stringify(files));
-            });
-    }
+                    uploadedFiles.innerHTML = addUploadedFile(json.data) + uploadedFiles.innerHTML;
+                    uploadedFiles.parentElement.style.display = 'flex';
+                    textArea.value = '';
 
-    function addUploadedFile(file) {
-        let file_url = `/${file.id}.${file.extension}`;
-        if (file.urls && file.urls.download_url) {
-            file_url = file.urls.download_url;
+                    // saving file
+                    let files = getUploadedFiles();
+                    files.unshift(json.data);
+                    localStorage.setItem('uploaded_files', JSON.stringify(files));
+                });
         }
-        let file_deletion = '';
-        if (file.urls && file.urls.deletion_url) {
-            file_deletion = `<button onclick="deleteUploadedFile('${file.urls.deletion_url}', '${file.id}')">Delete</button>`;
-        }
 
-        return `
+        function addUploadedFile(file) {
+            let file_url = `/${file.id}.${file.extension}`;
+            if (file.urls && file.urls.download_url) {
+                file_url = file.urls.download_url;
+            }
+            let file_deletion = '';
+            if (file.urls && file.urls.deletion_url) {
+                file_deletion = `<button onclick="deleteUploadedFile('${file.urls.deletion_url}', '${file.id}')">Delete</button>`;
+            }
+
+            return `
         <div class="box item column gap-4 pad-4">
             <?php if (FILE_THUMBNAILS): ?>
             <div class="column align-center justify-center grow">
@@ -310,71 +473,72 @@ if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
             </div>
         </div>
         `;
-    }
+        }
 
-    function deleteUploadedFile(url, id) {
-        fetch(url, {
-            'headers': {
-                'Accept': 'application/json'
-            },
-            'method': 'DELETE'
-        }).then((r) => r.json())
-            .then((json) => {
-                if (json.status_code != 200) {
-                    alert(`${json.message} (${json.status_code})`);
-                    return;
+        function deleteUploadedFile(url, id) {
+            fetch(url, {
+                'headers': {
+                    'Accept': 'application/json'
+                },
+                'method': 'DELETE'
+            }).then((r) => r.json())
+                .then((json) => {
+                    if (json.status_code != 200) {
+                        alert(`${json.message} (${json.status_code})`);
+                        return;
+                    }
+
+                    let files = getUploadedFiles();
+                    files = files.filter((x) => x.id !== id);
+                    localStorage.setItem('uploaded_files', JSON.stringify(files));
+                    loadUploadedFiles();
+                })
+                .catch((err) => {
+                    alert('Failed to delete the file. Look into the console!');
+                    console.error(err);
+                });
+        }
+
+        // loading already existing uploaded files
+        function loadUploadedFiles() {
+            let files = getUploadedFiles();
+
+            let html = '';
+
+            for (const file of files) {
+                html += addUploadedFile(file);
+            }
+
+            uploadedFiles.parentElement.style.display = html.length > 0 ? 'flex' : 'none';
+
+            uploadedFiles.innerHTML = html;
+        }
+
+        loadUploadedFiles();
+
+        function getUploadedFiles() {
+            let files = localStorage.getItem("uploaded_files");
+            if (!files) {
+                files = '[]';
+            }
+            return JSON.parse(files);
+        }
+
+        function showUploadType(type) {
+            document.getElementById('form-upload-wrapper').style.display = type == 'text' ? 'none' : 'flex';
+            document.getElementById('form-text-upload').style.display = type == 'text' ? 'flex' : 'none';
+
+            const tabs = document.querySelectorAll('.form-upload-tab');
+
+            for (const tab of tabs) {
+                if (tab.getAttribute('id') == `form-tab-${type}`) {
+                    tab.classList.remove('disabled');
+                } else {
+                    tab.classList.add('disabled');
                 }
-
-                let files = getUploadedFiles();
-                files = files.filter((x) => x.id !== id);
-                localStorage.setItem('uploaded_files', JSON.stringify(files));
-                loadUploadedFiles();
-            })
-            .catch((err) => {
-                alert('Failed to delete the file. Look into the console!');
-                console.error(err);
-            });
-    }
-
-    // loading already existing uploaded files
-    function loadUploadedFiles() {
-        let files = getUploadedFiles();
-
-        let html = '';
-
-        for (const file of files) {
-            html += addUploadedFile(file);
-        }
-
-        uploadedFiles.parentElement.style.display = html.length > 0 ? 'flex' : 'none';
-
-        uploadedFiles.innerHTML = html;
-    }
-
-    loadUploadedFiles();
-
-    function getUploadedFiles() {
-        let files = localStorage.getItem("uploaded_files");
-        if (!files) {
-            files = '[]';
-        }
-        return JSON.parse(files);
-    }
-
-    function showUploadType(type) {
-        document.getElementById('form-upload-wrapper').style.display = type == 'text' ? 'none' : 'flex';
-        document.getElementById('form-text-upload').style.display = type == 'text' ? 'flex' : 'none';
-
-        const tabs = document.querySelectorAll('.form-upload-tab');
-
-        for (const tab of tabs) {
-            if (tab.getAttribute('id') == `form-tab-${type}`) {
-                tab.classList.remove('disabled');
-            } else {
-                tab.classList.add('disabled');
             }
         }
-    }
-</script>
+    </script>
+<?php endif; ?>
 
 </html>
