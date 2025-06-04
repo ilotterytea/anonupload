@@ -143,6 +143,11 @@ if (FILE_CATALOG_FANCY_VIEW && strlen(substr($_SERVER['PHP_SELF'], strlen('/inde
                         <?php endif; ?>
                     </div>
                     <div class="grow row gap-8 justify-end align-center" id="file-tab-buttons">
+                        <?php if (FILE_REPORT): ?>
+                            <a href="/report.php?f=<?= $file['id'] ?>.<?= $file['extension'] ?>">
+                                <button>Report</button>
+                            </a>
+                        <?php endif; ?>
                         <a href="<?= $file['full_url'] ?>">
                             <button>Full size</button>
                         </a>
@@ -273,7 +278,7 @@ if (FILE_CATALOG_FANCY_VIEW && strlen(substr($_SERVER['PHP_SELF'], strlen('/inde
     <script>
         // adding deletion button
         const files = JSON.parse(localStorage.getItem('uploaded_files') ?? '[]');
-        const file = files.find§((x) => x.id === '<?= $file['id'] ?>');
+        const file = files.find((x) => x.id === '<?= $file['id'] ?>');
         console.log(file);
         if (file && file.urls && file.urls.deletion_url) {
             const buttons = document.getElementById('file-tab-buttons');

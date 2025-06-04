@@ -65,6 +65,11 @@ table.vertical {
     border-spacing: 8px;
 }
 
+table.vertical th {
+    text-align: end;
+    vertical-align: top;
+}
+
 /** FORM */
 button[type=submit] {
     background: linear-gradient(0deg, var(--box-tab-background), var(--background));
