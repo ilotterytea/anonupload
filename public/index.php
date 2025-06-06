@@ -111,6 +111,16 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
 <head>
     <?php if ($file): ?>
         <title><?= $file['name'] ?> - <?= INSTANCE_NAME ?></title>
+        <meta property="og:title" content="<?= $file['name'] ?> - <?= INSTANCE_NAME ?>" />
+        <meta property="og:description" content="<?= $file['size_formatted'] ?> - <?= $file['mime'] ?> &#40;<?= $file['extension'] ?>&#41;
+                        <?php if (isset($file['resolution'])): ?>
+                            - <?= $file['resolution'] ?><?php endif; ?>" />
+        <meta property="og:url" content="<?= sprintf("%s/%s.%s", INSTANCE_URL, $file['id'], $file['extension']) ?>" />
+        <meta property="og:type" content="website" />
+        <?php if (FILE_THUMBNAILS): ?>
+            <meta property="og:image"
+                content="<?= sprintf('%s%s/%s.webp', INSTANCE_URL, FILE_THUMBNAIL_DIRECTORY_PREFIX, $file['id']) ?>" />
+        <?php endif; ?>
     <?php else: ?>
         <title><?= INSTANCE_NAME ?></title>
     <?php endif; ?>
