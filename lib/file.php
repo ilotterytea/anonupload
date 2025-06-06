@@ -11,7 +11,7 @@ function verify_mimetype(string $file_path, string $mimetype): bool
     } else if (str_starts_with($mimetype, 'video/') || str_starts_with($mimetype, 'audio/')) {
         $output = [];
         $exitCode = 0;
-        $cmd = 'ffprobe -v error -i "/path/to/video.mp4" 2>&1';
+        $cmd = "ffprobe -v error -i $path 2>&1";
         exec($cmd, $output, $exitCode);
         return $exitCode === 0;
     }
