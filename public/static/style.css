@@ -7,11 +7,57 @@
     --box-border: #800;
     --box-content-background: #fff;
     --box-content-background-2: #e6d9d9;
+    --anchor-color: #800;
+    --anchor-color-hovered: #f00;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #262626;
+        --background-2: #202020;
+        --foreground: #ffffff;
+        --box-tab-background: #800;
+        --box-tab-foreground: #fff;
+        --box-border: #575757;
+        --box-content-background: #3a3a3a;
+        --box-content-background-2: #282828;
+        --anchor-color: #ff6161;
+        --anchor-color-hovered: #ff9696;
+    }
+
+    button[type=submit] {
+        background: var(--box-tab-background);
+        color: var(--box-tab-foreground);
+    }
+
+    button[type=submit]:hover {
+        background: var(--box-tab-background);
+    }
+
+    input,
+    textarea {
+        background: var(--background);
+        border: 1px solid var(--box-border);
+        color: var(--box-tab-foreground);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        color: var(--box-border);
+    }
 }
 
 * {
     padding: 0;
     margin: 0;
+}
+
+a {
+    color: var(--anchor-color);
+}
+
+a:hover {
+    color: var(--anchor-color-hovered);
 }
 
 button.transparent {
