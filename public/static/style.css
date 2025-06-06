@@ -66,8 +66,12 @@ table.vertical {
 }
 
 table.vertical th {
-    text-align: end;
+    text-align: right;
     vertical-align: top;
+}
+
+table.vertical.left th {
+    text-align: left;
 }
 
 /** FORM */

@@ -265,6 +265,12 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
                             <textarea name="paste" placeholder="Enter your text here..."></textarea>
                         </div>
 
+                        <table class="vertical" id="form-upload-options">
+                            <tr>
+                                <th>Preserve original filename:</th>
+                                <td><input type="checkbox" name="preserve_original_name" value="1"></td>
+                            </tr>
+                        </table>
                         <button type="submit">Upload</button>
                     </form>
                 </div>
@@ -288,7 +294,6 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
         // adding deletion button
         const files = JSON.parse(localStorage.getItem('uploaded_files') ?? '[]');
         const file = files.find((x) => x.id === '<?= $file['id'] ?>');
-        console.log(file);
         if (file && file.urls && file.urls.deletion_url) {
             const buttons = document.getElementById('file-tab-buttons');
             buttons.innerHTML = `<a href='${file.urls.deletion_url}'><button>Delete</button></a>` + buttons.innerHTML;
@@ -296,6 +301,8 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
     </script>
 <?php else: ?>
     <script>
+        const formDetails = document.getElementById('form-upload-options');
+
         document.getElementById('form-text-upload').style.display = 'none';
         let file = null;
 
@@ -321,13 +328,13 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
             const fileURLWrapper = document.querySelector('#form-upload-wrapper>div');
             fileURL.addEventListener('keyup', () => {
                 fileUploadWrapper.style.display = fileURL.value.length == 0 ? 'block' : 'none';
-                formSubmitButton.style.display = fileURL.value.length == 0 ? 'none' : 'block';
+                setFormDetailsVisiblity(fileURL.value.length > 0);
             });
         <?php endif; ?>
 
         const textArea = document.querySelector('#form-text-upload>textarea');
         textArea.addEventListener('keyup', () => {
-            formSubmitButton.style.display = textArea.value.length == 0 ? 'none' : 'block';
+            setFormDetailsVisiblity(fileURL.value.length > 0);
         });
 
         const formSubmitButton = document.querySelector('#form-upload button[type=submit]');
@@ -338,7 +345,7 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
             file = e.target.files[0];
             if (file) {
                 fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
-                formSubmitButton.style.display = 'block';
+                setFormDetailsVisiblity(true);
                 <?php if (FILEEXT_ENABLED): ?>
                     fileURLWrapper.style.display = 'none';
                 <?php endif; ?>
@@ -353,7 +360,7 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
                     if (item.kind === "file") {
                         file = item.getAsFile();
                         fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
-                        formSubmitButton.style.display = 'block';
+                        setFormDetailsVisiblity(true);
                         <?php if (FILEEXT_ENABLED): ?>
                             fileURLWrapper.style.display = 'none';
                         <?php endif; ?>
@@ -381,10 +388,10 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
 
         });
 
-        formSubmitButton.style.display = 'none';
+        setFormDetailsVisiblity(false);
 
         if (textArea.value.length > 0) {
-            formSubmitButton.style.display = 'block';
+            setFormDetailsVisiblity(true);
             showUploadType('text');
         }
 
@@ -413,7 +420,7 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
                 fileURL.value = '';
             <?php endif; ?>
             file = null;
-            formSubmitButton.style.display = 'none';
+            setFormDetailsVisiblity(false);
 
             fetch(formUpload.getAttribute('action'), {
                 'body': form,
@@ -452,6 +459,8 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
                     let files = getUploadedFiles();
                     files.unshift(json.data);
                     localStorage.setItem('uploaded_files', JSON.stringify(files));
+
+                    formUpload.clear();
                 });
         }
 
@@ -551,6 +560,11 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
                     tab.classList.add('disabled');
                 }
             }
+        }
+
+        function setFormDetailsVisiblity(show) {
+            formDetails.style.display = show ? 'flex' : 'none';
+            formSubmitButton.style.display = show ? 'block' : 'none';
         }
     </script>
 <?php endif; ?>
