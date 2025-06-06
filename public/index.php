@@ -71,22 +71,12 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
 
     $file['full_url'] = FILE_UPLOAD_DIRECTORY_PREFIX . "/{$file['id']}.{$file['extension']}";
 
+    // formatting the file size
     $size = $file['size'];
-    $size_suffix = 'B';
-    $size_i = 0;
-    do {
-        $size /= 1024;
-        $size_suffix = match ($size_i) {
-            0 => 'B',
-            1 => 'KB',
-            2 => 'MB',
-            3 => 'GB',
-            default => 'TB'
-        };
-        $size_i++;
-    } while ($size > 1024);
+    $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    $factor = floor((strlen($size) - 1) / 3);
+    $file['size_formatted'] = sprintf("%.2f", $size / pow(1024, $factor)) . ' ' . $units[$factor];
 
-    $file['size_formatted'] = sprintf('%.2f%s', $size, $size_suffix);
     $file['name'] = $file['original_name'] ?? sprintf('%s.%s', $file['id'], $file['extension']);
 
     if (!isset($file['uploaded_at'])) {
