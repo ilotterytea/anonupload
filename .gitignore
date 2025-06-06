@@ -2,3 +2,6 @@ config.php
 *.ini
 *.db
 userdata/
+
+TOS.txt
+PRIVACY.txt

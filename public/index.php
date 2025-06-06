@@ -105,6 +105,9 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
         $file['resolution'] = trim(shell_exec('wc -l < ' . escapeshellarg($file_path))) . ' lines';
     }
 }
+
+$tos_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/TOS.txt');
+$privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 ?>
 <html>
 
@@ -210,11 +213,20 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
                         Users do not need an account to start uploading.
                         <br><br>
                         Click the button below and share the files with your friends today!
-                        <br>
-                        But, read <a href="/static/TOS.txt">TOS</a> and <a href="/static/PRIVACY.txt">Privacy Policy</a>
-                        before
-                        interacting with the
-                        website.
+                        <?php if ($tos_exists || $privacy_exists): ?>
+                            <br>
+                            But, read
+                            <?php if ($tos_exists): ?>
+                                <a href="/static/TOS.txt">TOS</a>
+                            <?php endif; ?>
+                            <?php if ($tos_exists && $privacy_exists): ?> and <?php endif; ?>
+                            <?php if ($privacy_exists): ?>
+                                <a href="/static/PRIVACY.txt">Privacy Policy</a>
+                            <?php endif; ?>
+                            before
+                            interacting with the
+                            website.
+                        <?php endif; ?>
                     </p>
                 </div>
             </section>
