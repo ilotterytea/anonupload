@@ -16,7 +16,7 @@ $file_id = null;
 
 if (strlen(substr($_SERVER['PHP_SELF'], strlen('/index.php'))) > 0) {
     $file_id = basename($_SERVER['PHP_SELF']);
-} else if (!empty(trim($_SERVER['QUERY_STRING']))) {
+} else if (isset($_SERVER['QUERY_STRING']) && !empty(trim($_SERVER['QUERY_STRING']))) {
     $file_id = basename($_SERVER['QUERY_STRING']);
 }
 
