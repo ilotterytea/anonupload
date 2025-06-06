@@ -3,6 +3,7 @@
     --background-2: #f7f0f0;
     --foreground: #800;
     --box-tab-background: #efc2c2;
+    --box-tab-foreground: #800;
     --box-border: #800;
     --box-content-background: #fff;
     --box-content-background-2: #e6d9d9;
@@ -115,6 +116,8 @@ button[type=submit]:hover {
     flex-direction: row;
     align-items: center;
     gap: 8px;
+
+    color: var(--box-tab-foreground);
 }
 
 .tabs>.tab {}
@@ -128,6 +131,7 @@ button[type=submit]:hover {
 .box:has(.content)>.tab,
 .tabs>.tab:not(.disabled) {
     background: var(--box-tab-background);
+    color: var(--box-tab-foreground);
     border: 2px solid var(--box-border);
     border-bottom: none;
     padding: 8px;
@@ -145,15 +149,38 @@ button[type=submit]:hover {
     background: var(--box-content-background-2);
 }
 
+.box>.content.file-preview {
+    padding: 0;
+}
+
 /** FILES */
+.file-preview-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.file-preview-wrapper>.box {
+    max-width: 100%;
+}
+
+.file-preview:has(img),
+.file-preview:has(video) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .file-preview img,
 .file-preview video {
-    width: 100%;
-    max-height: 100%;
+    max-height: 80vh;
+    max-width: 100%;
+    border: 0.5px solid black;
 }
 
 .file-preview pre {
-    width: 100%;
+    max-width: 100%;
     overflow-x: scroll;
 }
 

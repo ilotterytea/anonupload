@@ -155,46 +155,48 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                 </div>
             </div>
 
-            <section class="box">
-                <div class="tab row">
-                    <div class="grow">
-                        <?php if (isset($file['original_name'])): ?>
-                            <p><i><?= $file['original_name'] ?></i></p>
-                        <?php else: ?>
-                            <p>File <?= sprintf('%s.%s', $file['id'], $file['extension']) ?></p>
-                        <?php endif; ?>
-                    </div>
-                    <div class="grow row gap-8 justify-end align-center" id="file-tab-buttons">
-                        <?php if (FILE_REPORT): ?>
-                            <a href="/report.php?f=<?= $file['id'] ?>.<?= $file['extension'] ?>">
-                                <button>Report</button>
+            <section class="file-preview-wrapper">
+                <section class="box">
+                    <div class="tab row">
+                        <div class="grow">
+                            <?php if (isset($file['original_name'])): ?>
+                                <p><i><?= $file['original_name'] ?></i></p>
+                            <?php else: ?>
+                                <p>File <?= sprintf('%s.%s', $file['id'], $file['extension']) ?></p>
+                            <?php endif; ?>
+                        </div>
+                        <div class="grow row gap-8 justify-end align-center" id="file-tab-buttons">
+                            <?php if (FILE_REPORT): ?>
+                                <a href="/report.php?f=<?= $file['id'] ?>.<?= $file['extension'] ?>">
+                                    <button>Report</button>
+                                </a>
+                            <?php endif; ?>
+                            <a href="<?= $file['full_url'] ?>">
+                                <button>Full size</button>
                             </a>
-                        <?php endif; ?>
-                        <a href="<?= $file['full_url'] ?>">
-                            <button>Full size</button>
-                        </a>
-                        <a href="<?= $file['full_url'] ?>" download="<?= $file['name'] ?>">
-                            <button>Download</button>
-                        </a>
+                            <a href="<?= $file['full_url'] ?>" download="<?= $file['name'] ?>">
+                                <button>Download</button>
+                            </a>
+                        </div>
                     </div>
-                </div>
-                <div class="content file-preview">
-                    <?php if (str_starts_with($file['mime'], 'image/')): ?>
-                        <img src="<?= $file['full_url'] ?>" alt="Image file.">
-                    <?php elseif (str_starts_with($file['mime'], 'video/')): ?>
-                        <video controls autoplay>
-                            <source src="<?= $file['full_url'] ?>" type="<?= $file['mime'] ?>">
-                        </video>
-                    <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>
-                        <audio controls autoplay>
-                            <source src="<?= $file['full_url'] ?>" type="<?= $file['mime'] ?>">
-                        </audio>
-                    <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
-                        <pre><?= file_get_contents(FILE_UPLOAD_DIRECTORY . "/{$file['id']}.{$file['extension']}") ?></pre>
-                    <?php else: ?>
-                        <p><i>This file cannot be displayed.</i></p>
-                    <?php endif; ?>
-                </div>
+                    <div class="content column file-preview">
+                        <?php if (str_starts_with($file['mime'], 'image/')): ?>
+                            <img src="<?= $file['full_url'] ?>" alt="Image file.">
+                        <?php elseif (str_starts_with($file['mime'], 'video/')): ?>
+                            <video controls autoplay>
+                                <source src="<?= $file['full_url'] ?>" type="<?= $file['mime'] ?>">
+                            </video>
+                        <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>
+                            <audio controls autoplay>
+                                <source src="<?= $file['full_url'] ?>" type="<?= $file['mime'] ?>">
+                            </audio>
+                        <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
+                            <pre><?= file_get_contents(FILE_UPLOAD_DIRECTORY . "/{$file['id']}.{$file['extension']}") ?></pre>
+                        <?php else: ?>
+                            <p><i>This file cannot be displayed.</i></p>
+                        <?php endif; ?>
+                    </div>
+                </section>
             </section>
         <?php else: ?>
             <noscript>No JavaScript Mode</noscript>
