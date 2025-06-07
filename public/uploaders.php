@@ -2,6 +2,8 @@
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
 
+session_start();
+
 $file_types = [];
 
 foreach (FILE_ACCEPTED_MIME_TYPES as $k => $v) {
