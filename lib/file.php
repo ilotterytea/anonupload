@@ -35,3 +35,10 @@ function delete_file(string $file_id, string $file_extension): bool
 
     return true;
 }
+
+function strip_exif(string $file_path)
+{
+    $file_path = escapeshellarg($file_path);
+    $output = shell_exec("exiftool -q -EXIF= $file_path $file_path");
+    return empty($output);
+}

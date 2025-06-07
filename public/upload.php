@@ -108,6 +108,11 @@ try {
             throw new RuntimeException('Invalid file format.');
         }
 
+        // striping exif data
+        if (FILE_STRIP_EXIF && $is_media && !strip_exif($file['tmp_name'])) {
+            throw new RuntimeException('Failed to strip EXIF tags.');
+        }
+
         $file_data = [
             'size' => $file['size'],
             'mime' => $file_mime,

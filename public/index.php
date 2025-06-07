@@ -299,6 +299,12 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                 <th>Preserve original filename:</th>
                                 <td><input type="checkbox" name="preserve_original_name" value="1"></td>
                             </tr>
+                            <?php if (FILE_STRIP_EXIF): ?>
+                                <tr>
+                                    <th>Strip EXIF data:</th>
+                                    <td><input type="checkbox" name="strip_exif_data" value="1" checked></td>
+                                </tr>
+                            <?php endif; ?>
                         </table>
                         <button type="submit">Upload</button>
                     </form>
