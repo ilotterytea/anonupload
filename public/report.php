@@ -27,6 +27,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $file_id = $_POST['id'];
     $file_id = explode('.', $file_id);
+    if (count($file_id) != 2) {
+        generate_alert(
+            '/report.php',
+            'Not enough data.',
+            400,
+            null
+        );
+        exit();
+    }
     $file_ext = $file_id[1];
     $file_id = $file_id[0];
 
@@ -40,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     }
 
-    $reason = trim($_POST['reason'] ?? '');
+    $reason = str_safe($_POST['reason'] ?? '', null);
 
     if (empty($reason)) {
         generate_alert(
@@ -52,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     }
 
-    $email = $_POST['email'] ?? '(Anonymous)';
+    $email = str_safe($_POST['email'] ?? '(Anonymous)', null);
     if (empty($email)) {
         $email = '(Anonymous)';
     }
