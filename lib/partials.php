@@ -23,6 +23,11 @@ function html_big_navbar()
             <a href="/uploaders.php">
                 <button>Uploaders</button>
             </a>
+            <?php if (isset($_SESSION['is_moderator'])): ?>
+                <a href="/mod.php">
+                    <button>Moderation</button>
+                </a>
+            <?php endif; ?>
         </div>
     </section>
     <?php ;
@@ -49,6 +54,11 @@ function html_mini_navbar()
             <a href="/uploaders.php">
                 <button>Uploaders</button>
             </a>
+            <?php if (isset($_SESSION['is_moderator'])): ?>
+                <a href="/mod.php">
+                    <button>Moderation</button>
+                </a>
+            <?php endif; ?>
         </div>
     </section>
     <?php ;

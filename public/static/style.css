@@ -117,7 +117,9 @@ table.vertical th {
     vertical-align: top;
 }
 
-table.vertical.left th {
+table.vertical.left th,
+table.left th,
+table.left td {
     text-align: left;
 }
 

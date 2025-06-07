@@ -3,6 +3,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/utils.php';
 
+session_start();
+
 if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
     $files = glob(FILE_UPLOAD_DIRECTORY . "/*.*");
     $file = $files[random_int(0, count($files) - 1)];
@@ -46,8 +48,6 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
         $file = json_decode(file_get_contents($meta_path), true);
 
         if (isset($file['views'])) {
-            session_start();
-
             $viewed_file_ids = $_SESSION['viewed_file_ids'] ?? [];
 
             if (!in_array($file['id'], $viewed_file_ids)) {
@@ -156,6 +156,11 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                             <?php endif; ?>
                         </div>
                         <div class="grow row gap-8 justify-end align-center" id="file-tab-buttons">
+                            <?php if (isset($_SESSION['is_moderator'])): ?>
+                                <a href="/delete.php?f=<?= $file['id'] ?>.<?= $file['extension'] ?>">
+                                    <button>Delete</button>
+                                </a>
+                            <?php endif; ?>
                             <?php if (FILE_REPORT): ?>
                                 <a href="/report.php?f=<?= $file['id'] ?>.<?= $file['extension'] ?>">
                                     <button>Report</button>
@@ -303,7 +308,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
     </main>
 </body>
 
-<?php if ($file): ?>
+<?php if ($file && !isset($_SESSION['is_moderator'])): ?>
     <script>
         // adding deletion button
         const files = JSON.parse(localStorage.getItem('uploaded_files') ?? '[]');
@@ -313,7 +318,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
             buttons.innerHTML = `<a href='${file.urls.deletion_url}'><button>Delete</button></a>` + buttons.innerHTML;
         }
     </script>
-<?php else: ?>
+<?php elseif (!$file): ?>
     <script>
         const formDetails = document.getElementById('form-upload-options');
 

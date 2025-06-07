@@ -1,17 +1,20 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/utils.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/file.php';
+
+session_start();
 
 if (!FILE_DELETION) {
     json_response(null, 'File deletion is not allowed!', 403);
     exit();
 }
 
-$file_id = $_GET['f'] ?: null;
-$password = $_GET['key'] ?: null;
+$file_id = $_GET['f'] ?? null;
+$password = $_GET['key'] ?? null;
 
-if (!isset($file_id, $password)) {
-    json_response(null, "Fields 'f' and 'key' must be set!", 400);
+if (!isset($file_id)) {
+    json_response(null, "File ID must be set!", 400);
     exit();
 }
 
@@ -41,7 +44,12 @@ if (!array_key_exists('password', $metadata)) {
     exit();
 }
 
-if (!password_verify($password, $metadata['password'])) {
+if (!isset($_SESSION['is_moderator']) && !isset($password)) {
+    json_response(null, "Field 'key' must be set!", 400);
+    exit();
+}
+
+if (!isset($_SESSION['is_moderator']) && !password_verify($password, $metadata['password'])) {
     json_response(null, "Bad password", 401);
     exit();
 }
