@@ -3,14 +3,25 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/utils.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/thumbnails.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/file.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/alert.php';
 
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-    json_response(null, 'Method not allowed', 405);
+    generate_alert(
+        '/',
+        "Method not allowed",
+        405,
+        null
+    );
     exit;
 }
 
 if (!is_dir(FILE_UPLOAD_DIRECTORY) && !mkdir(FILE_UPLOAD_DIRECTORY, 0777, true)) {
-    json_response(null, 'Failed to create a directory for user files', 500);
+    generate_alert(
+        '/',
+        "Failed to create a directory for user files",
+        500,
+        null
+    );
     exit();
 }
 
@@ -185,11 +196,12 @@ try {
         $file_data['urls']['deletion_url'] = INSTANCE_URL . "/delete.php?f={$file_data['id']}.{$file_data['extension']}&key={$file_data['password']}";
     }
 
-    if ($_SERVER['HTTP_ACCEPT'] == 'application/json') {
-        json_response($file_data, null, 201);
-    } else {
-        header("Location: /{$file_data['id']}.{$file_data['extension']}");
-    }
+    generate_alert(
+        "/{$file_data['id']}.{$file_data['extension']}",
+        null,
+        201,
+        $file_data
+    );
 
     if (FILE_METADATA) {
         unset($file_data['urls']);
@@ -213,10 +225,9 @@ try {
         }
     }
 } catch (RuntimeException $e) {
-    if ($_SERVER['HTTP_ACCEPT'] == 'application/json') {
-        json_response(null, $e->getMessage(), 400);
-    } else {
-        http_response_code(400);
-        echo $e->getMessage();
-    }
+    generate_alert(
+        "/",
+        $e->getMessage(),
+        400
+    );
 }

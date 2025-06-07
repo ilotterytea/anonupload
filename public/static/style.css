@@ -201,6 +201,16 @@ button[type=submit]:hover {
     padding: 0;
 }
 
+.box.alert {
+    padding: 8px;
+    background: var(--box-content-background);
+}
+
+.box.alert.red {
+    background: var(--anchor-color);
+    color: #000;
+}
+
 /** FILES */
 .file-preview-wrapper {
     display: flex;

@@ -2,6 +2,7 @@
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/utils.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/alert.php';
 
 session_start();
 
@@ -85,6 +86,7 @@ if (isset($_SESSION['is_moderator'])) {
 <body>
     <main>
         <?php html_mini_navbar() ?>
+        <?php display_alert() ?>
         <?php if (isset($_SESSION['is_moderator'])): ?>
             <?php if (!empty($files)): ?>
                 <section class="column gap-8">
@@ -114,7 +116,7 @@ if (isset($_SESSION['is_moderator'])) {
                                     <?= format_timestamp(time() - filemtime(sprintf('%s/%s', FILE_UPLOAD_DIRECTORY, $f['name']))) ?>
                                 </td>
                                 <td>
-                                    <a href="/delete.php?f=<?= $f['name'] ?>">
+                                    <a href="/delete.php?f=<?= $f['name'] ?>&r=/mod.php">
                                         <button>
                                             <img src="/static/img/icons/delete.png" alt="Delete">
                                         </button>

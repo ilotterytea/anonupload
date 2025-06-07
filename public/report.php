@@ -2,16 +2,27 @@
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/utils.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/alert.php';
 
 if (!FILE_REPORT) {
-    http_response_code(403);
-    exit('No reports allowed!');
+    generate_alert(
+        '/',
+        'No reports allowed!',
+        403,
+        null
+    );
+    exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!isset($_POST['id'], $_POST['reason'])) {
-        http_response_code(400);
-        exit('Not enough data.');
+        generate_alert(
+            '/report.php',
+            'Not enough data.',
+            400,
+            null
+        );
+        exit();
     }
 
     $file_id = $_POST['id'];
@@ -20,15 +31,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $file_id = $file_id[0];
 
     if (!is_file(FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_ext}")) {
-        http_response_code(404);
-        exit('Invalid file.');
+        generate_alert(
+            '/report.php',
+            'Invalid file.',
+            404,
+            null
+        );
+        exit();
     }
 
     $reason = trim($_POST['reason'] ?? '');
 
     if (empty($reason)) {
-        http_response_code(400);
-        exit('Report reason is empty');
+        generate_alert(
+            '/report.php',
+            'Report reason is empty',
+            400,
+            null
+        );
+        exit();
     }
 
     $email = $_POST['email'] ?? '(Anonymous)';
@@ -37,8 +58,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (!is_dir(FILE_REPORT_DIRECTORY) && !mkdir(FILE_REPORT_DIRECTORY, 0777, true)) {
-        http_response_code(500);
-        exit('Failed to create a folder for reports. Try again later.');
+        generate_alert(
+            '/report.php',
+            'Failed to create a folder for reports. Try again later.',
+            500,
+            null
+        );
+        exit();
     }
 
     do {
@@ -52,11 +78,21 @@ Reason:
 {$reason}";
 
     if (!file_put_contents(FILE_REPORT_DIRECTORY . "/{$report_id}.txt", $contents)) {
-        http_response_code(500);
-        exit("Failed to save the report. Try again later!");
+        generate_alert(
+            '/report.php',
+            'Failed to save the report. Try again later!',
+            500,
+            null
+        );
+        exit();
     }
 
-    json_response(['id' => $report_id], 'Sent!', 201);
+    generate_alert(
+        '/report.php',
+        'Success!',
+        201,
+        ['id' => $report_id]
+    );
     exit();
 }
 
@@ -78,6 +114,8 @@ if (!is_file(FILE_UPLOAD_DIRECTORY . "/{$file_id}")) {
 <body>
     <main>
         <?php html_mini_navbar() ?>
+        <?php display_alert() ?>
+
         <h1>Report a file</h1>
         <hr>
         <form action="/report.php" method="post">

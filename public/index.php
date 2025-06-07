@@ -2,6 +2,7 @@
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/utils.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/alert.php';
 
 session_start();
 
@@ -18,8 +19,6 @@ $file_id = null;
 
 if (strlen(substr($_SERVER['PHP_SELF'], strlen('/index.php'))) > 0) {
     $file_id = basename($_SERVER['PHP_SELF']);
-} else if (isset($_SERVER['QUERY_STRING']) && !empty(trim($_SERVER['QUERY_STRING']))) {
-    $file_id = basename($_SERVER['QUERY_STRING']);
 }
 
 if (FILE_CATALOG_FANCY_VIEW && $file_id) {
@@ -145,9 +144,11 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                 </div>
             </div>
 
+            <?php display_alert() ?>
+
             <section class="file-preview-wrapper">
                 <section class="box">
-                    <div class="tab row">
+                    <div class="tab row gap-8">
                         <div class="grow">
                             <?php if (isset($file['original_name'])): ?>
                                 <p><i><?= $file['original_name'] ?></i></p>
@@ -196,6 +197,8 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         <?php else: ?>
             <noscript>No JavaScript Mode</noscript>
             <?php html_big_navbar() ?>
+
+            <?php display_alert() ?>
 
             <section class="box">
                 <div class="tab">
