@@ -287,7 +287,14 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                             <textarea name="paste" placeholder="Enter your text here..."></textarea>
                         </div>
 
-                        <table class="vertical" id="form-upload-options">
+                        <table class="vertical left" id="form-upload-options">
+                            <tr>
+                                <th>Title:</th>
+                                <td>
+                                    <input type="text" name="title" placeholder="Leave empty if you want a random title"
+                                        maxlength="<?= FILE_TITLE_MAX_LENGTH ?>">
+                                </td>
+                            </tr>
                             <tr>
                                 <th>Preserve original filename:</th>
                                 <td><input type="checkbox" name="preserve_original_name" value="1"></td>
@@ -356,7 +363,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 
         const textArea = document.querySelector('#form-text-upload>textarea');
         textArea.addEventListener('keyup', () => {
-            setFormDetailsVisiblity(fileURL.value.length > 0);
+            setFormDetailsVisiblity(textArea.value.length > 0);
         });
 
         const formSubmitButton = document.querySelector('#form-upload button[type=submit]');

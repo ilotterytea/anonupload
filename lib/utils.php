@@ -41,3 +41,23 @@ function format_timestamp(int $timestamp_secs)
         return "$days day" . ($days > 1 ? "s" : "");
     }
 }
+
+function str_safe(string $s, int|null $max_length, bool $remove_new_lines = true): string
+{
+    $output = $s;
+
+    if ($remove_new_lines) {
+        $output = str_replace(PHP_EOL, "", $output);
+    }
+
+    $output = htmlspecialchars($output);
+    $output = strip_tags($output);
+
+    if ($max_length) {
+        $output = substr($output, 0, $max_length);
+    }
+
+    $output = trim($output);
+
+    return $output;
+}

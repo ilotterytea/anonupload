@@ -27,6 +27,10 @@ if (!is_dir(FILE_UPLOAD_DIRECTORY) && !mkdir(FILE_UPLOAD_DIRECTORY, 0777, true))
 
 try {
     $preserve_original_name = boolval($_POST['preserve_original_name'] ?? '0');
+    $title = str_safe($_POST['title'] ?? '', FILE_TITLE_MAX_LENGTH);
+    if (empty(trim($title))) {
+        $title = null;
+    }
 
     $url = isset($_POST['url']) ? $_POST['url'] ?: null : null;
     $file = isset($_FILES['file']) ? $_FILES['file'] ?: null : null;
@@ -209,7 +213,11 @@ try {
         $file_data['views'] = 0;
         $file_data['uploaded_at'] = time();
 
-        if ($preserve_original_name) {
+        if ($title) {
+            $file_data['original_name'] = $title;
+        }
+
+        if ($preserve_original_name && !$title) {
             if ($file && !empty($file['name'])) {
                 $file_data['original_name'] = $file['name'];
             } else if ($url) {
