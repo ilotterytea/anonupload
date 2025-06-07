@@ -242,6 +242,11 @@ button[type=submit]:hover {
     overflow-x: scroll;
 }
 
+.item .delete-btn {
+    position: absolute;
+    align-self: flex-end;
+}
+
 /** SHORTCUTS */
 .column {
     display: flex;

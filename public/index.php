@@ -511,6 +511,9 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 
             return `
         <div class="box item column gap-4 pad-4">
+            <button class="delete-btn" onclick="deleteFileLocally('${file.id}');loadUploadedFiles();" title="Delete locally">
+                <img src="/static/img/icons/cross.png" alt="X">
+            </button>
             <?php if (FILE_THUMBNAILS): ?>
             <div class="column align-center justify-center grow">
                 <div style="max-width: 128px; max-height:128px;">
@@ -546,15 +549,19 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                         return;
                     }
 
-                    let files = getUploadedFiles();
-                    files = files.filter((x) => x.id !== id);
-                    localStorage.setItem('uploaded_files', JSON.stringify(files));
+                    deleteFileLocally(id);
                     loadUploadedFiles();
                 })
                 .catch((err) => {
                     alert('Failed to delete the file. Look into the console!');
                     console.error(err);
                 });
+        }
+
+        function deleteFileLocally(id) {
+            let files = getUploadedFiles();
+            files = files.filter((x) => x.id !== id);
+            localStorage.setItem('uploaded_files', JSON.stringify(files));
         }
 
         // loading already existing uploaded files
