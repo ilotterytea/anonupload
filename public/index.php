@@ -16,9 +16,10 @@ if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
 
 $file = null;
 $file_id = null;
+$url = parse_url($_SERVER['REQUEST_URI']);
 
-if (strlen(substr($_SERVER['PHP_SELF'], strlen('/index.php'))) > 0) {
-    $file_id = basename($_SERVER['PHP_SELF']);
+if (strlen($url['path']) > 1) {
+    $file_id = basename($url['path']);
 }
 
 if (FILE_CATALOG_FANCY_VIEW && $file_id) {
