@@ -8,16 +8,16 @@ session_start();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!isset($_POST['password'])) {
-        json_response(null, 'No password set', 400);
+        generate_alert('/mod.php', 'No password set!', 400, null);
         exit();
     }
 
     if (!is_file(MOD_FILE) && !file_put_contents(MOD_FILE, '')) {
-        json_response(null, 'Failed to create a file for mod passwords', 500);
+        generate_alert('/mod.php', 'Failed to create a file for mod passwords!', 500, null);
         exit();
     }
 
-    $password_file = explode('\n', file_get_contents(MOD_FILE));
+    $password_file = explode(PHP_EOL, file_get_contents(MOD_FILE));
 
     $is_authorized = false;
 
@@ -29,21 +29,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (!$is_authorized) {
-        if (IS_JSON_REQUEST) {
-            json_response(null, 'Unauthorized!', 401);
-        } else {
-            header('Location: /mod.php');
-        }
+        generate_alert('/mod.php', 'Unauthorized!', 401, null);
         exit();
     }
 
     $_SESSION['is_moderator'] = $is_authorized;
 
-    if (IS_JSON_REQUEST) {
-        json_response(null, 'Authorized!', 200);
-    } else {
-        header('Location: /mod.php');
-    }
+    generate_alert('/mod.php', 'Authorized!', 200, null);
     exit();
 }
 
