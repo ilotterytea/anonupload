@@ -116,6 +116,9 @@ function html_footer()
         <?php elseif (!empty(INSTANCE_DONATIONS) && is_string(INSTANCE_DONATIONS)): ?>
             <p><a href="<?= INSTANCE_DONATIONS ?>">[Donate]</a></p>
         <?php endif; ?>
+        <?php if (!empty(INSTANCE_TOR)): ?>
+            <p><a href="<?= INSTANCE_TOR ?>">[Tor]</a></p>
+        <?php endif; ?>
         <p>Serving <?= count($files) ?> files and <?= $file_size ?> of active content</p>
     </footer>
     <?php ;
