@@ -233,7 +233,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
             </section>
 
             <section class="box column">
-                <div class="tabs">
+                <div class="tabs" id="form-upload-tabs">
                     <div class="form-upload-tab tab" id="form-tab-file">
                         <button onclick="showUploadType('file')" class="transparent">
                             <p>File Upload</p>
@@ -288,6 +288,8 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                             <textarea name="paste" placeholder="Enter your text here..."></textarea>
                         </div>
 
+                        <div class="column" id="form-record-upload" style="display: none;"></div>
+
                         <table class="vertical left" id="form-upload-options">
                             <tr>
                                 <th>Title:</th>
@@ -336,6 +338,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         }
     </script>
 <?php elseif (!$file): ?>
+    <script src="/static/scripts/audiorecorder.js"></script>
     <script>
         const formDetails = document.getElementById('form-upload-options');
 
@@ -591,8 +594,13 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         }
 
         function showUploadType(type) {
-            document.getElementById('form-upload-wrapper').style.display = type == 'text' ? 'none' : 'flex';
+            if (document.getElementById('form-upload-tabs').hasAttribute('disabled')) {
+                return;
+            }
+
+            document.getElementById('form-upload-wrapper').style.display = type == 'file' ? 'flex' : 'none';
             document.getElementById('form-text-upload').style.display = type == 'text' ? 'flex' : 'none';
+            document.getElementById('form-record-upload').style.display = type === 'audio' ? 'flex' : 'none';
 
             const tabs = document.querySelectorAll('.form-upload-tab');
 

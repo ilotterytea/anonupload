@@ -136,7 +136,8 @@ button[type=submit]:hover {
     cursor: pointer;
 }
 
-#form-upload-wrapper>button {
+#form-upload-wrapper>button,
+.big-upload-button {
     background: var(--background-2);
     padding: 32px 0;
     color: var(--foreground);
@@ -278,6 +279,10 @@ button[type=submit]:hover {
     justify-content: end;
 }
 
+.justify-between {
+    justify-content: space-between;
+}
+
 .align-center {
     align-items: center;
 }
@@ -288,6 +293,10 @@ button[type=submit]:hover {
 
 .pad-4 {
     padding: 4px;
+}
+
+.pad-8 {
+    padding: 8px;
 }
 
 .gap-16 {
