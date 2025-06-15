@@ -2,7 +2,9 @@
     --background: #ffe1d4;
     --background-2: #f7f0f0;
     --foreground: #800;
+    --box-tab-background-dark: #d39c9c;
     --box-tab-background: #efc2c2;
+    --box-tab-background-light: #e4a8a8;
     --box-tab-foreground: #800;
     --box-border: #800;
     --box-content-background: #fff;
@@ -16,7 +18,9 @@
         --background: #262626;
         --background-2: #202020;
         --foreground: #ffffff;
+        --box-tab-background-dark: #500000;
         --box-tab-background: #800;
+        --box-tab-background-light: #620000;
         --box-tab-foreground: #fff;
         --box-border: #575757;
         --box-content-background: #3a3a3a;
@@ -164,12 +168,10 @@ button[type=submit]:hover {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+    gap: 2px;
 
     color: var(--box-tab-foreground);
 }
-
-.tabs>.tab {}
 
 .box:has(.tabs),
 .box:has(.tab) {
@@ -178,13 +180,23 @@ button[type=submit]:hover {
 }
 
 .box:has(.content)>.tab,
-.tabs>.tab:not(.disabled) {
+.tabs>.tab {
     background: var(--box-tab-background);
     color: var(--box-tab-foreground);
     border: 2px solid var(--box-border);
     border-bottom: none;
     padding: 8px;
     font-weight: bold;
+}
+
+.tabs>.tab.disabled {
+    background: var(--box-tab-background-dark);
+    padding: 4px 8px;
+    margin-bottom: -8px;
+}
+
+.tabs>.tab.disabled:hover {
+    background: var(--box-tab-background-light);
 }
 
 .box:has(.tab)>.content,
