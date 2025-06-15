@@ -1,8 +1,5 @@
-// getting form upload tabs
-const tabs = document.getElementById('form-upload-tabs');
-
 // creating an audio button
-tabs.innerHTML += `
+formTabs.innerHTML += `
 <div class="form-upload-tab tab disabled" id="form-tab-audio">
     <button onclick="showUploadType('audio')" class="transparent">
         <p>Record</p>
@@ -160,7 +157,7 @@ function stopRecording() {
             formFile.files = dt.files;
         }
         
-        tabs.setAttribute('disabled', 'true');
+        formTabs.setAttribute('disabled', 'true');
     };
 }
 
@@ -171,7 +168,7 @@ function removeRecording() {
     formFile.value = '';
     setFormDetailsVisiblity(false);
     
-    tabs.removeAttribute('disabled');
+    formTabs.removeAttribute('disabled');
 }
 
 function playRecord() {

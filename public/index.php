@@ -123,6 +123,11 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 
 <body>
     <main>
+        <noscript>
+            <p><b>No-JavaScript chad <img src="/static/img/icons/chad.png" alt="" width="16"></b></p>
+            <p style="color:gray">no fancy features like local file saving</p>
+        </noscript>
+
         <?php if ($file): ?>
             <div class="row">
                 <?php html_mini_navbar() ?>
@@ -196,7 +201,6 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                 </section>
             </section>
         <?php else: ?>
-            <noscript>No JavaScript Mode</noscript>
             <?php html_big_navbar() ?>
 
             <?php display_alert() ?>
@@ -232,8 +236,11 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                 </div>
             </section>
 
-            <section class="box column">
-                <div class="tabs" id="form-upload-tabs">
+            <section class="box column" id="form-box">
+                <div class="tab">
+                    <p>Form Upload</p>
+                </div>
+                <div class="tabs" id="form-upload-tabs" style="display: none;">
                     <div class="form-upload-tab tab" id="form-tab-file">
                         <button onclick="showUploadType('file')" class="transparent">
                             <p>File Upload</p>
@@ -248,6 +255,8 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                 <div class="content">
                     <form class="column gap-8" action="/upload.php" method="post" enctype="multipart/form-data"
                         id="form-upload">
+                        <p class="remove-script">File:</p>
+                        <hr class="remove-script">
                         <input type="file" name="file"
                             accept="<?= implode(', ', array_unique(array_values(FILE_ACCEPTED_MIME_TYPES))) ?>"
                             id="form-file">
@@ -285,32 +294,38 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                         </div>
 
                         <div class="column" id="form-text-upload">
+                            <p class="remove-script">Text:</p>
+                            <hr class="remove-script">
                             <textarea name="paste" placeholder="Enter your text here..."></textarea>
                         </div>
 
                         <div class="column" id="form-record-upload" style="display: none;"></div>
 
-                        <table class="vertical left" id="form-upload-options">
-                            <tr>
-                                <th>Title:</th>
-                                <td>
-                                    <input type="text" name="title" placeholder="Leave empty if you want a random title"
-                                        maxlength="<?= FILE_TITLE_MAX_LENGTH ?>">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Preserve original filename:</th>
-                                <td><input type="checkbox" name="preserve_original_name" value="1"></td>
-                            </tr>
-                            <?php if (FILE_STRIP_EXIF): ?>
+                        <div class="column">
+                            <p class="remove-script">Details:</p>
+                            <hr class="remove-script">
+                            <table class="vertical left" id="form-upload-options">
                                 <tr>
-                                    <th>Strip EXIF data:</th>
-                                    <td><input type="checkbox" name="strip_exif_data" value="1" checked></td>
+                                    <th>Title:</th>
+                                    <td>
+                                        <input type="text" name="title" placeholder="Leave empty if you want a random title"
+                                            maxlength="<?= FILE_TITLE_MAX_LENGTH ?>">
+                                    </td>
                                 </tr>
-                            <?php endif; ?>
-                        </table>
-                        <button type="submit">Upload</button>
+                                <tr>
+                                    <th>Preserve original filename:</th>
+                                    <td><input type="checkbox" name="preserve_original_name" value="1"></td>
+                                </tr>
+                                <?php if (FILE_STRIP_EXIF): ?>
+                                    <tr>
+                                        <th>Strip EXIF data:</th>
+                                        <td><input type="checkbox" name="strip_exif_data" value="1" checked></td>
+                                    </tr>
+                                <?php endif; ?>
+                            </table>
+                            <button type="submit">Upload</button>
                     </form>
+                </div>
                 </div>
             </section>
 
@@ -338,8 +353,19 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         }
     </script>
 <?php elseif (!$file): ?>
+    <script>
+        const formTabs = document.getElementById('form-upload-tabs');
+    </script>
     <script src="/static/scripts/audiorecorder.js"></script>
     <script>
+        document.querySelectorAll(".remove-script").forEach((x) => {
+            x.remove();
+        });
+
+        formTabs.style.display = 'flex';
+
+        document.querySelector('#form-box>.tab').remove();
+
         const formDetails = document.getElementById('form-upload-options');
 
         document.getElementById('form-text-upload').style.display = 'none';
@@ -594,7 +620,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         }
 
         function showUploadType(type) {
-            if (document.getElementById('form-upload-tabs').hasAttribute('disabled')) {
+            if (formTabs.hasAttribute('disabled')) {
                 return;
             }
 
