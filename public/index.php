@@ -88,7 +88,11 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
     } else if (str_starts_with($file['mime'], 'video/')) {
         $info = shell_exec('ffprobe -v error -select_streams v:0 -show_entries stream=width,height,duration -of csv=p=0 ' . escapeshellarg($file_path));
         [$width, $height, $duration] = explode(',', trim($info));
-        $file['resolution'] = sprintf('%sx%s (%s seconds)', $width, $height, round($duration, 2));
+        if ($duration == 'N/A') {
+            $file['resolution'] = sprintf('%sx%s', $width, $height);
+        } else {
+            $file['resolution'] = sprintf('%sx%s (%s seconds)', $width, $height, round($duration, 2));
+        }
     } else if (str_starts_with($file['mime'], 'audio/')) {
         $file['resolution'] = round(trim(shell_exec('ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ' . escapeshellarg($file_path))), 2) . ' seconds';
     } else if (str_starts_with($file['mime'], 'text/')) {
