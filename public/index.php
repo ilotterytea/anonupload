@@ -267,7 +267,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 
                         <div class="column gap-8" id="form-upload-wrapper">
                             <button type="button" style="display: none;">
-                                <h1>Click, or drop files here</h1>
+                                <h1>Click, drop, or paste files here</h1>
                             </button>
                             <?php if (FILEEXT_ENABLED): ?>
                                 <div class="row gap-8">
@@ -412,13 +412,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         formFile.style.display = 'none';
         formFile.addEventListener("change", (e) => {
             file = e.target.files[0];
-            if (file) {
-                fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
-                setFormDetailsVisiblity(true);
-                <?php if (FILEEXT_ENABLED): ?>
-                    fileURLWrapper.style.display = 'none';
-                <?php endif; ?>
-            }
+            showFile(file);
         });
 
         fileUploadWrapper.addEventListener("click", () => formFile.click());
@@ -428,11 +422,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                 for (const item of e.dataTransfer.items) {
                     if (item.kind === "file") {
                         file = item.getAsFile();
-                        fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
-                        setFormDetailsVisiblity(true);
-                        <?php if (FILEEXT_ENABLED): ?>
-                            fileURLWrapper.style.display = 'none';
-                        <?php endif; ?>
+                        showFile(file);
                         break;
                     }
                 }
@@ -446,15 +436,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
             <?php endif; ?>
         });
         fileUploadWrapper.addEventListener("dragleave", (e) => {
-            if (file) {
-                fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
-                return;
-            }
-            fileUploadWrapper.innerHTML = '<h1>Click, or drop files here</h1>';
-            <?php if (FILEEXT_ENABLED): ?>
-                fileURLWrapper.style.display = 'flex';
-            <?php endif; ?>
-
+            showFile(file);
         });
 
         setFormDetailsVisiblity(false);
@@ -505,11 +487,11 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                         fileURLWrapper.style.display = 'flex';
                     <?php endif; ?>
                     fileUploadWrapper.style.display = 'block';
-                    fileUploadWrapper.innerHTML = '<h1>Click, or drop files here</h1>';
+                    fileUploadWrapper.innerHTML = '<h1>Click, drop, or paste files here</h1>';
                 })
                 .then((r) => r.json())
                 .then((json) => {
-                    fileUploadWrapper.innerHTML = '<h1>Click, or drop files here</h1>';
+                    fileUploadWrapper.innerHTML = '<h1>Click, drop, or paste files here</h1>';
                     <?php if (FILEEXT_ENABLED): ?>
                         fileURLWrapper.style.display = 'flex';
                     <?php endif; ?>
@@ -529,7 +511,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                     files.unshift(json.data);
                     localStorage.setItem('uploaded_files', JSON.stringify(files));
 
-                    formUpload.clear();
+                    formUpload.reset();
                 });
         }
 
@@ -662,6 +644,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
             formSubmitButton.style.display = show ? 'block' : 'none';
         }
     </script>
+    <script src="/static/scripts/form.js"></script>
 <?php endif; ?>
 
 </html>
