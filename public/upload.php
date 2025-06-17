@@ -172,6 +172,8 @@ try {
         throw new RuntimeException("Failed to save the file. Try again later.");
     }
 
+    $file_data['size'] = filesize($file_path);
+
     if (FILE_THUMBNAILS && !is_dir(FILE_THUMBNAIL_DIRECTORY) && !mkdir(FILE_THUMBNAIL_DIRECTORY, 0777, true)) {
         throw new RuntimeException('Failed to create a directory for thumbnails');
     }
