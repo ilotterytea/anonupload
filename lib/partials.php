@@ -66,12 +66,14 @@ function html_mini_navbar()
 
 function html_footer()
 {
-    $files = glob(FILE_UPLOAD_DIRECTORY . "/*.*");
-    $file_size = 0;
+    $db = new PDO(DB_URL, DB_USER, DB_PASS);
+    $stmt = $db->query('SELECT COUNT(*) AS file_count, SUM(size) AS file_overall_size FROM files');
+    $stmt->execute();
 
-    foreach ($files as $file) {
-        $file_size += filesize($file);
-    }
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $file_count = $row['file_count'];
+    $file_size = $row['file_overall_size'];
 
     $suffix = 'MB';
     $file_size /= 1024 * 1024; // MB
@@ -119,7 +121,7 @@ function html_footer()
         <?php if (!empty(INSTANCE_TOR)): ?>
             <p><a href="<?= INSTANCE_TOR ?>">[Tor]</a></p>
         <?php endif; ?>
-        <p>Serving <?= count($files) ?> files and <?= $file_size ?> of active content</p>
+        <p>Serving <?= $file_count ?> files and <?= $file_size ?> of active content</p>
     </footer>
     <?php ;
 }

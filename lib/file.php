@@ -19,18 +19,21 @@ function verify_mimetype(string $file_path, string $mimetype): bool
     throw new RuntimeException("Illegal type for MIME verifications: $mimetype");
 }
 
-function delete_file(string $file_id, string $file_extension): bool
+function delete_file(string $file_id, string $file_extension, PDO|null $db = null): bool
 {
     $paths = [
         FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_extension}",
-        FILE_THUMBNAIL_DIRECTORY . "/{$file_id}.webp",
-        FILE_METADATA_DIRECTORY . "/{$file_id}.metadata.json"
+        FILE_THUMBNAIL_DIRECTORY . "/{$file_id}.webp"
     ];
 
     foreach ($paths as $path) {
         if (is_file($path) && !unlink($path)) {
             return false;
         }
+    }
+
+    if ($db) {
+        $db->prepare('DELETE FROM files WHERE id = ? AND extension = ?')->execute([$file_id, $file_extension]);
     }
 
     return true;

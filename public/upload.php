@@ -116,7 +116,7 @@ try {
         $file_data = [
             'size' => $file['size'],
             'mime' => $file_mime,
-            'extension' => $file_ext
+            'extension' => $file_ext,
         ];
     }
 
@@ -124,8 +124,11 @@ try {
         throw new RuntimeException('No URL or file specified');
     }
 
+    $db = new PDO(DB_URL, DB_USER, DB_PASS);
+
     $file_id_length = FILE_ID_LENGTH;
     $file_id_gen_attempts = 0;
+    $sql = 'SELECT id FROM files WHERE id = ? AND extension = ?';
     do {
         $file_id = FILE_ID_PREFIX . generate_random_char_sequence(FILE_ID_CHARACTERS, $file_id_length);
         if ($file_id_gen_attempts > 20) {
@@ -133,7 +136,10 @@ try {
             $file_id_gen_attempts = 0;
         }
         $file_id_gen_attempts++;
-    } while (is_file(FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_data['extension']}"));
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$file_id, $file_data['extension']]);
+    } while ($stmt->rowCount() > 0);
     $file_data['id'] = $file_id;
 
     if (isset($url)) {
@@ -160,9 +166,9 @@ try {
             delete_file($file_id, $file_data['extension']);
             throw new RuntimeException('Invalid file format.');
         }
-    } else if (isset($paste) && !file_put_contents(FILE_UPLOAD_DIRECTORY . sprintf('/%s.%s', $file_id, $file_data['extension']), $paste)) {
+    } else if (isset($paste) && !file_put_contents($file_path = FILE_UPLOAD_DIRECTORY . sprintf('/%s.%s', $file_id, $file_data['extension']), $paste)) {
         throw new RuntimeException('Failed to paste a text! Try again later.');
-    } else if (isset($file) && !move_uploaded_file($file['tmp_name'], FILE_UPLOAD_DIRECTORY . sprintf('/%s.%s', $file_id, $file_data['extension']))) {
+    } else if (isset($file) && !move_uploaded_file($file['tmp_name'], $file_path = FILE_UPLOAD_DIRECTORY . sprintf('/%s.%s', $file_id, $file_data['extension']))) {
         throw new RuntimeException("Failed to save the file. Try again later.");
     }
 
@@ -196,11 +202,36 @@ try {
         throw new RuntimeException("Failed to create a thumbnail (Error code {$thumbnail_error})");
     }
 
+    // getting file metadata
+    $file_data['metadata'] = [
+        'width' => null,
+        'height' => null,
+        'duration' => null,
+        'line_count' => null,
+    ];
+    $metadata_should_be_created = in_array(explode('/', $file_data['mime'])[0], ['image', 'video', 'audio', 'text']);
+
+    if (str_starts_with($file_data['mime'], 'image/')) {
+        [$width, $height] = explode('x', trim(shell_exec('identify -format "%wx%h" ' . escapeshellarg($file_path) . '[0]')));
+        $file_data['metadata']['width'] = intval($width);
+        $file_data['metadata']['height'] = intval($height);
+    } else if (str_starts_with($file_data['mime'], 'video/')) {
+        $info = shell_exec('ffprobe -v error -select_streams v:0 -show_entries stream=width,height,duration -of csv=p=0 ' . escapeshellarg($file_path));
+        [$width, $height, $duration] = explode(',', trim($info));
+        $file_data['metadata']['width'] = intval($width);
+        $file_data['metadata']['height'] = intval($height);
+        $file_data['metadata']['duration'] = $duration == 'N/A' ? null : intval(round($duration, 2));
+    } else if (str_starts_with($file_data['mime'], 'audio/')) {
+        $file_data['metadata']['duration'] = intval(round(trim(shell_exec('ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ' . escapeshellarg($file_path))), 2));
+    } else if (str_starts_with($file_data['mime'], 'text/')) {
+        $file_data['metadata']['line_count'] = intval(trim(shell_exec('wc -l < ' . escapeshellarg($file_path))));
+    }
+
     $file_data['urls'] = [
         'download_url' => INSTANCE_URL . "/{$file_data['id']}.{$file_data['extension']}"
     ];
 
-    if (FILE_METADATA && FILE_DELETION) {
+    if (FILE_DELETION) {
         $file_data['password'] = $_POST['password'] ?? generate_random_char_sequence(FILE_ID_CHARACTERS, FILE_DELETION_KEY_LENGTH);
         $file_data['urls']['deletion_url'] = INSTANCE_URL . "/delete.php?f={$file_data['id']}.{$file_data['extension']}&key={$file_data['password']}";
     }
@@ -212,30 +243,36 @@ try {
         $file_data
     );
 
-    if (FILE_METADATA) {
-        unset($file_data['urls']);
-        $file_data['password'] = password_hash($file_data['password'], PASSWORD_DEFAULT);
-        $file_data['views'] = 0;
-        $file_data['uploaded_at'] = time();
+    $file_data['password'] = isset($file_data['password']) ? password_hash($file_data['password'], PASSWORD_DEFAULT) : null;
+    $file_data['views'] = 0;
+    $file_data['uploaded_at'] = time();
 
-        if ($title) {
-            $file_data['original_name'] = $title;
-        }
+    if ($title) {
+        $file_data['original_name'] = $title;
+    }
 
-        if ($preserve_original_name && !$title) {
-            if ($file && !empty($file['name'])) {
-                $file_data['original_name'] = $file['name'];
-            } else if ($url) {
-                $file_data['original_name'] = $url;
-            }
+    if ($preserve_original_name && !$title) {
+        if ($file && !empty($file['name'])) {
+            $file_data['original_name'] = $file['name'];
+        } else if ($url) {
+            $file_data['original_name'] = $url;
         }
+    }
 
-        if (!is_dir(FILE_METADATA_DIRECTORY) && !mkdir(FILE_METADATA_DIRECTORY, 0777, true)) {
-            throw new RuntimeException('Failed to create a folder for file metadata');
-        }
-        if (!file_put_contents(FILE_METADATA_DIRECTORY . "/{$file_data['id']}.metadata.json", json_encode($file_data, JSON_UNESCAPED_SLASHES))) {
-            throw new RuntimeException('Failed to create a file metadata');
-        }
+    $db->prepare('INSERT INTO files(id, mime, extension, size, title, password) VALUES (?, ?, ?, ?, ?, ?)')
+        ->execute([
+            $file_data['id'],
+            $file_data['mime'],
+            $file_data['extension'],
+            $file_data['size'],
+            $file_data['original_name'] ?? null,
+            $file_data['password']
+        ]);
+
+    if ($metadata_should_be_created) {
+        $file_data['metadata']['id'] = $file_data['id'];
+        $db->prepare('INSERT INTO file_metadata(width, height, duration, line_count, id) VALUES (?, ?, ?, ?, ?)')
+            ->execute(array_values($file_data['metadata']));
     }
 } catch (RuntimeException $e) {
     generate_alert(

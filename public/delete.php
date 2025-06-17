@@ -40,7 +40,13 @@ if (!preg_match('/^[a-zA-Z0-9_-]+$/', $file_id) || !preg_match('/^[a-zA-Z0-9]+$/
     exit();
 }
 
-if (!is_file(FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_ext}")) {
+$db = new PDO(DB_URL, DB_USER, DB_PASS);
+$stmt = $db->prepare('SELECT password FROM files WHERE id = ? AND extension = ?');
+$stmt->execute([$file_id, $file_ext]);
+
+$file = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+
+if (!$file) {
     generate_alert(
         "/",
         "File $file_id not found",
@@ -49,18 +55,7 @@ if (!is_file(FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_ext}")) {
     exit();
 }
 
-if (!is_file(FILE_METADATA_DIRECTORY . "/{$file_id}.metadata.json")) {
-    generate_alert(
-        "/$file_id.$file_ext",
-        "File metadata $file_id not found",
-        404
-    );
-    exit();
-}
-
-$metadata = json_decode(file_get_contents(FILE_METADATA_DIRECTORY . "/{$file_id}.metadata.json"), true);
-
-if (!array_key_exists('password', $metadata)) {
+if (!isset($file['password'])) {
     generate_alert(
         "/$file_id.$file_ext",
         "File $file_id does not have a password. File cannot be deleted!",
@@ -78,7 +73,7 @@ if (!isset($_SESSION['is_moderator']) && !isset($password)) {
     exit();
 }
 
-if (!isset($_SESSION['is_moderator']) && !password_verify($password, $metadata['password'])) {
+if (!isset($_SESSION['is_moderator']) && !password_verify($password, $file['password'])) {
     generate_alert(
         "/$file_id.$file_ext",
         'Unauthorized',
@@ -87,7 +82,7 @@ if (!isset($_SESSION['is_moderator']) && !password_verify($password, $metadata['
     exit();
 }
 
-if (!delete_file($file_id, $file_ext)) {
+if (!delete_file($file_id, $file_ext, $db)) {
     generate_alert(
         "/$file_id.$file_ext",
         'Failed to remove files. Try again later',

@@ -6,12 +6,16 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/alert.php';
 
 session_start();
 
+$db = new PDO(DB_URL, DB_USER, DB_PASS);
+
 if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
-    $files = glob(FILE_UPLOAD_DIRECTORY . "/*.*");
-    $file = $files[random_int(0, count($files) - 1)];
-    $filename = basename($file);
-    header("Location: /{$filename}");
-    exit();
+    $stmt = $db->query('SELECT id, extension FROM files ORDER BY rand() LIMIT 1');
+    $stmt->execute();
+
+    if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        header("Location: /{$row['id']}.{$row['extension']}");
+        exit;
+    }
 }
 
 $file = null;
@@ -37,37 +41,34 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
     }
 
     $file_path = FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_ext}";
-    $meta_path = FILE_METADATA_DIRECTORY . "/{$file_id}.metadata.json";
 
     if (!file_exists($file_path)) {
         http_response_code(404);
         exit();
     }
 
-    if (file_exists($meta_path)) {
-        $file = json_decode(file_get_contents($meta_path), true);
+    $stmt = $db->prepare('SELECT fm.*, f.*
+        FROM files f
+        LEFT JOIN file_metadata fm ON fm.id = f.id
+        WHERE f.id = ? AND f.extension = ?
+    ');
+    $stmt->execute([$file_id, $file_ext]);
+    $file = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
-        if (isset($file['views'])) {
-            $viewed_file_ids = $_SESSION['viewed_file_ids'] ?? [];
-
-            if (!in_array($file['id'], $viewed_file_ids)) {
-                $file['views']++;
-                array_push($viewed_file_ids, $file['id']);
-                file_put_contents($meta_path, json_encode($file, JSON_UNESCAPED_SLASHES));
-            }
-
-            $_SESSION['viewed_file_ids'] = $viewed_file_ids;
-
-            session_commit();
-        }
-    } else {
-        $file = [
-            'id' => $file_id,
-            'extension' => $file_ext,
-            'mime' => FILE_ACCEPTED_MIME_TYPES[$file_ext],
-            'size' => filesize($file_path)
-        ];
+    if (!$file) {
+        http_response_code(404);
+        exit();
     }
+
+    // counting views
+    $viewed_file_ids = $_SESSION['viewed_file_ids'] ?? [];
+    if (!in_array($file['id'], $viewed_file_ids)) {
+        $file['views']++;
+        array_push($viewed_file_ids, $file['id']);
+        $db->prepare('UPDATE files SET views = ? WHERE id = ? AND extension = ?')->execute([$file['views'], $file['id'], $file['extension']]);
+    }
+    $_SESSION['viewed_file_ids'] = $viewed_file_ids;
+    session_commit();
 
     $file['full_url'] = FILE_UPLOAD_DIRECTORY_PREFIX . "/{$file['id']}.{$file['extension']}";
 
@@ -77,27 +78,23 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
     $factor = floor((strlen($size) - 1) / 3);
     $file['size_formatted'] = sprintf("%.2f", $size / pow(1024, $factor)) . ' ' . $units[$factor];
 
-    $file['name'] = $file['original_name'] ?? sprintf('%s.%s', $file['id'], $file['extension']);
+    $file['name'] = $file['title'] ?? sprintf('%s.%s', $file['id'], $file['extension']);
 
-    if (!isset($file['uploaded_at'])) {
-        $file['uploaded_at'] = filemtime($file_path);
+    $file['resolution'] = [];
+
+    if (isset($file['width'], $file['height'])) {
+        array_push($file['resolution'], sprintf('%sx%s', $file['width'], $file['height']));
     }
 
-    if (str_starts_with($file['mime'], 'image/')) {
-        $file['resolution'] = trim(shell_exec('identify -format "%wx%h" ' . escapeshellarg($file_path) . '[0]'));
-    } else if (str_starts_with($file['mime'], 'video/')) {
-        $info = shell_exec('ffprobe -v error -select_streams v:0 -show_entries stream=width,height,duration -of csv=p=0 ' . escapeshellarg($file_path));
-        [$width, $height, $duration] = explode(',', trim($info));
-        if ($duration == 'N/A') {
-            $file['resolution'] = sprintf('%sx%s', $width, $height);
-        } else {
-            $file['resolution'] = sprintf('%sx%s (%s seconds)', $width, $height, round($duration, 2));
-        }
-    } else if (str_starts_with($file['mime'], 'audio/')) {
-        $file['resolution'] = round(trim(shell_exec('ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ' . escapeshellarg($file_path))), 2) . ' seconds';
-    } else if (str_starts_with($file['mime'], 'text/')) {
-        $file['resolution'] = trim(shell_exec('wc -l < ' . escapeshellarg($file_path))) . ' lines';
+    if (isset($file['duration'])) {
+        array_push($file['resolution'], format_timestamp($file['duration']));
     }
+
+    if (isset($file['line_count'])) {
+        array_push($file['resolution'], sprintf('%d lines', $file['line_count']));
+    }
+
+    $file['resolution'] = implode(' ', $file['resolution']) ?: null;
 }
 
 $tos_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/TOS.txt');
@@ -144,7 +141,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                         <?php endif; ?>
                     </div>
                     <div class="row gap-8 grow align-bottom">
-                        <p>Uploaded <?= format_timestamp(time() - $file['uploaded_at']) ?> ago</p>
+                        <p>Uploaded <?= format_timestamp(time() - strtotime($file['uploaded_at'])) ?> ago</p>
                     </div>
                     <div class="row gap-8 grow align-bottom">
                         <?php if (FILE_COUNT_VIEWS && isset($file['views'])): ?>
@@ -160,8 +157,8 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                 <section class="box">
                     <div class="tab row gap-8">
                         <div class="grow">
-                            <?php if (isset($file['original_name'])): ?>
-                                <p><i><?= $file['original_name'] ?></i></p>
+                            <?php if (isset($file['title'])): ?>
+                                <p><i><?= $file['title'] ?></i></p>
                             <?php else: ?>
                                 <p>File <?= sprintf('%s.%s', $file['id'], $file['extension']) ?></p>
                             <?php endif; ?>
