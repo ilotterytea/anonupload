@@ -172,6 +172,15 @@ try {
         throw new RuntimeException("Failed to save the file. Try again later.");
     }
 
+    // checking if this is a banned file
+    $file_sha = hash_file('sha256', $file_path);
+    $stmt = $db->prepare('SELECT reason FROM hash_bans WHERE sha256 = ?');
+    $stmt->execute([$file_sha]);
+    if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        delete_file($file_id, $file_data['extension']);
+        throw new RuntimeException('This file is not allowed for upload.' . (isset($row['reason']) ? ' Reason: ' . $row['reason'] : ''));
+    }
+
     $file_data['size'] = filesize($file_path);
 
     if (FILE_THUMBNAILS && !is_dir(FILE_THUMBNAIL_DIRECTORY) && !mkdir(FILE_THUMBNAIL_DIRECTORY, 0777, true)) {

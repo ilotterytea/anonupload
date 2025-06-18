@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <td><input type="password" name="password" required></td>
                     </tr>
                 </table>
-                <button type="submit">Log in</button>
+                <button type="submit" class="fancy">Log in</button>
             </form>
         <?php endif; ?>
     </main>

@@ -17,3 +17,14 @@ CREATE TABLE IF NOT EXISTS file_metadata (
     duration BIGINT,
     line_count BIGINT
 );
+
+CREATE TABLE IF NOT EXISTS hash_bans (
+    sha256 CHAR(64) PRIMARY KEY,
+    reason TEXT
+);
+
+CREATE TABLE IF NOT EXISTS file_bans (
+    id CHAR(32) NOT NULL PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE,
+    hash_ban CHAR(64) NOT NULL REFERENCES hash_bans(sha256) ON DELETE CASCADE,
+    banned_at TIMESTAMP NOT NULL DEFAULT UTC_TIMESTAMP
+);

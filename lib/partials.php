@@ -82,7 +82,7 @@ function html_mini_navbar(string|null $subtitle = null)
 function html_footer()
 {
     $db = new PDO(DB_URL, DB_USER, DB_PASS);
-    $stmt = $db->query('SELECT COUNT(*) AS file_count, SUM(size) AS file_overall_size FROM files');
+    $stmt = $db->query('SELECT COUNT(*) AS file_count, SUM(size) AS file_overall_size FROM files WHERE id NOT IN (SELECT id FROM file_bans)');
     $stmt->execute();
 
     $row = $stmt->fetch(PDO::FETCH_ASSOC);

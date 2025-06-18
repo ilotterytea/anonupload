@@ -17,7 +17,7 @@ $page = max(intval($_GET['p'] ?? '1') - 1, 0);
 $limit = 20;
 
 // counting max pages
-$stmt = $db->query('SELECT COUNT(id) AS all_files FROM files');
+$stmt = $db->query('SELECT COUNT(id) AS all_files FROM files WHERE id NOT IN (SELECT id FROM file_bans)');
 $stmt->execute();
 
 $max_pages = ceil(($stmt->fetch(PDO::FETCH_ASSOC)['all_files'] ?: 0) / $limit);
@@ -28,6 +28,7 @@ $offset = $page * $limit;
 
 $stmt = $db->query("SELECT f.id, f.mime, f.extension
     FROM files f
+    WHERE f.id NOT IN (SELECT id FROM file_bans)
     ORDER BY f.uploaded_at DESC
     LIMIT $limit OFFSET $offset
 ");

@@ -29,12 +29,12 @@
         --anchor-color-hovered: #ff9696;
     }
 
-    button[type=submit] {
+    button[type=submit].fancy {
         background: var(--box-tab-background);
         color: var(--box-tab-foreground);
     }
 
-    button[type=submit]:hover {
+    button[type=submit].fancy:hover {
         background: var(--box-tab-background);
     }
 
@@ -139,14 +139,14 @@ table.left td {
 }
 
 /** FORM */
-button[type=submit] {
+button[type=submit].fancy {
     background: linear-gradient(0deg, var(--box-tab-background), var(--background));
     padding: 8px;
     font-size: 18px;
     border: 1px solid var(--box-border);
 }
 
-button[type=submit]:hover {
+button[type=submit].fancy:hover {
     background: linear-gradient(180deg, var(--box-tab-background), var(--background));
     cursor: pointer;
 }
@@ -173,6 +173,12 @@ button[type=submit]:hover {
 .box {
     background: var(--box-content-background);
     border: 2px solid var(--box-border);
+    padding: 8px;
+}
+
+.box.red {
+    background: var(--box-tab-foreground);
+    color: var(--background);
 }
 
 .box>.tabs {
@@ -186,6 +192,7 @@ button[type=submit]:hover {
 
 .box:has(.tabs),
 .box:has(.tab) {
+    padding: 0;
     background: none;
     border: none;
 }
