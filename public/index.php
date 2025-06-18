@@ -2,6 +2,7 @@
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/utils.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/file.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/alert.php';
 
 session_start();
@@ -67,7 +68,19 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
         $db->prepare('UPDATE files SET views = ? WHERE id = ? AND extension = ?')->execute([$file['views'], $file['id'], $file['extension']]);
     }
     $_SESSION['viewed_file_ids'] = $viewed_file_ids;
-    session_commit();
+
+    if (
+        $file_exists &&
+        isset($file['expires_at']) &&
+        (
+            ($file['expires_at'] == $file['uploaded_at'] && $file['views'] > 1) ||
+            ($file['expires_at'] != $file['uploaded_at'] && time() > strtotime($file['expires_at']))
+        )
+    ) {
+        delete_file($file_id, $file_ext, $db);
+        http_response_code(404);
+        exit;
+    }
 
     $file['full_url'] = FILE_UPLOAD_DIRECTORY_PREFIX . "/{$file['id']}.{$file['extension']}";
 
@@ -340,6 +353,18 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                             value="<?= generate_random_char_sequence(FILE_ID_CHARACTERS, FILE_DELETION_KEY_LENGTH) ?>">
                                     </td>
                                 </tr>
+                                <?php if (!empty(FILE_EXPIRATION)): ?>
+                                    <tr>
+                                        <th>File expiration:</th>
+                                        <td>
+                                            <select name="expires_in">
+                                                <?php foreach (FILE_EXPIRATION as $v => $n): ?>
+                                                    <option value="<?= $v ?>"><?= $n ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
                                 <tr>
                                     <th>Preserve original filename:</th>
                                     <td><input type="checkbox" name="preserve_original_name" value="1"></td>

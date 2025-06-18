@@ -5,6 +5,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/thumbnails.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/file.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/alert.php';
 
+session_start();
+
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     generate_alert(
         '/',
@@ -247,6 +249,35 @@ try {
         $file_data['urls']['deletion_url'] = INSTANCE_URL . "/delete.php?f={$file_data['id']}.{$file_data['extension']}&key={$file_data['password']}";
     }
 
+    $file_data['expires_at'] = null;
+
+    if (array_key_exists($_POST['expires_in'] ?? '', FILE_EXPIRATION)) {
+        $e = $_POST['expires_in'];
+        $format = 'Y-m-d H:i:s';
+
+        function calculate_expiration_time($e, $format)
+        {
+            $v = intval(substr($e, 0, strlen($e) - 1));
+            $m = substr($e, strlen($e) - 1);
+
+            $secs = match ($m) {
+                'd' => 86400,
+                'h' => 3600,
+                'm' => 60,
+                default => 0
+            };
+
+            $t = time() + $v * $secs;
+            return date($format, $t);
+        }
+
+        $file_data['expires_at'] = match ($e) {
+            'ne' => null,
+            're' => date($format),
+            default => calculate_expiration_time($e, $format)
+        };
+    }
+
     generate_alert(
         "/{$file_data['id']}.{$file_data['extension']}",
         null,
@@ -270,14 +301,15 @@ try {
         }
     }
 
-    $db->prepare('INSERT INTO files(id, mime, extension, size, title, password) VALUES (?, ?, ?, ?, ?, ?)')
+    $db->prepare('INSERT INTO files(id, mime, extension, size, title, password, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
         ->execute([
             $file_data['id'],
             $file_data['mime'],
             $file_data['extension'],
             $file_data['size'],
             $file_data['original_name'] ?? null,
-            $file_data['password']
+            $file_data['password'],
+            $file_data['expires_at']
         ]);
 
     if ($metadata_should_be_created) {
