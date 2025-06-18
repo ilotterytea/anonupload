@@ -334,6 +334,13 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                     </td>
                                 </tr>
                                 <tr>
+                                    <th>Password<span class="help" title="For file deletion">[?]</span>:</th>
+                                    <td><input type="text" name="password"
+                                            placeholder="Leave empty if you want the file to be non-deletable"
+                                            value="<?= generate_random_char_sequence(FILE_ID_CHARACTERS, FILE_DELETION_KEY_LENGTH) ?>">
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th>Preserve original filename:</th>
                                     <td><input type="checkbox" name="preserve_original_name" value="1"></td>
                                 </tr>

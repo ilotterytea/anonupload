@@ -365,3 +365,9 @@ button[type=submit].fancy:hover {
 .font-small {
     font-size: 10px;
 }
+
+.help {
+    cursor: help;
+    font-size: 10px;
+    vertical-align: top;
+}
