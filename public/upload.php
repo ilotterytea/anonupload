@@ -317,6 +317,11 @@ try {
         $db->prepare('INSERT INTO file_metadata(width, height, duration, line_count, id) VALUES (?, ?, ?, ?, ?)')
             ->execute(array_values($file_data['metadata']));
     }
+
+    // don't add a view from the owner
+    $viewed_file_ids = $_SESSION['viewed_file_ids'] ?? [];
+    array_push($viewed_file_ids, $file_id);
+    $_SESSION['viewed_file_ids'] = $viewed_file_ids;
 } catch (RuntimeException $e) {
     generate_alert(
         "/",
