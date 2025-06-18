@@ -24,21 +24,35 @@ function generate_random_char_sequence(array $chars, int $length): string
     return $o;
 }
 
-function format_timestamp(int $timestamp_secs)
+function format_timestamp(string|DateTime $datetime)
 {
-    $days = (int) floor($timestamp_secs / (60.0 * 60.0 * 24.0));
-    $hours = (int) floor(round($timestamp_secs / (60 * 60)) % 24);
-    $minutes = (int) floor(round($timestamp_secs % (60 * 60)) / 60);
-    $seconds = (int) floor($timestamp_secs % 60);
+    $dt = $datetime instanceof DateTime ? $datetime : new DateTime($datetime);
+    $now = new DateTime();
 
-    if ($days == 0 && $hours == 0 && $minutes == 0) {
+    $diff = match ($dt->getTimestamp() < $now->getTimestamp()) {
+        true => $dt->diff($now),
+        false => $now->diff($dt)
+    };
+
+    $seconds = $diff->s;
+    $days = $diff->d;
+    $minutes = $diff->i;
+    $hours = $diff->h;
+    $years = $diff->y;
+    $months = $diff->m;
+
+    if ($years == 0 && $months == 0 && $days == 0 && $hours == 0 && $minutes == 0) {
         return "$seconds second" . ($seconds > 1 ? "s" : "");
-    } else if ($days == 0 && $hours == 0) {
+    } else if ($years == 0 && $months == 0 && $days == 0 && $hours == 0) {
         return "$minutes minute" . ($minutes > 1 ? "s" : "");
-    } else if ($days == 0) {
+    } else if ($years == 0 && $months == 0 && $days == 0) {
         return "$hours hour" . ($hours > 1 ? "s" : "");
-    } else {
+    } else if ($years == 0 && $months == 0) {
         return "$days day" . ($days > 1 ? "s" : "");
+    } else if ($years == 0) {
+        return "$months month" . ($months > 1 ? "s" : "");
+    } else {
+        return "$years year" . ($years > 1 ? "s" : "");
     }
 }
 

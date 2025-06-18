@@ -99,7 +99,7 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
     }
 
     if (isset($file['duration'])) {
-        array_push($file['resolution'], format_timestamp($file['duration']));
+        array_push($file['resolution'], format_timestamp(new DateTime()->setTimestamp(time() + $file['duration'])));
     }
 
     if (isset($file['line_count'])) {
@@ -153,7 +153,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                         <?php endif; ?>
                     </div>
                     <div class="row gap-8 grow align-bottom">
-                        <p>Uploaded <?= format_timestamp(time() - strtotime($file['uploaded_at'])) ?> ago</p>
+                        <p>Uploaded <?= format_timestamp($file['uploaded_at']) ?> ago</p>
                     </div>
                     <div class="row gap-8 grow align-bottom">
                         <?php if (FILE_COUNT_VIEWS && isset($file['views'])): ?>
