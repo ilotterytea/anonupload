@@ -378,6 +378,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         const formTabs = document.getElementById('form-upload-tabs');
     </script>
     <script src="/static/scripts/audiorecorder.js"></script>
+    <script src="/static/scripts/options.js"></script>
     <script>
         document.querySelectorAll(".remove-script").forEach((x) => {
             x.remove();
