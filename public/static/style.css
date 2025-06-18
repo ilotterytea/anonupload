@@ -271,6 +271,27 @@ button[type=submit]:hover {
     align-self: flex-end;
 }
 
+/** FILE CATALOG (WALL) */
+.wall {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.wall .brick {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 128px;
+    height: 128px;
+}
+
+.brick img {
+    min-width: 100%;
+    height: auto;
+}
+
 /** SHORTCUTS */
 .column {
     display: flex;

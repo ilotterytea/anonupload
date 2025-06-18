@@ -15,6 +15,11 @@ function html_big_navbar()
             <a href="/">
                 <button>Home</button>
             </a>
+            <?php if (FILE_CATALOG_PUBLIC || isset($_SESSION['is_moderator'])): ?>
+                <a href="/catalogue.php">
+                    <button>Catalogue</button>
+                </a>
+            <?php endif; ?>
             <?php if (FILE_CATALOG_RANDOM): ?>
                 <a href="/?random">
                     <button>I'm Feeling Lucky</button>
@@ -33,19 +38,29 @@ function html_big_navbar()
     <?php ;
 }
 
-function html_mini_navbar()
+function html_mini_navbar(string|null $subtitle = null)
 {
     echo '' ?>
     <section class="row align-center gap-8 navbar">
         <a href="/" class="row gap-8 align-bottom" style="text-decoration:none;color:inherit;">
             <img src="/static/img/brand/mini.webp" alt="">
-            <h2><?= INSTANCE_NAME ?></h2>
+            <div class="column">
+                <?php if ($subtitle): ?>
+                    <p class="font-small"><?= $subtitle ?></p>
+                <?php endif; ?>
+                <h2><?= INSTANCE_NAME ?></h2>
+            </div>
         </a>
 
         <div class="row gap-8 align-bottom" style="height: 100%">
             <a href="/">
                 <button>Home</button>
             </a>
+            <?php if (FILE_CATALOG_PUBLIC || isset($_SESSION['is_moderator'])): ?>
+                <a href="/catalogue.php">
+                    <button>Catalogue</button>
+                </a>
+            <?php endif; ?>
             <?php if (FILE_CATALOG_RANDOM): ?>
                 <a href="/?random">
                     <button>I'm Feeling Lucky</button>
