@@ -3,11 +3,24 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 
 function html_big_navbar()
 {
+    $brand_url = '/static/img/brand/big.webp';
+    $static_folder = '/static/img/brand/big';
+    $brand_folder = $_SERVER['DOCUMENT_ROOT'] . $static_folder;
+
+    if (is_dir($brand_folder)) {
+        $files = glob("$brand_folder/*.*");
+
+        if (!empty($files)) {
+            $file = basename($files[random_int(0, count($files) - 1)]);
+            $brand_url = "$static_folder/$file";
+        }
+    }
+
     echo '' ?>
     <section class="column justify-center align-center gap-8 navbar">
         <div class="column justify-center grow">
             <a href="/">
-                <h1><img src="/static/img/brand/big.webp" alt="<?= INSTANCE_NAME ?>"></h1>
+                <h1><img src="<?= $brand_url ?>" alt="<?= INSTANCE_NAME ?>"></h1>
             </a>
         </div>
 
