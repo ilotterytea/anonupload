@@ -10,13 +10,33 @@ session_start();
 $db = new PDO(DB_URL, DB_USER, DB_PASS);
 
 if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
-    $stmt = $db->query('SELECT id, extension FROM files ORDER BY rand() LIMIT 1');
-    $stmt->execute();
+    $random_viewed_files = $_SESSION['random_viewed_files'] ?? [];
 
-    if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        header("Location: /{$row['id']}.{$row['extension']}");
-        exit;
-    }
+    $in = !empty($random_viewed_files) ? (str_repeat('?,', count($random_viewed_files) - 1) . '?') : '';
+    $in_condition = !empty($random_viewed_files) ? "WHERE id NOT IN ($in)" : "";
+
+    do {
+        $stmt = $db->prepare("SELECT id, extension FROM files $in_condition ORDER BY rand() LIMIT 1");
+        if (empty($random_viewed_files)) {
+            $stmt->execute();
+        } else {
+            $stmt->execute($random_viewed_files);
+        }
+
+        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $file_id = $row['id'];
+            $file_path = "{$row['id']}.{$row['extension']}";
+        } else {
+            $random_viewed_files = array_diff($random_viewed_files, $random_viewed_files);
+            $in_condition = '';
+        }
+    } while (!$file_id || in_array($file_id, $random_viewed_files));
+
+    array_push($random_viewed_files, $file_id);
+    $_SESSION['random_viewed_files'] = $random_viewed_files;
+
+    header("Location: /$file_path");
+    exit;
 }
 
 $file = null;
