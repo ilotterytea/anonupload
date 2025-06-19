@@ -1,6 +1,6 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
-define('IS_JSON_REQUEST', $_SERVER['HTTP_ACCEPT'] == 'application/json');
+define('IS_JSON_REQUEST', isset($_SERVER['HTTP_ACCEPT']) && $_SERVER['HTTP_ACCEPT'] == 'application/json');
 
 function json_response(mixed $data, string|null $message, int $code = 200)
 {
