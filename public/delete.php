@@ -55,7 +55,7 @@ if (!$file) {
     exit();
 }
 
-if (!isset($file['password'])) {
+if (!isset($_SESSION['is_moderator']) && !isset($file['password'])) {
     generate_alert(
         "/$file_id.$file_ext",
         "File $file_id does not have a password. File cannot be deleted!",
