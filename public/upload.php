@@ -128,20 +128,34 @@ try {
 
     $db = new PDO(DB_URL, DB_USER, DB_PASS);
 
-    $file_id_length = FILE_ID_LENGTH;
-    $file_id_gen_attempts = 0;
-    $sql = 'SELECT id FROM files WHERE id = ? AND extension = ?';
-    do {
-        $file_id = FILE_ID_PREFIX . generate_random_char_sequence(FILE_ID_CHARACTERS, $file_id_length);
-        if ($file_id_gen_attempts > 20) {
-            $file_id_length++;
-            $file_id_gen_attempts = 0;
+    if (FILE_CUSTOM_ID && isset($_POST['id']) && !empty(trim($_POST['id']))) {
+        $file_id = $_POST['id'];
+        if (!preg_match(FILE_CUSTOM_ID_REGEX, $file_id) || strlen($file_id) > FILE_CUSTOM_ID_LENGTH) {
+            throw new RuntimeException('Invalid file ID.');
         }
-        $file_id_gen_attempts++;
 
-        $stmt = $db->prepare($sql);
-        $stmt->execute([$file_id, $file_data['extension']]);
-    } while ($stmt->rowCount() > 0);
+        $stmt = $db->prepare('SELECT id FROM files WHERE id = ?');
+        $stmt->execute([$file_id]);
+        if ($stmt->rowCount() > 0) {
+            throw new RuntimeException('File ID has already been taken.');
+        }
+    } else {
+        $file_id_length = FILE_ID_LENGTH;
+        $file_id_gen_attempts = 0;
+        $sql = 'SELECT id FROM files WHERE id = ? AND extension = ?';
+        do {
+            $file_id = FILE_ID_PREFIX . generate_random_char_sequence(FILE_ID_CHARACTERS, $file_id_length);
+            if ($file_id_gen_attempts > 20) {
+                $file_id_length++;
+                $file_id_gen_attempts = 0;
+            }
+            $file_id_gen_attempts++;
+
+            $stmt = $db->prepare($sql);
+            $stmt->execute([$file_id, $file_data['extension']]);
+        } while ($stmt->rowCount() > 0);
+    }
+
     $file_data['id'] = $file_id;
 
     if (isset($url)) {

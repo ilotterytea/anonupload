@@ -339,6 +339,14 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                             <p class="remove-script">Details:</p>
                             <hr class="remove-script">
                             <table class="vertical left" id="form-upload-options">
+                                <?php if (FILE_CUSTOM_ID): ?>
+                                    <tr>
+                                        <th>File ID:</th>
+                                        <td><input type="text" name="id" placeholder="Leave empty for a random ID"
+                                                maxlength="<?= FILE_CUSTOM_ID_LENGTH ?>">
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
                                 <tr>
                                     <th>Title:</th>
                                     <td>
