@@ -54,7 +54,7 @@ function html_big_navbar()
 function html_mini_navbar(string|null $subtitle = null)
 {
     echo '' ?>
-    <section class="row align-center gap-8 navbar">
+    <section class="row align-bottom gap-8 navbar">
         <a href="/" class="row gap-8 align-bottom" style="text-decoration:none;color:inherit;">
             <img src="/static/img/brand/mini.webp" alt="">
             <div class="column">
