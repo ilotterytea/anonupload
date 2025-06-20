@@ -594,10 +594,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                     uploadedFiles.parentElement.style.display = 'flex';
                     textArea.value = '';
 
-                    // saving file
-                    let files = getUploadedFiles();
-                    files.unshift(json.data);
-                    localStorage.setItem('uploaded_files', JSON.stringify(files));
+                    addFileLocally(json.data);
 
                     formUpload.reset();
                 });
@@ -610,7 +607,9 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
             }
             let file_deletion = '';
             if (file.urls && file.urls.deletion_url) {
-                file_deletion = `<button onclick="deleteUploadedFile('${file.urls.deletion_url}', '${file.id}')">Delete</button>`;
+                file_deletion = `<button onclick="deleteUploadedFile('${file.urls.deletion_url}', '${file.id}')" title="Delete">
+                    <img src="/static/img/icons/cross.png" alt="Delete">
+                </button>`;
             }
 
             <?php if (FILE_THUMBNAILS): ?>
@@ -629,9 +628,6 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 
             return `
         <div class="box item column gap-4 pad-4">
-            <button class="delete-btn" onclick="deleteFileLocally('${file.id}');loadUploadedFiles();" title="Delete locally">
-                <img src="/static/img/icons/cross.png" alt="X">
-            </button>
             <?php if (FILE_THUMBNAILS): ?>
             <div class="column align-center justify-center grow">
                 <div class="column justify-center align-center" style="width: 128px; height:128px;">
@@ -649,12 +645,21 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                     <button>Open</button>
                 </a>
                 ${file_deletion}
+                <button onclick="navigator.clipboard.writeText('${window.location.href}')" title="Copy URL">
+                    <img src="/static/img/icons/paste_plain.png" alt="Copy URL">
+                </button>
             </div>
         </div>
         `;
         }
 
         function deleteUploadedFile(url, id) {
+            if (!confirm(`Are you sure you want to delete file ID ${id}?`)) {
+                return;
+            }
+
+            const file = deleteFileLocally(id);
+
             fetch(url, {
                 'headers': {
                     'Accept': 'application/json'
@@ -664,10 +669,13 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                 .then((json) => {
                     if (json.status_code != 200) {
                         alert(`${json.message} (${json.status_code})`);
+                        if (json.status_code != 404) {
+                            addFileLocally(file);
+                        }
+                        loadUploadedFiles();
                         return;
                     }
 
-                    deleteFileLocally(id);
                     loadUploadedFiles();
                 })
                 .catch((err) => {
@@ -678,8 +686,10 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 
         function deleteFileLocally(id) {
             let files = getUploadedFiles();
+            let file = files.filter((x) => x.id == id);
             files = files.filter((x) => x.id !== id);
             localStorage.setItem('uploaded_files', JSON.stringify(files));
+            return file;
         }
 
         // loading already existing uploaded files
@@ -705,6 +715,12 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                 files = '[]';
             }
             return JSON.parse(files);
+        }
+
+        function addFileLocally(file) {
+            let files = getUploadedFiles();
+            files.unshift(file);
+            localStorage.setItem('uploaded_files', JSON.stringify(files));
         }
 
         function showUploadType(type) {
