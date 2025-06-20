@@ -427,14 +427,20 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
     </main>
 </body>
 
+<?php if ($file): ?>
+    <script>
+        const fileTabButtons = document.getElementById('file-tab-buttons');
+        fileTabButtons.innerHTML += `<button onclick="navigator.clipboard.writeText('${window.location.href}')">Copy URL</button>`;
+    </script>
+<?php endif; ?>
+
 <?php if ($file && !isset($_SESSION['is_moderator'])): ?>
     <script>
         // adding deletion button
         const files = JSON.parse(localStorage.getItem('uploaded_files') ?? '[]');
         const file = files.find((x) => x.id === '<?= $file['id'] ?>');
         if (file && file.urls && file.urls.deletion_url) {
-            const buttons = document.getElementById('file-tab-buttons');
-            buttons.innerHTML = `<a href='${file.urls.deletion_url}'><button>Delete</button></a>` + buttons.innerHTML;
+            fileTabButtons.innerHTML = `<a href='${file.urls.deletion_url}'><button>Delete</button></a>` + fileTabButtons.innerHTML;
         }
     </script>
 <?php elseif (!$file): ?>
