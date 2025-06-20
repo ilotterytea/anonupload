@@ -245,9 +245,8 @@ button[type=submit].fancy:hover {
 /** FILES */
 .file-preview-wrapper {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .file-preview-wrapper>.box {
@@ -312,6 +311,10 @@ button[type=submit].fancy:hover {
 
 .grow {
     flex-grow: 1;
+}
+
+.wrap {
+    flex-wrap: wrap;
 }
 
 .grid {

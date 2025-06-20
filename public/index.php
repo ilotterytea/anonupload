@@ -128,7 +128,8 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
     }
 
     if (isset($file['duration'])) {
-        array_push($file['resolution'], format_timestamp(new DateTime()->setTimestamp(time() + $file['duration'])));
+        $dur = format_timestamp(new DateTime()->setTimestamp(time() + $file['duration']));
+        array_push($file['resolution'], empty($file['resolution']) ? $dur : "($dur)");
     }
 
     if (isset($file['line_count'])) {
@@ -171,26 +172,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         </noscript>
 
         <?php if ($file): ?>
-            <div class="row">
-                <?php html_mini_navbar() ?>
-                <div class="font-small column grow justify-end align-bottom">
-                    <div class="row gap-8 grow align-bottom">
-                        <p title="<?= $file['size'] ?>B"><?= $file['size_formatted'] ?></p>
-                        <p><?= $file['mime'] ?> &#40;<?= $file['extension'] ?>&#41;</p>
-                        <?php if (isset($file['resolution'])): ?>
-                            <p><?= $file['resolution'] ?></p>
-                        <?php endif; ?>
-                    </div>
-                    <div class="row gap-8 grow align-bottom">
-                        <p>Uploaded <?= format_timestamp($file['uploaded_at']) ?> ago</p>
-                    </div>
-                    <div class="row gap-8 grow align-bottom">
-                        <?php if (FILE_COUNT_VIEWS && isset($file['views'])): ?>
-                            <p><?= $file['views'] ?> views</p>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
+            <?php html_mini_navbar() ?>
 
             <?php display_alert() ?>
 
@@ -208,7 +190,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
             <?php if ($file_exists): ?>
                 <section class="file-preview-wrapper">
                     <section class="box">
-                        <div class="tab row gap-8">
+                        <div class="tab row wrap gap-8">
                             <div class="grow">
                                 <?php if (isset($file['title'])): ?>
                                     <p><i><?= $file['title'] ?></i></p>
@@ -260,7 +242,20 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                 <p><i>This file cannot be displayed.</i></p>
                             <?php endif; ?>
                         </div>
+
                     </section>
+
+                    <div class="font-small row wrap justify-end gap-16 align-bottom">
+                        <p title="<?= $file['size'] ?>B"><?= $file['size_formatted'] ?></p>
+                        <p><?= $file['mime'] ?> &#40;<?= $file['extension'] ?>&#41;</p>
+                        <?php if (isset($file['resolution'])): ?>
+                            <p><?= $file['resolution'] ?></p>
+                        <?php endif; ?>
+                        <p title="<?= $file['uploaded_at'] ?>">Uploaded <?= format_timestamp($file['uploaded_at']) ?> ago</p>
+                        <?php if (FILE_COUNT_VIEWS && isset($file['views'])): ?>
+                            <p><?= $file['views'] ?> views</p>
+                        <?php endif; ?>
+                    </div>
                 </section>
             <?php endif; ?>
         <?php else: ?>
