@@ -374,3 +374,23 @@ button[type=submit].fancy:hover {
     font-size: 10px;
     vertical-align: top;
 }
+
+@media screen and (max-width: 1000px) {
+    main {
+        width: 100%;
+    }
+
+    .file-preview-wrapper,
+    .navbar {
+        margin: 8px;
+    }
+
+    .navbar {
+        align-items: start;
+        flex-direction: column;
+    }
+
+    .grid-3 {
+        grid-template-columns: auto;
+    }
+}

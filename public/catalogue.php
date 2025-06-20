@@ -41,8 +41,11 @@ $files = $stmt->fetchAll();
 
 <head>
     <title>File Catalogue &lpar;Page <?= $page + 1 ?>/<?= $max_pages ?>&rpar; - <?= INSTANCE_NAME ?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <meta name="theme-color" content="#ffe1d4">
 </head>
 
 <body>
