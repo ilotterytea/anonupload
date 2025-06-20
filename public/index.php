@@ -168,7 +168,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 </head>
 
 <body>
-    <main>
+    <main<?= $file ? ' class="full-size"' : '' ?>>
         <noscript>
             <p><b>No-JavaScript chad <img src="/static/img/icons/chad.png" alt="" width="16"></b></p>
             <p style="color:gray">no fancy features like local file saving</p>
@@ -191,75 +191,78 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
             <?php endif; ?>
 
             <?php if ($file_exists): ?>
-                <section class="file-preview-wrapper">
-                    <section class="box">
-                        <div class="tab row wrap gap-8">
-                            <div class="grow">
-                                <?php if (isset($file['title'])): ?>
-                                    <p><i><?= $file['title'] ?></i></p>
-                                <?php else: ?>
-                                    <p>File <?= sprintf('%s.%s', $file['id'], $file['extension']) ?></p>
-                                <?php endif; ?>
-                            </div>
-                            <div class="grow row gap-8 justify-end align-center" id="file-tab-buttons">
-                                <?php if (isset($_SESSION['is_moderator'])): ?>
-                                    <a href="/delete.php?f=<?= $file['id'] ?>.<?= $file['extension'] ?>">
-                                        <button>Delete</button>
-                                    </a>
-                                    <?php if (MOD_BAN_FILES): ?>
-                                        <form action="/ban.php" method="post" class="row gap-4">
-                                            <input type="text" name="f" value="<?= $file['id'] ?>.<?= $file['extension'] ?>"
-                                                style="display:none">
-                                            <input type="text" name="reason" placeholder="Ban reason">
-                                            <button type="submit">Ban</button>
-                                        </form>
+                <div class="row grow justify-center">
+                    <section class="file-preview-wrapper" style="max-width:<?= max($file['width'], 256) ?>px;">
+                        <section class="box">
+                            <div class="tab row wrap gap-8">
+                                <div class="grow">
+                                    <?php if (isset($file['title'])): ?>
+                                        <p><i><?= $file['title'] ?></i></p>
+                                    <?php else: ?>
+                                        <p>File <?= sprintf('%s.%s', $file['id'], $file['extension']) ?></p>
                                     <?php endif; ?>
-                                <?php endif; ?>
-                                <?php if (FILE_REPORT): ?>
-                                    <a href="/report.php?f=<?= $file['id'] ?>.<?= $file['extension'] ?>">
-                                        <button>Report</button>
+                                </div>
+                                <div class="grow row gap-8 justify-end align-center" id="file-tab-buttons">
+                                    <?php if (isset($_SESSION['is_moderator'])): ?>
+                                        <a href="/delete.php?f=<?= $file['id'] ?>.<?= $file['extension'] ?>">
+                                            <button>Delete</button>
+                                        </a>
+                                        <?php if (MOD_BAN_FILES): ?>
+                                            <form action="/ban.php" method="post" class="row gap-4">
+                                                <input type="text" name="f" value="<?= $file['id'] ?>.<?= $file['extension'] ?>"
+                                                    style="display:none">
+                                                <input type="text" name="reason" placeholder="Ban reason">
+                                                <button type="submit">Ban</button>
+                                            </form>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                    <?php if (FILE_REPORT): ?>
+                                        <a href="/report.php?f=<?= $file['id'] ?>.<?= $file['extension'] ?>">
+                                            <button>Report</button>
+                                        </a>
+                                    <?php endif; ?>
+                                    <a href="<?= $file['full_url'] ?>">
+                                        <button>Full size</button>
                                     </a>
-                                <?php endif; ?>
-                                <a href="<?= $file['full_url'] ?>">
-                                    <button>Full size</button>
-                                </a>
-                                <a href="<?= $file['full_url'] ?>" download="<?= $file['name'] ?>">
-                                    <button>Download</button>
-                                </a>
+                                    <a href="<?= $file['full_url'] ?>" download="<?= $file['name'] ?>">
+                                        <button>Download</button>
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="content column file-preview">
-                            <?php if (str_starts_with($file['mime'], 'image/')): ?>
-                                <img src="<?= $file['full_url'] ?>" alt="Image file.">
-                            <?php elseif (str_starts_with($file['mime'], 'video/')): ?>
-                                <video controls autoplay>
-                                    <source src="<?= $file['full_url'] ?>" type="<?= $file['mime'] ?>">
-                                </video>
-                            <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>
-                                <audio controls autoplay>
-                                    <source src="<?= $file['full_url'] ?>" type="<?= $file['mime'] ?>">
-                                </audio>
-                            <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
-                                <pre><?= file_get_contents(FILE_UPLOAD_DIRECTORY . "/{$file['id']}.{$file['extension']}") ?></pre>
-                            <?php else: ?>
-                                <p><i>This file cannot be displayed.</i></p>
+                            <div class="content column file-preview">
+                                <?php if (str_starts_with($file['mime'], 'image/')): ?>
+                                    <img src="<?= $file['full_url'] ?>" alt="Image file.">
+                                <?php elseif (str_starts_with($file['mime'], 'video/')): ?>
+                                    <video controls autoplay>
+                                        <source src="<?= $file['full_url'] ?>" type="<?= $file['mime'] ?>">
+                                    </video>
+                                <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>
+                                    <audio controls autoplay>
+                                        <source src="<?= $file['full_url'] ?>" type="<?= $file['mime'] ?>">
+                                    </audio>
+                                <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
+                                    <pre><?= file_get_contents(FILE_UPLOAD_DIRECTORY . "/{$file['id']}.{$file['extension']}") ?></pre>
+                                <?php else: ?>
+                                    <p><i>This file cannot be displayed.</i></p>
+                                <?php endif; ?>
+                            </div>
+
+                        </section>
+
+                        <div class="font-small row right wrap justify-end gap-8 align-bottom">
+                            <p title="<?= $file['size'] ?>B"><?= $file['size_formatted'] ?></p>
+                            <p><?= $file['mime'] ?> &#40;<?= $file['extension'] ?>&#41;</p>
+                            <?php if (isset($file['resolution'])): ?>
+                                <p><?= $file['resolution'] ?></p>
+                            <?php endif; ?>
+                            <p title="<?= $file['uploaded_at'] ?>">Uploaded <?= format_timestamp($file['uploaded_at']) ?> ago
+                            </p>
+                            <?php if (FILE_COUNT_VIEWS && isset($file['views'])): ?>
+                                <p><?= $file['views'] ?> views</p>
                             <?php endif; ?>
                         </div>
-
                     </section>
-
-                    <div class="font-small row wrap justify-end gap-16 align-bottom">
-                        <p title="<?= $file['size'] ?>B"><?= $file['size_formatted'] ?></p>
-                        <p><?= $file['mime'] ?> &#40;<?= $file['extension'] ?>&#41;</p>
-                        <?php if (isset($file['resolution'])): ?>
-                            <p><?= $file['resolution'] ?></p>
-                        <?php endif; ?>
-                        <p title="<?= $file['uploaded_at'] ?>">Uploaded <?= format_timestamp($file['uploaded_at']) ?> ago</p>
-                        <?php if (FILE_COUNT_VIEWS && isset($file['views'])): ?>
-                            <p><?= $file['views'] ?> views</p>
-                        <?php endif; ?>
-                    </div>
-                </section>
+                </div>
             <?php endif; ?>
         <?php else: ?>
             <?php html_big_navbar() ?>
@@ -427,7 +430,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 
             <?php html_footer() ?>
         <?php endif; ?>
-    </main>
+        </main>
 </body>
 
 <?php if ($file): ?>

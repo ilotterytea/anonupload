@@ -97,20 +97,22 @@ body {
     width: 100%;
     min-height: 100vh;
     display: flex;
-    flex-direction: column;
     justify-content: center;
-    align-items: center;
 
     font-family: Arial, Helvetica, sans-serif;
 }
 
 main {
-    width: 50%;
+    max-width: 50%;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 8px 0;
+    padding: 8px;
+}
+
+main.full-size {
+    max-width: 100%;
 }
 
 footer {
@@ -243,11 +245,7 @@ button[type=submit].fancy:hover {
 }
 
 /** FILES */
-.file-preview-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
+.file-preview-wrapper {}
 
 .file-preview-wrapper>.box {
     max-width: 100%;
@@ -373,6 +371,10 @@ button[type=submit].fancy:hover {
     cursor: help;
     font-size: 10px;
     vertical-align: top;
+}
+
+.right {
+    float: right;
 }
 
 @media screen and (max-width: 1000px) {
