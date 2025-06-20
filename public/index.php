@@ -102,6 +102,15 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
         exit;
     }
 
+    if (IS_JSON_REQUEST) {
+        unset($file['password']);
+        $file['urls'] = [
+            'download_url' => INSTANCE_ORIGINAL_URL . "/{$file['id']}.{$file['extension']}"
+        ];
+        json_response($file, null);
+        exit;
+    }
+
     $file['full_url'] = FILE_UPLOAD_DIRECTORY_PREFIX . "/{$file['id']}.{$file['extension']}";
 
     // formatting the file size
