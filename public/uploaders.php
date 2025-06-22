@@ -91,12 +91,16 @@ foreach (FILE_ACCEPTED_MIME_TYPES as $k => $v) {
                 <!-- CHATTERINO -->
                 <section class="column">
                     <div class="column">
-                        <h2>Chatterino</h2>
-                        <p class="small-font">(Settings &rarr; External tools &rarr; Image Uploader)</p>
+                        <h2>Chatterino/DankChat</h2>
+                        <p class="small-font"><b>Chatterino</b>: Settings &rarr; External tools &rarr; Image Uploader
+                        </p>
+                        <p class="small-font"><b>DankChat</b>: &#8942; &rarr; Settings &rarr; Tools &rarr; Configure
+                            uploader
+                        </p>
                     </div>
                     <table class="vertical">
                         <tr>
-                            <th>Request URL:</th>
+                            <th>URL:</th>
                             <td><code class="copy"><?= INSTANCE_URL ?>/upload.php</code></td>
                         </tr>
                         <tr>
