@@ -40,6 +40,7 @@ try {
         $file = null;
     }
     $paste = isset($_POST['paste']) ? $_POST['paste'] ?: null : null;
+    $password = $_POST['password'] ?? generate_random_char_sequence(FILE_ID_CHARACTERS, FILE_DELETION_KEY_LENGTH);
     $file_data = null;
 
     if (!(isset($file) ^ isset($url) ^ isset($paste)) || (isset($file) && isset($url) && isset($paste))) {
@@ -258,8 +259,8 @@ try {
         'download_url' => INSTANCE_URL . "/{$file_data['id']}.{$file_data['extension']}"
     ];
 
-    if (FILE_DELETION && !empty($_POST['password'])) {
-        $file_data['password'] = $_POST['password'] ?? generate_random_char_sequence(FILE_ID_CHARACTERS, FILE_DELETION_KEY_LENGTH);
+    if (FILE_DELETION && !empty($password)) {
+        $file_data['password'] = $password;
         $file_data['urls']['deletion_url'] = INSTANCE_URL . "/delete.php?f={$file_data['id']}.{$file_data['extension']}&key={$file_data['password']}";
     }
 
