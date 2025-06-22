@@ -53,10 +53,23 @@ function html_big_navbar()
 
 function html_mini_navbar(string|null $subtitle = null)
 {
+    $brand_url = '/static/img/brand/mini.webp';
+    $static_folder = '/static/img/brand/mini';
+    $brand_folder = $_SERVER['DOCUMENT_ROOT'] . $static_folder;
+
+    if (is_dir($brand_folder)) {
+        $files = glob("$brand_folder/*.*");
+
+        if (!empty($files)) {
+            $file = basename($files[random_int(0, count($files) - 1)]);
+            $brand_url = "$static_folder/$file";
+        }
+    }
+
     echo '' ?>
-    <section class="row align-bottom gap-8 navbar">
+    <section class="row align-bottom gap-8 navbar wrap">
         <a href="/" class="row gap-8 align-bottom" style="text-decoration:none;color:inherit;">
-            <img src="/static/img/brand/mini.webp" alt="">
+            <img src="<?= $brand_url ?>" alt="">
             <div class="column">
                 <?php if ($subtitle): ?>
                     <p class="font-small"><?= $subtitle ?></p>
