@@ -208,7 +208,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                         <p>File <?= sprintf('%s.%s', $file['id'], $file['extension']) ?></p>
                                     <?php endif; ?>
                                 </div>
-                                <div class="grow row gap-8 justify-end align-center" id="file-tab-buttons">
+                                <div class="grow row gap-8 justify-end align-center wrap" id="file-tab-buttons">
                                     <?php if (isset($_SESSION['is_moderator'])): ?>
                                         <a href="/delete.php?f=<?= $file['id'] ?>.<?= $file['extension'] ?>">
                                             <button>Delete</button>
