@@ -196,6 +196,12 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                         <section class="box">
                             <div class="tab row wrap gap-8">
                                 <div class="grow">
+                                    <div style="display: none;">
+                                        <p id="file-id"><?= $file['id'] ?></p>
+                                        <p id="file-mime"><?= $file['mime'] ?></p>
+                                        <p id="file-extension"><?= $file['extension'] ?></p>
+                                        <p id="file-size"><?= $file['size'] ?></p>
+                                    </div>
                                     <?php if (isset($file['title'])): ?>
                                         <p><i><?= $file['title'] ?></i></p>
                                     <?php else: ?>
@@ -304,7 +310,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                 <div class="tab">
                     <p>Form Upload</p>
                 </div>
-                <div class="tabs" id="form-upload-tabs" style="display: none;">
+                <div class="tab-category tabs" id="form-upload-tabs" style="display: none;">
                     <div class="form-upload-tab tab" id="form-tab-file">
                         <button onclick="showUploadType('file')" class="transparent">
                             <p>File Upload</p>
@@ -421,10 +427,23 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
             </section>
 
             <section class="box column" style="display:none">
-                <div class="tab">
-                    <p>Uploaded files<span title="Your file ownership is stored locally." style="cursor:help">*</span></p>
+                <div class="tab-category tabs" id="file-tabs">
+                    <div class="tab" id="uploaded-files-tab">
+                        <button class="transparent">
+                            <p>Uploaded files<span title="Your file ownership is stored locally."
+                                    style="cursor:help">*</span></p>
+                        </button>
+                    </div>
+                    <div class="tab" id="favorite-files-tab">
+                        <button class="transparent">
+                            <p>Favorites<span title="Favorite files are stored locally." style="cursor:help">*</span>
+                            </p>
+                        </button>
+                    </div>
                 </div>
                 <div class="content grid grid-3 gap-8" id="uploaded-files">
+                </div>
+                <div class="content grid grid-3 gap-8" id="favorite-files" style="display: none;">
                 </div>
             </section>
 
@@ -438,6 +457,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         const fileTabButtons = document.getElementById('file-tab-buttons');
         fileTabButtons.innerHTML += `<button onclick="navigator.clipboard.writeText('${window.location.href}')">Copy URL</button>`;
     </script>
+    <script src="/static/scripts/favorites.js"></script>
 <?php endif; ?>
 
 <?php if ($file && !isset($_SESSION['is_moderator'])): ?>
@@ -455,6 +475,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
     </script>
     <script src="/static/scripts/audiorecorder.js"></script>
     <script src="/static/scripts/options.js"></script>
+    <script src="/static/scripts/tabs.js"></script>
     <script>
         document.querySelectorAll(".remove-script").forEach((x) => {
             x.remove();
@@ -596,6 +617,9 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                         return;
                     }
 
+                    showTab('uploaded-files');
+                    displayTab('file-tabs', 'uploaded-files');
+
                     uploadedFiles.innerHTML = addUploadedFile(json.data) + uploadedFiles.innerHTML;
                     uploadedFiles.parentElement.style.display = 'flex';
                     textArea.value = '';
@@ -698,6 +722,14 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
             return file;
         }
 
+        function setFormDetailsVisiblity(show) {
+            formDetails.style.display = show ? 'flex' : 'none';
+            formSubmitButton.style.display = show ? 'block' : 'none';
+        }
+    </script>
+    <script src="/static/scripts/favorites.js"></script>
+    <script>
+
         // loading already existing uploaded files
         function loadUploadedFiles() {
             let files = getUploadedFiles();
@@ -708,7 +740,19 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                 html += addUploadedFile(file);
             }
 
-            uploadedFiles.parentElement.style.display = html.length > 0 ? 'flex' : 'none';
+            if (html.length > 0) {
+                showTab('uploaded-files');
+                displayTab('file-tabs', 'uploaded-files');
+            } else {
+                hideTab('uploaded-files');
+            }
+
+            if (getFavoriteFiles().length > 0 && html.length == 0) {
+                showTab('favorite-files');
+                displayTab('file-tabs', 'favorite-files');
+            }
+
+            uploadedFiles.parentElement.style.display = html.length > 0 || getFavoriteFiles().length > 0 ? 'flex' : 'none';
 
             uploadedFiles.innerHTML = html;
         }
@@ -747,11 +791,6 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                     tab.classList.add('disabled');
                 }
             }
-        }
-
-        function setFormDetailsVisiblity(show) {
-            formDetails.style.display = show ? 'flex' : 'none';
-            formSubmitButton.style.display = show ? 'block' : 'none';
         }
     </script>
     <script src="/static/scripts/form.js"></script>

@@ -209,13 +209,15 @@ button[type=submit].fancy:hover {
     font-weight: bold;
 }
 
-.tabs>.tab.disabled {
+.tabs>.tab.disabled,
+.tabs>.tab[show-disabled='true'] {
     background: var(--box-tab-background-dark);
     padding: 4px 8px;
     margin-bottom: -8px;
 }
 
-.tabs>.tab.disabled:hover {
+.tabs>.tab.disabled:hover,
+.tabs>.tab[show-disabled='true']:hover {
     background: var(--box-tab-background-light);
 }
 
