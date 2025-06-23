@@ -140,6 +140,10 @@ table.left td {
     text-align: left;
 }
 
+ul {
+    list-style: none;
+}
+
 /** FORM */
 button[type=submit].fancy {
     background: linear-gradient(0deg, var(--box-tab-background), var(--background));
@@ -291,6 +295,14 @@ button[type=submit].fancy:hover {
 
     width: 128px;
     height: 128px;
+}
+
+.brick.red img {
+    border: 2px solid maroon;
+}
+
+.brick.blue img {
+    border: 2px solid blue;
 }
 
 .brick img {

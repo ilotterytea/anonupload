@@ -661,7 +661,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
             <?php if (FILE_THUMBNAILS): ?>
             <div class="column align-center justify-center grow">
                 <div class="column justify-center align-center" style="width: 128px; height:128px;">
-                    <p><i><img src="${thumbnailPath}" alt="No thumbnail." style="${thumbnailSize}"></i></p>
+                    <p><i><img src="${thumbnailPath}" alt="No thumbnail." style="${thumbnailSize}" loading="lazy"></i></p>
                 </div>
             </div>
             <?php endif; ?>
