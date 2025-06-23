@@ -192,7 +192,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 
             <?php if ($file_exists): ?>
                 <div class="row grow justify-center">
-                    <section class="file-preview-wrapper" style="max-width:<?= max($file['width'], 256) ?>px;">
+                    <section class="file-preview-wrapper" <?= isset($file['width']) ? ('style="max-width:' . max($file['width'], 256) . 'px;"') : '' ?>>
                         <section class="box">
                             <div class="tab row wrap gap-8">
                                 <div class="grow">
