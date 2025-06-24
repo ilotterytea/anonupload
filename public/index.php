@@ -659,7 +659,9 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                     thumbnailPath = '/static/img/icons/file_audio.png';
                 } else if (file.mime.startsWith('text/')) {
                     thumbnailPath = '/static/img/icons/file_text.png';
-                } else if (!file.mime.startsWith('image/') && !file.mime.startsWith('video/') && file.mime != 'application/x-shockwave-flash') {
+                } else if (file.mime == 'application/x-shockwave-flash') {
+                    thumbnailPath = '/static/img/icons/file_flash.png';
+                } else if (!file.mime.startsWith('image/') && !file.mime.startsWith('video/')) {
                     thumbnailPath = '/static/img/icons/file.png';
                 } else {
                     thumbnailSize = 'max-width:100%; max-height: 100%;';

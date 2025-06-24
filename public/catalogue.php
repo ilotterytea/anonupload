@@ -77,15 +77,20 @@ unset($f);
                 <div class="brick<?= isset($file['color']) ? " {$file['color']}" : '' ?>">
                     <a href="/<?= sprintf('%s.%s', $file['id'], $file['extension']) ?>">
                         <i title="<?= $file['thumb_title'] ?>">
-                            <?php if (str_starts_with($file['mime'], 'image/') || str_starts_with($file['mime'], 'video/') || $file['mime'] == 'application/x-shockwave-flash'): ?>
+                            <?php if (str_starts_with($file['mime'], 'image/') || str_starts_with($file['mime'], 'video/')): ?>
                                 <img src="<?= sprintf('%s/%s.webp', FILE_THUMBNAIL_DIRECTORY_PREFIX, $file['id']) ?>"
                                     alt="No thumbnail." loading="lazy">
                             <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>
-                                <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy">
+                                <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy" width="64"
+                                    height="64">
                             <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
-                                <img src="/static/img/icons/file_text.png" alt="No thumbnail." loading="lazy">
+                                <img src="/static/img/icons/file_text.png" alt="No thumbnail." loading="lazy" width="64"
+                                    height="64">
+                            <?php elseif ($file['mime'] == 'application/x-shockwave-flash'): ?>
+                                <img src="/static/img/icons/file_flash.png" alt="No thumbnail." loading="lazy" width="64"
+                                    height="64">
                             <?php else: ?>
-                                <img src="/static/img/icons/file.png" alt="No thumbnail.">
+                                <img src="/static/img/icons/file.png" alt="No thumbnail." width="64" height="64">
                             <?php endif; ?>
                         </i>
                     </a>

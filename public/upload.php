@@ -207,7 +207,7 @@ try {
     if (
         FILE_THUMBNAILS && (
             (
-                (str_starts_with($file_data['mime'], 'image/') || $file_data['mime'] == 'application/x-shockwave-flash') &&
+                str_starts_with($file_data['mime'], 'image/') &&
                 $thumbnail_error = generate_image_thumbnail(
                     FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_data['extension']}",
                     FILE_THUMBNAIL_DIRECTORY . "/{$file_id}.webp",
@@ -255,8 +255,9 @@ try {
     } else if (str_starts_with($file_data['mime'], 'text/')) {
         $file_data['metadata']['line_count'] = intval(trim(shell_exec('wc -l < ' . escapeshellarg($file_path))));
     } else if ($file_data['mime'] == 'application/x-shockwave-flash') {
-        $file_data['metadata']['width'] = intval(substr(trim(shell_exec("swfdump -X $file_path_escaped")), 3));
-        $file_data['metadata']['height'] = intval(substr(trim(shell_exec("swfdump -Y $file_path_escaped")), 3));
+        [$width, $height] = parse_swf_file($file_path);
+        $file_data['metadata']['width'] = $width;
+        $file_data['metadata']['height'] = $height;
     }
 
     $file_data['urls'] = [

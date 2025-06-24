@@ -10,15 +10,7 @@ function generate_image_thumbnail(string $src_path, string $dst_path, int $width
 
     $result_code = null;
 
-    if (str_ends_with($src_path, ".swf")) {
-        exec(command: "swfrender $input_path -o $output_path", result_code: $result_code);
-        if ($result_code != 0) {
-            return $result_code;
-        }
-        exec(command: "magick $output_path -resize {$width}x{$height} -loop 0 $output_path", result_code: $result_code);
-    } else {
-        exec(command: "magick $input_path -resize {$width}x{$height} -loop 0 $output_path", result_code: $result_code);
-    }
+    exec(command: "magick $input_path -resize {$width}x{$height} -loop 0 $output_path", result_code: $result_code);
 
     return $result_code;
 }

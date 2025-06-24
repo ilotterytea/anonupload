@@ -1,6 +1,89 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 
+function is_swf_file($filename)
+{
+    if (!is_readable($filename)) {
+        return false;
+    }
+
+    $fh = fopen($filename, 'rb');
+    if (!$fh)
+        return false;
+
+    $header = fread($fh, 8);
+    fclose($fh);
+
+    if (strlen($header) < 8) {
+        return false;
+    }
+
+    $signature = substr($header, 0, 3);
+    $version = ord($header[3]);
+
+    if (in_array($signature, ['FWS', 'CWS', 'ZWS'])) {
+        if ($version >= 6 && $version <= 50) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function parse_swf_file(string $file_path): array
+{
+    $fh = fopen($file_path, 'rb');
+    if (!$fh) {
+        throw new RuntimeException('Failed to open the file!');
+    }
+
+    $chunk = fread($fh, 512 * 1024);
+    fclose($fh);
+
+    if (strlen($chunk) < 9) {
+        throw new RuntimeException('File too short.');
+    }
+
+    $signature = substr($chunk, 0, 3);
+    if (!in_array($signature, ['FWS', 'CWS', 'ZWS'])) {
+        throw new RuntimeException('Not a valid SWF.');
+    }
+
+    if ($signature === 'CWS') {
+        $decompressed = gzuncompress(substr($chunk, 8));
+        if ($decompressed === false) {
+            throw new RuntimeException('Bad compressed SWF.');
+        }
+        $data = $decompressed;
+    } else if ($signature === 'ZWS') {
+        throw new RuntimeException('LZMA SWF is not supported');
+    } else {
+        $data = substr($chunk, 8);
+    }
+
+    $bits = ord($data[0]) >> 3;
+    $bitstr = '';
+    for ($i = 0; $i < ceil((5 + 4 * $bits) / 8); $i++) {
+        $bitstr .= str_pad(decbin(ord($data[$i])), 8, '0', STR_PAD_LEFT);
+    }
+
+    $nbits = bindec(substr($bitstr, 0, 5));
+    $pos = 5;
+    $xmin = bindec(substr($bitstr, $pos, $nbits));
+    $pos += $nbits;
+    $xmax = bindec(substr($bitstr, $pos, $nbits));
+    $pos += $nbits;
+    $ymin = bindec(substr($bitstr, $pos, $nbits));
+    $pos += $nbits;
+    $ymax = bindec(substr($bitstr, $pos, $nbits));
+    $pos += $nbits;
+
+    $width = ($xmax - $xmin) / 20;
+    $height = ($ymax - $ymin) / 20;
+
+    return [$width, $height];
+}
+
 function verify_mimetype(string $file_path, string $mimetype): bool
 {
     $path = escapeshellarg($file_path);
@@ -15,9 +98,7 @@ function verify_mimetype(string $file_path, string $mimetype): bool
         exec($cmd, $output, $exitCode);
         return $exitCode === 0;
     } else if ($mimetype == 'application/x-shockwave-flash') {
-        $cmd = "swfdump $path 2>&1";
-        exec($cmd, $output, $exitCode);
-        return $exitCode === 0;
+        return is_swf_file($file_path);
     }
 
     throw new RuntimeException("Illegal type for MIME verifications: $mimetype");
