@@ -276,6 +276,11 @@ button[type=submit].fancy:hover {
     overflow-x: scroll;
 }
 
+.file-preview-wrapper:has(pre) {
+    flex-grow: 1;
+    max-width: unset;
+}
+
 .item .delete-btn {
     position: absolute;
     align-self: flex-end;
