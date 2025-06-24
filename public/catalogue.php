@@ -77,7 +77,7 @@ unset($f);
                 <div class="brick<?= isset($file['color']) ? " {$file['color']}" : '' ?>">
                     <a href="/<?= sprintf('%s.%s', $file['id'], $file['extension']) ?>">
                         <i title="<?= $file['thumb_title'] ?>">
-                            <?php if (str_starts_with($file['mime'], 'image/') || str_starts_with($file['mime'], 'video/')): ?>
+                            <?php if (str_starts_with($file['mime'], 'image/') || str_starts_with($file['mime'], 'video/') || $file['mime'] == 'application/x-shockwave-flash'): ?>
                                 <img src="<?= sprintf('%s/%s.webp', FILE_THUMBNAIL_DIRECTORY_PREFIX, $file['id']) ?>"
                                     alt="No thumbnail." loading="lazy">
                             <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>

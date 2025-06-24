@@ -4,14 +4,18 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
 function verify_mimetype(string $file_path, string $mimetype): bool
 {
     $path = escapeshellarg($file_path);
+    $output = [];
+    $exitCode = 0;
 
     if (str_starts_with($mimetype, 'image/')) {
         $output = shell_exec("identify -quiet -ping $path");
         return !empty($output);
     } else if (str_starts_with($mimetype, 'video/') || str_starts_with($mimetype, 'audio/')) {
-        $output = [];
-        $exitCode = 0;
         $cmd = "ffprobe -v error -i $path 2>&1";
+        exec($cmd, $output, $exitCode);
+        return $exitCode === 0;
+    } else if ($mimetype == 'application/x-shockwave-flash') {
+        $cmd = "swfdump $path 2>&1";
         exec($cmd, $output, $exitCode);
         return $exitCode === 0;
     }

@@ -2,6 +2,7 @@ config.php
 *.ini
 *.db
 userdata/
+ruffle/
 
 TOS.txt
 PRIVACY.txt

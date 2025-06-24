@@ -248,6 +248,12 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                     </audio>
                                 <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
                                     <pre><?= file_get_contents(FILE_UPLOAD_DIRECTORY . "/{$file['id']}.{$file['extension']}") ?></pre>
+                                <?php elseif ($file['mime'] == 'application/x-shockwave-flash' && !empty(RUFFLE_DRIVER_PATH)): ?>
+                                    <noscript>JavaScript is required to play Flash</noscript>
+                                    <object>
+                                        <embed src="<?= $file['full_url'] ?>" width="<?= $file['width'] - 4 ?>"
+                                            height="<?= $file['height'] ?>">
+                                    </object>
                                 <?php else: ?>
                                     <p><i>This file cannot be displayed.</i></p>
                                 <?php endif; ?>
@@ -452,6 +458,10 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         </main>
 </body>
 
+<?php if ($file && $file['mime'] == 'application/x-shockwave-flash' && !empty(RUFFLE_DRIVER_PATH)): ?>
+    <script src="<?= RUFFLE_DRIVER_PATH ?>"></script>
+<?php endif; ?>
+
 <?php if ($file): ?>
     <script>
         const fileTabButtons = document.getElementById('file-tab-buttons');
@@ -649,7 +659,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                     thumbnailPath = '/static/img/icons/file_audio.png';
                 } else if (file.mime.startsWith('text/')) {
                     thumbnailPath = '/static/img/icons/file_text.png';
-                } else if (!file.mime.startsWith('image/') && !file.mime.startsWith('video/')) {
+                } else if (!file.mime.startsWith('image/') && !file.mime.startsWith('video/') && file.mime != 'application/x-shockwave-flash') {
                     thumbnailPath = '/static/img/icons/file.png';
                 } else {
                     thumbnailSize = 'max-width:100%; max-height: 100%;';

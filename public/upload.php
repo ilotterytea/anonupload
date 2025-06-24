@@ -207,7 +207,7 @@ try {
     if (
         FILE_THUMBNAILS && (
             (
-                str_starts_with($file_data['mime'], 'image/') &&
+                (str_starts_with($file_data['mime'], 'image/') || $file_data['mime'] == 'application/x-shockwave-flash') &&
                 $thumbnail_error = generate_image_thumbnail(
                     FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_data['extension']}",
                     FILE_THUMBNAIL_DIRECTORY . "/{$file_id}.webp",
@@ -237,7 +237,8 @@ try {
         'duration' => null,
         'line_count' => null,
     ];
-    $metadata_should_be_created = in_array(explode('/', $file_data['mime'])[0], ['image', 'video', 'audio', 'text']);
+    $metadata_should_be_created = in_array(explode('/', $file_data['mime'])[0], ['image', 'video', 'audio', 'text']) || $file_data['mime'] == 'application/x-shockwave-flash';
+    $file_path_escaped = escapeshellarg($file_path);
 
     if (str_starts_with($file_data['mime'], 'image/')) {
         [$width, $height] = explode('x', trim(shell_exec('identify -format "%wx%h" ' . escapeshellarg($file_path) . '[0]')));
@@ -253,6 +254,9 @@ try {
         $file_data['metadata']['duration'] = intval(round(trim(shell_exec('ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ' . escapeshellarg($file_path))), 2));
     } else if (str_starts_with($file_data['mime'], 'text/')) {
         $file_data['metadata']['line_count'] = intval(trim(shell_exec('wc -l < ' . escapeshellarg($file_path))));
+    } else if ($file_data['mime'] == 'application/x-shockwave-flash') {
+        $file_data['metadata']['width'] = intval(substr(trim(shell_exec("swfdump -X $file_path_escaped")), 3));
+        $file_data['metadata']['height'] = intval(substr(trim(shell_exec("swfdump -Y $file_path_escaped")), 3));
     }
 
     $file_data['urls'] = [
