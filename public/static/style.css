@@ -286,6 +286,12 @@ button[type=submit].fancy:hover {
     align-self: flex-end;
 }
 
+.thumbnail.stock {
+    width: 64px;
+    height: 64px;
+    image-rendering: pixelated;
+}
+
 /** FILE CATALOG (WALL) */
 .wall {
     display: flex;

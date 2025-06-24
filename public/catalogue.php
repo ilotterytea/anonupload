@@ -81,16 +81,16 @@ unset($f);
                                 <img src="<?= sprintf('%s/%s.webp', FILE_THUMBNAIL_DIRECTORY_PREFIX, $file['id']) ?>"
                                     alt="No thumbnail." loading="lazy">
                             <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>
-                                <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy" width="64"
-                                    height="64">
+                                <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy"
+                                    class="thumbnail stock">
                             <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
-                                <img src="/static/img/icons/file_text.png" alt="No thumbnail." loading="lazy" width="64"
-                                    height="64">
+                                <img src="/static/img/icons/file_text.png" alt="No thumbnail." loading="lazy"
+                                    class="thumbnail stock">
                             <?php elseif ($file['mime'] == 'application/x-shockwave-flash'): ?>
-                                <img src="/static/img/icons/file_flash.png" alt="No thumbnail." loading="lazy" width="64"
-                                    height="64">
+                                <img src="/static/img/icons/file_flash.png" alt="No thumbnail." loading="lazy"
+                                    class="thumbnail stock">
                             <?php else: ?>
-                                <img src="/static/img/icons/file.png" alt="No thumbnail." width="64" height="64">
+                                <img src="/static/img/icons/file.png" alt="No thumbnail." class="thumbnail stock">
                             <?php endif; ?>
                         </i>
                     </a>

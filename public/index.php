@@ -655,6 +655,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
             <?php if (FILE_THUMBNAILS): ?>
                 let thumbnailPath = `<?= FILE_THUMBNAIL_DIRECTORY_PREFIX ?>/${file.id}.webp`;
                 let thumbnailSize = "width: 64px; height: 64px;";
+                let thumbnailClass = "thumbnail stock";
                 if (file.mime.startsWith('audio/')) {
                     thumbnailPath = '/static/img/icons/file_audio.png';
                 } else if (file.mime.startsWith('text/')) {
@@ -665,6 +666,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                     thumbnailPath = '/static/img/icons/file.png';
                 } else {
                     thumbnailSize = 'max-width:100%; max-height: 100%;';
+                    thumbnailClass = "thumbnail";
                 }
             <?php endif; ?>
 
@@ -673,7 +675,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
             <?php if (FILE_THUMBNAILS): ?>
             <div class="column align-center justify-center grow">
                 <div class="column justify-center align-center" style="width: 128px; height:128px;">
-                    <p><i><img src="${thumbnailPath}" alt="No thumbnail." style="${thumbnailSize}" loading="lazy"></i></p>
+                    <p><i><img src="${thumbnailPath}" alt="No thumbnail." style="${thumbnailSize}" loading="lazy" class="${thumbnailClass}"></i></p>
                 </div>
             </div>
             <?php endif; ?>
