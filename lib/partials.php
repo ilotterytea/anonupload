@@ -16,12 +16,25 @@ function html_big_navbar()
         }
     }
 
+    $line = null;
+    $line_path = $_SERVER['DOCUMENT_ROOT'] . '/../MOTD.txt';
+    if (file_exists($line_path) && $contents = file_get_contents($line_path)) {
+        $lines = explode("\n", trim($contents));
+        $line_count = count($lines);
+        if ($line_count > 0) {
+            $line = $lines[intval(date('j')) % $line_count];
+        }
+    }
+
     echo '' ?>
     <section class="column justify-center align-center gap-8 navbar">
-        <div class="column justify-center grow">
+        <div class="column align-center justify-center grow">
             <a href="/">
                 <h1><img src="<?= $brand_url ?>" alt="<?= INSTANCE_NAME ?>"></h1>
             </a>
+            <?php if (isset($line)): ?>
+                <p><i>&quot;<?= $line ?>&quot;</i></p>
+            <?php endif; ?>
         </div>
 
         <div class="row gap-8 justify-center">
