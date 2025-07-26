@@ -239,7 +239,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                 <?php if (str_starts_with($file['mime'], 'image/')): ?>
                                     <img src="<?= $file['full_url'] ?>" alt="Image file.">
                                 <?php elseif (str_starts_with($file['mime'], 'video/')): ?>
-                                    <video controls autoplay>
+                                    <video controls autoplay loop>
                                         <source src="<?= $file['full_url'] ?>" type="<?= $file['mime'] ?>">
                                     </video>
                                 <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>
