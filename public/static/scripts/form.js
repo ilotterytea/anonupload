@@ -20,7 +20,11 @@ function showFile(file) {
             fileURLWrapper.style.display = 'flex';
         }
     } else {
-        fileUploadWrapper.innerHTML = `<h1>File: ${file.name}</h1>`;
+        if (file.length == 1) {
+            fileUploadWrapper.innerHTML = `<h1>File: ${file[0].name}</h1>`;
+        } else {
+            fileUploadWrapper.innerHTML = `<h1>Selected ${file.length} files</h1>`;
+        }
 
         if (fileURLWrapper) {
             fileURLWrapper.style.display = 'none';

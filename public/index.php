@@ -334,7 +334,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                         <p class="remove-script">File:</p>
                         <hr class="remove-script">
                         <input type="file" name="file"
-                            accept="<?= implode(', ', array_unique(array_values(FILE_ACCEPTED_MIME_TYPES))) ?>"
+                            accept="<?= implode(', ', array_unique(array_values(FILE_ACCEPTED_MIME_TYPES))) ?>" multiple
                             id="form-file">
 
                         <div class="column gap-8" id="form-upload-wrapper">
@@ -505,11 +505,18 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 
         const uploadedFiles = document.getElementById('uploaded-files');
 
+        let files = [];
+
         const formUpload = document.getElementById('form-upload');
         formUpload.addEventListener('submit', (event) => {
             event.preventDefault();
             displayTab('file-tabs', 'uploaded-files');
-            uploadData(new FormData(formUpload));
+            for (const file of files) {
+                const form = new FormData(formUpload);
+                form.set("file", file);
+                uploadData(form);
+            }
+            files.clear();
 
             fileUploadWrapper.innerHTML = '<h1>Click, drop, or paste files here</h1>';
             setFormDetailsVisiblity(false);
@@ -535,8 +542,8 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         const formFile = document.getElementById('form-file');
         formFile.style.display = 'none';
         formFile.addEventListener("change", (e) => {
-            file = e.target.files[0];
-            showFile(file);
+            files = e.target.files;
+            showFile(files);
         });
 
         fileUploadWrapper.addEventListener("click", () => formFile.click());
@@ -546,14 +553,15 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         // ---------------------
         fileUploadWrapper.addEventListener("drop", (e) => {
             e.preventDefault();
+            files.clear();
             if (e.dataTransfer.items) {
                 for (const item of e.dataTransfer.items) {
                     if (item.kind === "file") {
                         file = item.getAsFile();
-                        showFile(file);
-                        break;
+                        files.push(file);
                     }
                 }
+                showFile(files);
             }
         });
         fileUploadWrapper.addEventListener("dragover", (e) => {
@@ -562,7 +570,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
             fileURLWrapper.style.display = 'none';
         });
         fileUploadWrapper.addEventListener("dragleave", (e) => {
-            showFile(file);
+            showFile(files);
         });
 
         setFormDetailsVisiblity(false);

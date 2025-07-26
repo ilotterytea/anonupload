@@ -86,7 +86,6 @@ window.addEventListener('load', () => {
             disableTab('favorite-files');
         }
         data.forEach((x) => {
-            console.log(x);
             const item = createUploadedFileItem(x);
             files.appendChild(item.base);
         });
