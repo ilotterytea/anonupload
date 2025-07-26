@@ -49,8 +49,6 @@ window.addEventListener('load', () => {
             id = id.substring(0, id.length - 4);
 
             tab.addEventListener('click', () => displayTab(category, id));
-
-            console.log(id);
         });
     });
 });

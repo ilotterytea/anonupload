@@ -482,10 +482,14 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 <?php elseif (!$file): ?>
     <script>
         const formTabs = document.getElementById('form-upload-tabs');
+        const thumbnailPathPrefix = "<?= FILE_THUMBNAIL_DIRECTORY_PREFIX ?>";
     </script>
     <script src="/static/scripts/audiorecorder.js"></script>
     <script src="/static/scripts/options.js"></script>
     <script src="/static/scripts/tabs.js"></script>
+    <script src="/static/scripts/upload.js"></script>
+    <script src="/static/scripts/favorites.js"></script>
+    <script src="/static/scripts/form.js"></script>
     <script>
         document.querySelectorAll(".remove-script").forEach((x) => {
             x.remove();
@@ -498,33 +502,28 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         const formDetails = document.getElementById('form-upload-options');
 
         document.getElementById('form-text-upload').style.display = 'none';
-        let file = null;
 
         const uploadedFiles = document.getElementById('uploaded-files');
-        <?php if (FILEEXT_ENABLED): ?>
-            const fileURL = document.getElementById('form-url');
-        <?php endif; ?>
 
         const formUpload = document.getElementById('form-upload');
         formUpload.addEventListener('submit', (event) => {
             event.preventDefault();
-            <?php if (FILEEXT_ENABLED): ?>
-                fileUpload(fileURL.value.length != 0);
-            <?php else: ?>
-                fileUpload(false);
-            <?php endif; ?>
+            displayTab('file-tabs', 'uploaded-files');
+            uploadData(new FormData(formUpload));
+
+            fileUploadWrapper.innerHTML = '<h1>Click, drop, or paste files here</h1>';
+            setFormDetailsVisiblity(false);
         });
 
         const fileUploadWrapper = document.querySelector('#form-upload-wrapper>button');
         fileUploadWrapper.style.display = 'block';
 
-        <?php if (FILEEXT_ENABLED): ?>
-            const fileURLWrapper = document.querySelector('#form-upload-wrapper>div');
-            fileURL.addEventListener('keyup', () => {
-                fileUploadWrapper.style.display = fileURL.value.length == 0 ? 'block' : 'none';
-                setFormDetailsVisiblity(fileURL.value.length > 0);
-            });
-        <?php endif; ?>
+        const fileURLWrapper = document.querySelector('#form-upload-wrapper>div');
+        const fileURL = document.getElementById('form-url');
+        fileURL.addEventListener('keyup', () => {
+            fileUploadWrapper.style.display = fileURL.value.length == 0 ? 'block' : 'none';
+            setFormDetailsVisiblity(fileURL.value.length > 0);
+        });
 
         const textArea = document.querySelector('#form-text-upload>textarea');
         textArea.addEventListener('keyup', () => {
@@ -541,6 +540,10 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         });
 
         fileUploadWrapper.addEventListener("click", () => formFile.click());
+
+        // ---------------------
+        // DRAG AND DROP FEATURE
+        // ---------------------
         fileUploadWrapper.addEventListener("drop", (e) => {
             e.preventDefault();
             if (e.dataTransfer.items) {
@@ -556,258 +559,15 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         fileUploadWrapper.addEventListener("dragover", (e) => {
             e.preventDefault();
             fileUploadWrapper.innerHTML = '<h1>Drop files here</h1>';
-            <?php if (FILEEXT_ENABLED): ?>
-                fileURLWrapper.style.display = 'none';
-            <?php endif; ?>
+            fileURLWrapper.style.display = 'none';
         });
         fileUploadWrapper.addEventListener("dragleave", (e) => {
             showFile(file);
         });
 
         setFormDetailsVisiblity(false);
-
-        if (textArea.value.length > 0) {
-            setFormDetailsVisiblity(true);
-            showUploadType('text');
-        }
-
-        function fileUpload(is_url) {
-            if (textArea.value.length > 0) {
-                file = null;
-                formFile.value = null;
-            }
-
-            const form = new FormData(formUpload);
-
-            if (file) {
-                form.set('file', file);
-            }
-
-            if (is_url) {
-                fileUploadWrapper.innerHTML = `<h1>Uploading ${fileURL.value}</h1><p>This might take a while...</p>`;
-            } else if (file) {
-                fileUploadWrapper.innerHTML = `<h1>Uploading ${file.name}...</h1><p>This might take a while...</p>`;
-            } else {
-                fileUploadWrapper.innerHTML = `<h1>Uploading...</h1>`;
-            }
-            fileUploadWrapper.style.display = 'block';
-            <?php if (FILEEXT_ENABLED): ?>
-                fileURLWrapper.style.display = 'none';
-                fileURL.value = '';
-            <?php endif; ?>
-            file = null;
-            setFormDetailsVisiblity(false);
-
-            fetch(formUpload.getAttribute('action'), {
-                'body': form,
-                'method': 'POST',
-                'headers': {
-                    'Accept': 'application/json'
-                }
-            })
-                .catch((err) => {
-                    console.error(err);
-                    alert('Failed to send a file. More info in the console...');
-                    <?php if (FILEEXT_ENABLED): ?>
-                        fileURLWrapper.style.display = 'flex';
-                    <?php endif; ?>
-                    fileUploadWrapper.style.display = 'block';
-                    fileUploadWrapper.innerHTML = '<h1>Click, drop, or paste files here</h1>';
-                })
-                .then((r) => r.json())
-                .then((json) => {
-                    fileUploadWrapper.innerHTML = '<h1>Click, drop, or paste files here</h1>';
-                    <?php if (FILEEXT_ENABLED): ?>
-                        fileURLWrapper.style.display = 'flex';
-                    <?php endif; ?>
-                    fileUploadWrapper.style.display = 'block';
-
-                    if (json.status_code != 201) {
-                        alert(`${json.message} (${json.status_code})`);
-                        return;
-                    }
-
-                    showTab('uploaded-files');
-                    displayTab('file-tabs', 'uploaded-files');
-
-                    uploadedFiles.innerHTML = addUploadedFile(json.data) + uploadedFiles.innerHTML;
-                    uploadedFiles.parentElement.style.display = 'flex';
-                    textArea.value = '';
-
-                    addFileLocally(json.data);
-
-                    formUpload.reset();
-                });
-        }
-
-        function addUploadedFile(file) {
-            let file_url = `/${file.id}.${file.extension}`;
-            if (file.urls && file.urls.download_url) {
-                file_url = file.urls.download_url;
-            }
-            let file_deletion = '';
-            if (file.urls && file.urls.deletion_url) {
-                file_deletion = `<button onclick="deleteUploadedFile('${file.urls.deletion_url}', '${file.id}')" title="Delete">
-                    <img src="/static/img/icons/cross.png" alt="Delete">
-                </button>`;
-            }
-
-            <?php if (FILE_THUMBNAILS): ?>
-                let thumbnailPath = `<?= FILE_THUMBNAIL_DIRECTORY_PREFIX ?>/${file.id}.webp`;
-                let thumbnailSize = "width: 64px; height: 64px;";
-                let thumbnailClass = "thumbnail stock";
-                if (file.mime.startsWith('audio/')) {
-                    thumbnailPath = '/static/img/icons/file_audio.png';
-                } else if (file.mime.startsWith('text/')) {
-                    thumbnailPath = '/static/img/icons/file_text.png';
-                } else if (file.mime == 'application/x-shockwave-flash') {
-                    thumbnailPath = '/static/img/icons/file_flash.png';
-                } else if (!file.mime.startsWith('image/') && !file.mime.startsWith('video/')) {
-                    thumbnailPath = '/static/img/icons/file.png';
-                } else {
-                    thumbnailSize = 'max-width:100%; max-height: 100%;';
-                    thumbnailClass = "thumbnail";
-                }
-            <?php endif; ?>
-
-            return `
-        <div class="box item column gap-4 pad-4">
-            <?php if (FILE_THUMBNAILS): ?>
-            <div class="column align-center justify-center grow">
-                <div class="column justify-center align-center" style="width: 128px; height:128px;">
-                    <p><i><img src="${thumbnailPath}" alt="No thumbnail." style="${thumbnailSize}" loading="lazy" class="${thumbnailClass}"></i></p>
-                </div>
-            </div>
-            <?php endif; ?>
-            <h2>${file.id}.${file.extension}</h2>
-            <div>
-                <p>${file.mime}</p>
-                <p title="${file.size} B">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
-            </div>
-            <div class="row gap-8">
-                <a href="${file_url}">
-                    <button>Open</button>
-                </a>
-                ${file_deletion}
-                <button onclick="navigator.clipboard.writeText('${window.location.href}')" title="Copy URL">
-                    <img src="/static/img/icons/paste_plain.png" alt="Copy URL">
-                </button>
-            </div>
-        </div>
-        `;
-        }
-
-        function deleteUploadedFile(url, id) {
-            if (!confirm(`Are you sure you want to delete file ID ${id}?`)) {
-                return;
-            }
-
-            const file = deleteFileLocally(id);
-
-            fetch(url, {
-                'headers': {
-                    'Accept': 'application/json'
-                },
-                'method': 'DELETE'
-            }).then((r) => r.json())
-                .then((json) => {
-                    if (json.status_code != 200) {
-                        alert(`${json.message} (${json.status_code})`);
-                        if (json.status_code != 404) {
-                            addFileLocally(file);
-                        }
-                        loadUploadedFiles();
-                        return;
-                    }
-
-                    loadUploadedFiles();
-                })
-                .catch((err) => {
-                    alert('Failed to delete the file. Look into the console!');
-                    console.error(err);
-                });
-        }
-
-        function deleteFileLocally(id) {
-            let files = getUploadedFiles();
-            let file = files.filter((x) => x.id == id);
-            files = files.filter((x) => x.id !== id);
-            localStorage.setItem('uploaded_files', JSON.stringify(files));
-            return file;
-        }
-
-        function setFormDetailsVisiblity(show) {
-            formDetails.style.display = show ? 'flex' : 'none';
-            formSubmitButton.style.display = show ? 'block' : 'none';
-        }
+        displayTab('file-tabs', 'uploaded-files');
     </script>
-    <script src="/static/scripts/favorites.js"></script>
-    <script>
-
-        // loading already existing uploaded files
-        function loadUploadedFiles() {
-            let files = getUploadedFiles();
-
-            let html = '';
-
-            for (const file of files) {
-                html += addUploadedFile(file);
-            }
-
-            if (html.length > 0) {
-                showTab('uploaded-files');
-                displayTab('file-tabs', 'uploaded-files');
-            } else {
-                hideTab('uploaded-files');
-            }
-
-            if (getFavoriteFiles().length > 0 && html.length == 0) {
-                showTab('favorite-files');
-                displayTab('file-tabs', 'favorite-files');
-            }
-
-            uploadedFiles.parentElement.style.display = html.length > 0 || getFavoriteFiles().length > 0 ? 'flex' : 'none';
-
-            uploadedFiles.innerHTML = html;
-        }
-
-        loadUploadedFiles();
-
-        function getUploadedFiles() {
-            let files = localStorage.getItem("uploaded_files");
-            if (!files) {
-                files = '[]';
-            }
-            return JSON.parse(files);
-        }
-
-        function addFileLocally(file) {
-            let files = getUploadedFiles();
-            files.unshift(file);
-            localStorage.setItem('uploaded_files', JSON.stringify(files));
-        }
-
-        function showUploadType(type) {
-            if (formTabs.hasAttribute('disabled')) {
-                return;
-            }
-
-            document.getElementById('form-upload-wrapper').style.display = type == 'file' ? 'flex' : 'none';
-            document.getElementById('form-text-upload').style.display = type == 'text' ? 'flex' : 'none';
-            document.getElementById('form-record-upload').style.display = type === 'audio' ? 'flex' : 'none';
-
-            const tabs = document.querySelectorAll('.form-upload-tab');
-
-            for (const tab of tabs) {
-                if (tab.getAttribute('id') == `form-tab-${type}`) {
-                    tab.classList.remove('disabled');
-                } else {
-                    tab.classList.add('disabled');
-                }
-            }
-        }
-    </script>
-    <script src="/static/scripts/form.js"></script>
 <?php endif; ?>
 
 </html>

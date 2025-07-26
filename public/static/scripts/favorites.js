@@ -13,7 +13,7 @@ function addFavoriteFile(f) {
     }
 
     const files = getFavoriteFiles();
-    files.push(f);
+    files.unshift(f);
     saveFavoriteFiles(files);
 }
 
@@ -86,8 +86,9 @@ window.addEventListener('load', () => {
             disableTab('favorite-files');
         }
         data.forEach((x) => {
-            const html = addUploadedFile(x);
-            files.innerHTML += html;
+            console.log(x);
+            const item = createUploadedFileItem(x);
+            files.appendChild(item.base);
         });
     }
 });
