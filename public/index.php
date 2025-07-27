@@ -12,11 +12,23 @@ $db = new PDO(DB_URL, DB_USER, DB_PASS);
 if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
     $random_viewed_files = $_SESSION['random_viewed_files'] ?? [];
 
+    $mime_filter = "";
+    if (!empty(FILE_CATALOG_INCLUDE_MIMETYPES)) {
+        $mime_filter = [];
+        foreach (FILE_CATALOG_INCLUDE_MIMETYPES as $k) {
+            array_push($mime_filter, "mime LIKE '$k'");
+        }
+        $mime_filter = implode(' AND ', $mime_filter);
+    }
+
     $in = !empty($random_viewed_files) ? (str_repeat('?,', count($random_viewed_files) - 1) . '?') : '';
-    $in_condition = !empty($random_viewed_files) ? "WHERE id NOT IN ($in)" : "";
+    $in_condition = !empty($random_viewed_files) ? ("id NOT IN ($in) " . ($mime_filter ? " AND " : "")) : "";
+    $where_word = $in_condition || $mime_filter ? "WHERE" : "";
+
+    error_log("SELECT id, extension FROM files $where_word $in_condition $mime_filter ORDER BY rand() LIMIT 1");
 
     do {
-        $stmt = $db->prepare("SELECT id, extension FROM files $in_condition ORDER BY rand() LIMIT 1");
+        $stmt = $db->prepare("SELECT id, extension FROM files $where_word $in_condition $mime_filter ORDER BY rand() LIMIT 1");
         if (empty($random_viewed_files)) {
             $stmt->execute();
         } else {
