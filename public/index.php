@@ -114,6 +114,14 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
         exit;
     }
 
+    if (!FILE_SHOW_UPLOADTIME) {
+        unset($file['uploaded_at']);
+    }
+
+    if (!FILE_SHOW_VIEWS) {
+        unset($file['views']);
+    }
+
     if (IS_JSON_REQUEST) {
         unset($file['password']);
         $file['urls'] = [
@@ -279,9 +287,11 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                             <?php if (isset($file['resolution'])): ?>
                                 <p><?= $file['resolution'] ?></p>
                             <?php endif; ?>
-                            <p title="<?= $file['uploaded_at'] ?>">Uploaded <?= format_timestamp($file['uploaded_at']) ?> ago
-                            </p>
-                            <?php if (FILE_COUNT_VIEWS && isset($file['views'])): ?>
+                            <?php if (isset($file['uploaded_at'])): ?>
+                                <p title="<?= $file['uploaded_at'] ?>">Uploaded <?= format_timestamp($file['uploaded_at']) ?> ago
+                                </p>
+                            <?php endif; ?>
+                            <?php if (FILE_SHOW_VIEWS && isset($file['views'])): ?>
                                 <p><?= $file['views'] ?> views</p>
                             <?php endif; ?>
                         </div>
