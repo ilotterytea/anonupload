@@ -18,7 +18,7 @@ if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
         foreach (FILE_CATALOG_INCLUDE_MIMETYPES as $k) {
             array_push($mime_filter, "mime LIKE '$k'");
         }
-        $mime_filter = implode(' AND ', $mime_filter);
+        $mime_filter = '(' . implode(' OR ', $mime_filter) . ')';
     }
 
     $in = !empty($random_viewed_files) ? (str_repeat('?,', count($random_viewed_files) - 1) . '?') : '';
