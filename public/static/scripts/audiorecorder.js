@@ -67,15 +67,15 @@ let audioLength = 0;
 
 async function startRecording() {
     // TODO: very poor sound quality
-    stream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: 44100, channelCount: 1 }});
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: 44100, channelCount: 1 } });
     const options = { mimeType: 'audio/ogg; codecs=opus', audioBitsPerSecond: 128000 };
     if (!MediaRecorder.isTypeSupported(options.mimeType)) {
         alert("Your browser doesn't support audio/ogg recording.");
         return;
     }
-    
+
     audioLength = 0;
-      
+
     mediaRecorder = new MediaRecorder(stream, options);
     audioChunks = [];
 
@@ -90,7 +90,7 @@ async function startRecording() {
     startBtn.style.display = 'none';
     stopBtn.style.display = 'block';
     player.style.display = 'none';
-    
+
     setFormDetailsVisiblity(false);
 }
 
@@ -98,65 +98,68 @@ function stopRecording() {
     mediaRecorder.stop();
     startBtn.style.display = 'block';
     stopBtn.style.display = 'none';
-    
+
     if (playback) {
         form.removeChild(playback);
         playback = null;
     }
-    
+
     mediaRecorder.onstop = () => {
         const blob = new Blob(audioChunks, { type: 'audio/ogg; codecs=opus' });
         const file = new File([blob], 'recording.ogg', { type: 'audio/ogg; codecs=opus' });
-        
+
         const url = URL.createObjectURL(file);
-        
+
         playback = document.createElement('audio');
         playback.src = url;
-        
+
         playback.addEventListener('loadedmetadata', () => {
-           const d = playback.duration;
-           slider.max = d;
-           slider.value = 0;
-           currentSecond.textContent = formatTimestamp(slider.getAttribute('value'));
-           duration.textContent = formatTimestamp(d);
+            const d = playback.duration;
+            slider.max = d;
+            slider.value = 0;
+            currentSecond.textContent = formatTimestamp(slider.getAttribute('value'));
+            duration.textContent = formatTimestamp(d);
         });
-        
+
         playback.addEventListener('timeupdate', () => {
             currentSecond.textContent = formatTimestamp(playback.currentTime);
             slider.value = playback.currentTime;
         });
-        
+
         playback.addEventListener('ended', () => {
             playBtn.style.display = 'flex';
             pauseBtn.style.display = 'none';
             currentSecond.textContent = formatTimestamp(0);
             slider.value = 0;
         });
-        
+
         form.appendChild(playback);
-        
+
         playBtn.style.display = 'flex';
         pauseBtn.style.display = 'none';
-        
+
         startBtn.style.display = 'none';
         stopBtn.style.display = 'none';
         player.style.display = 'flex';
-        
+
         setFormDetailsVisiblity(true);
-        
+
         stream.getAudioTracks().forEach(track => {
             track.stop();
         });
-        
+
         stream = null;
-        
+
         // attaching the file
         if (formFile) {
             const dt = new DataTransfer();
             dt.items.add(file);
-            formFile.files = dt.files;
+            files = [];
+            for (const file of dt.files) {
+                files.push(file);
+            }
         }
-        
+
         formTabs.setAttribute('disabled', 'true');
     };
 }
@@ -167,20 +170,20 @@ function removeRecording() {
     form.removeChild(playback);
     formFile.value = '';
     setFormDetailsVisiblity(false);
-    
+
     formTabs.removeAttribute('disabled');
 }
 
 function playRecord() {
     if (playback) playback.play();
-    
+
     playBtn.style.display = 'none';
     pauseBtn.style.display = 'flex';
 }
 
 function pauseRecord() {
     if (playback) playback.pause();
-    
+
     playBtn.style.display = 'flex';
     pauseBtn.style.display = 'none';
 }
@@ -196,7 +199,7 @@ function rewindRecord() {
 function formatTimestamp(timestamp) {
     const m = Math.floor(timestamp / 60);
     const s = Math.ceil(timestamp % 60);
-    
+
     return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s
 }
 
