@@ -8,6 +8,7 @@ function createUploadedFileItem(data) {
 
     const preview = document.createElement("img");
     preview.alt = "No thumbnail.";
+    preview.loading = "lazy";
     previewContainer.appendChild(preview);
 
     const header = document.createElement("h2");
