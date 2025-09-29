@@ -67,6 +67,10 @@ function createUploadedFileItem(data) {
             const btn = document.createElement("button");
             btn.addEventListener("click", () => {
                 deleteUploadedFile(data.urls.deletion_url, data.id);
+                base.remove();
+                if (getUploadedFiles().length == 0) {
+                    document.querySelector('#uploaded-files').parentElement.style.display = 'none';
+                }
             });
 
             const img = document.createElement("img");

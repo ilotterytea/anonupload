@@ -555,6 +555,8 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
             showFile(null);
             fileUploadWrapper.style.display = 'block';
             fileURL.value = '';
+
+            document.querySelector('#uploaded-files').parentElement.style.display = 'grid';
         });
 
         const fileURLWrapper = document.querySelector('#form-upload-wrapper>div');
@@ -609,7 +611,19 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         });
 
         setFormDetailsVisiblity(false);
-        displayTab('file-tabs', 'uploaded-files');
+        const uploadedFileCount = getUploadedFiles().length;
+        const favoriteFileCount = getFavoriteFiles().length;
+        if (uploadedFileCount > 0) {
+            document.querySelector('#uploaded-files').parentElement.style.display = 'grid';
+            displayTab('file-tabs', 'uploaded-files');
+        }
+
+        if (favoriteFileCount > 0) {
+            document.querySelector('#favorite-files').parentElement.style.display = 'grid';
+            if (uploadedFileCount == 0) {
+                displayTab('file-tabs', 'favorite-files');
+            }
+        }
     </script>
 <?php endif; ?>
 
