@@ -159,7 +159,14 @@ function html_footer()
                 <p><a href="<?= $link ?>"><?= $title ?></a></p>
             <?php endforeach; ?>
         </div>
-        <p>Serving <?= $file_count ?> files and <?= $file_size ?> of active content</p>
+        <p>
+            Serving <?= $file_count ?> files and <?= $file_size ?> of active content
+            <?php if (STATS_PUBLIC): ?>
+                <a href="/stats.php">
+                    <img src="/static/img/icons/stats.png" alt="[Stats]">
+                </a>
+            <?php endif; ?>
+        </p>
     </footer>
     <?php ;
 }

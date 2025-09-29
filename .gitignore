@@ -2,7 +2,9 @@ config.php
 *.ini
 *.db
 userdata/
+
 ruffle/
+chart.js
 
 TOS.txt
 PRIVACY.txt
