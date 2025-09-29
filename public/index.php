@@ -84,13 +84,12 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
     ');
     $stmt->execute([$file_id, $file_ext]);
     $file = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    $file_exists = is_file(FILE_UPLOAD_DIRECTORY . "/$file_id.$file_ext");
 
-    if (!$file) {
+    if (!$file || !$file_exists) {
         http_response_code(404);
         exit();
     }
-
-    $file_exists = is_file(FILE_UPLOAD_DIRECTORY . "/$file_id.$file_ext");
 
     // counting views
     $viewed_file_ids = $_SESSION['viewed_file_ids'] ?? [];
