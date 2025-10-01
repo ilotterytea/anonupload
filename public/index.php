@@ -249,7 +249,8 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                     <a href="<?= $file['full_url'] ?>">
                                         <button>Full size</button>
                                     </a>
-                                    <a href="<?= $file['full_url'] ?>" download="<?= $file['name'] ?>">
+                                    <a href="<?= $file['full_url'] ?>"
+                                        download="<?= sprintf('%s.%s', $file['name'], $file['extension']) ?>">
                                         <button>Download</button>
                                     </a>
                                 </div>
