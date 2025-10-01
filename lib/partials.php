@@ -64,7 +64,7 @@ function html_big_navbar()
     <?php ;
 }
 
-function html_mini_navbar(string|null $subtitle = null)
+function html_mini_navbar(string|null $subtitle = null, string $title = INSTANCE_NAME)
 {
     $brand_url = '/static/img/brand/mini.webp';
     $static_folder = '/static/img/brand/mini';
@@ -87,11 +87,11 @@ function html_mini_navbar(string|null $subtitle = null)
                 <?php if ($subtitle): ?>
                     <p class="font-small"><?= $subtitle ?></p>
                 <?php endif; ?>
-                <h2><?= INSTANCE_NAME ?></h2>
+                <h2><?= $title ?></h2>
             </div>
         </a>
 
-        <div class="row gap-8 align-bottom" style="height: 100%">
+        <div class="row gap-8 align-bottom">
             <a href="/">
                 <button>Home</button>
             </a>
