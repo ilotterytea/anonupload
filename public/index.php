@@ -446,6 +446,14 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                         <td><input type="checkbox" name="strip_exif_data" value="1" checked></td>
                                     </tr>
                                 <?php endif; ?>
+                                <?php if (FILE_REMOVE_LETTERBOXES): ?>
+                                    <tr>
+                                        <th>Remove letterboxing<span class="help"
+                                                title="Removes black bars from the video, may be inaccurate, and only applies to videos">[?]</span>:
+                                        </th>
+                                        <td><input type="checkbox" name="remove_letterbox" value="1"></td>
+                                    </tr>
+                                <?php endif; ?>
                             </table>
                             <button type="submit" class="fancy">Upload</button>
                     </form>

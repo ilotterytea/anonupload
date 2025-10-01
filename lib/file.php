@@ -130,3 +130,24 @@ function strip_exif(string $file_path)
     $output = shell_exec("exiftool -q -EXIF= $file_path $file_path");
     return empty($output);
 }
+
+function remove_video_letterbox(string $input_path, string $output_path)
+{
+    $input_path = escapeshellarg($input_path);
+    $output_path = escapeshellarg($output_path);
+    $output = shell_exec("ffmpeg -nostdin -i $input_path -vf cropdetect=24:16:0 -f null - 2>&1");
+
+    if (preg_match_all('/crop=\d+:\d+:\d+:\d+/', $output, $matches)) {
+        $area = end($matches);
+        $area = end($area);
+    } else {
+        throw new RuntimeException('Could not detect crop parameters. Try upload the video without "Remove letterbox" option.');
+    }
+
+    $area = escapeshellarg($area);
+
+    $output = [];
+    exec("ffmpeg -nostdin -i $input_path -vf $area -c:a copy $output_path 2>&1", $output, $code);
+
+    return $code == 0;
+}

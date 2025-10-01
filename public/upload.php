@@ -200,6 +200,20 @@ try {
         throw new RuntimeException('This file is not allowed for upload.' . (isset($row['reason']) ? ' Reason: ' . $row['reason'] : ''));
     }
 
+    // remove letterbox
+    $remove_letterbox = FILE_REMOVE_LETTERBOXES && boolval($_POST['remove_letterbox'] ?? '0');
+    if ($remove_letterbox && str_starts_with($file_data['mime'], 'video/')) {
+        $output_path = $file_path;
+        $input_path = FILE_UPLOAD_DIRECTORY . sprintf('/%s.temporary.%s', $file_id, $file_data['extension']);
+        rename($output_path, $input_path);
+        if (!remove_video_letterbox($input_path, $output_path)) {
+            rename($input_path, $output_path);
+            delete_file($file_id, $file_data['extension']);
+            throw new RuntimeException('Failed to remove letterbox from the video');
+        }
+        unlink($input_path);
+    }
+
     $file_data['size'] = filesize($file_path);
 
     if (FILE_THUMBNAILS && !is_dir(FILE_THUMBNAIL_DIRECTORY) && !mkdir(FILE_THUMBNAIL_DIRECTORY, 0777, true)) {
