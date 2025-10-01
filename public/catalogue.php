@@ -14,10 +14,19 @@ if (!isset($_SESSION['is_moderator']) && !FILE_CATALOG_PUBLIC) {
 $db = new PDO(DB_URL, DB_USER, DB_PASS);
 
 $page = max(intval($_GET['p'] ?? '1') - 1, 0);
-$limit = 20;
+$limit = FILE_CATALOG_LIMIT;
+
+$sort_option = $_GET['sort'] ?? 'recent';
+
+$sort = match ($sort_option) {
+    'oldest' => 'ORDER BY uploaded_at ASC',
+    'most_viewed' => 'ORDER BY views DESC',
+    'least_viewed' => 'ORDER BY views ASC',
+    default => 'ORDER by uploaded_at DESC'
+};
 
 // counting max pages
-$stmt = $db->query('SELECT COUNT(id) AS all_files FROM files WHERE id NOT IN (SELECT id FROM file_bans)');
+$stmt = $db->query("SELECT COUNT(id) AS all_files FROM files WHERE id NOT IN (SELECT id FROM file_bans) $sort");
 $stmt->execute();
 
 $max_pages = ceil(($stmt->fetch(PDO::FETCH_ASSOC)['all_files'] ?: 0) / $limit);
@@ -26,10 +35,10 @@ $page = min($page, $max_pages - 1);
 // getting files
 $offset = $page * $limit;
 
-$stmt = $db->query("SELECT f.id, f.mime, f.extension
+$stmt = $db->query("SELECT f.id, f.mime, f.extension, f.title
     FROM files f
     WHERE f.id NOT IN (SELECT id FROM file_bans)
-    ORDER BY f.uploaded_at DESC
+    $sort
     LIMIT $limit OFFSET $offset
 ");
 $stmt->execute();
@@ -43,7 +52,9 @@ foreach ($files as &$f) {
         $f['color'] = 'red';
     }
 
-    $f['thumb_title'] = "{$f['mime']} ({$f['extension']})";
+    $f['name'] = $f['title'] ?: sprintf('%s.%s', $f['id'], $f['extension']);
+
+    $f['thumb_title'] = "{$f['name']} // {$f['mime']} ({$f['extension']})";
 }
 unset($f);
 ?>
@@ -60,43 +71,84 @@ unset($f);
 </head>
 
 <body>
-    <main>
-        <?php html_mini_navbar('Page ' . ($page + 1) . '/' . $max_pages) ?>
+    <main class="full-size">
+        <?php html_mini_navbar('Page ' . ($page + 1) . '/' . $max_pages, "Library of " . INSTANCE_NAME) ?>
 
-        <section class="row align-center">
-            <?php if ($page - 1 >= 0): ?>
-                <a href="/catalogue.php?p=<?= $page ?>">&larr; Previous page</a>
-            <?php endif; ?>
-            <?php if ($page + 2 <= $max_pages): ?>
-                <a href="/catalogue.php?p=<?= $page + 2 ?>" style="margin-left:auto">&rarr; Next page</a>
-            <?php endif; ?>
-        </section>
+        <div class="row gap-8">
+            <!-- SIDE BAR -->
+            <div class="column gap-8">
+                <form action="/catalogue.php" method="get">
+                    <div class="box">
+                        <div class="tab">
+                            Search
+                        </div>
+                        <div class="content column gap-8">
+                            <label for="sort">Sort by</label>
+                            <select name="sort" id="sort">
+                                <option value="recent" <?= $sort_option == 'recent' ? 'selected' : '' ?>>Recent</option>
+                                <option value="oldest" <?= $sort_option == 'oldest' ? 'selected' : '' ?>>Oldest</option>
+                                <option value="most_viewed" <?= $sort_option == 'most_viewed' ? 'selected' : '' ?>>Most
+                                    viewed</option>
+                                <option value="least_viewed" <?= $sort_option == 'least_viewed' ? 'selected' : '' ?>>Least
+                                    viewed</option>
+                            </select>
+                            <button type="submit">Search</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
-        <section class="wall">
-            <?php foreach ($files as $file): ?>
-                <div class="brick<?= isset($file['color']) ? " {$file['color']}" : '' ?>">
-                    <a href="/<?= sprintf('%s.%s', $file['id'], $file['extension']) ?>">
-                        <i title="<?= $file['thumb_title'] ?>">
-                            <?php if (str_starts_with($file['mime'], 'image/') || str_starts_with($file['mime'], 'video/')): ?>
-                                <img src="<?= sprintf('%s/%s.webp', FILE_THUMBNAIL_DIRECTORY_PREFIX, $file['id']) ?>"
-                                    alt="No thumbnail." loading="lazy">
-                            <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>
-                                <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy"
-                                    class="thumbnail stock">
-                            <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
-                                <img src="/static/img/icons/file_text.png" alt="No thumbnail." loading="lazy"
-                                    class="thumbnail stock">
-                            <?php elseif ($file['mime'] == 'application/x-shockwave-flash'): ?>
-                                <img src="/static/img/icons/file_flash.png" alt="No thumbnail." loading="lazy"
-                                    class="thumbnail stock">
-                            <?php else: ?>
-                                <img src="/static/img/icons/file.png" alt="No thumbnail." class="thumbnail stock">
-                            <?php endif; ?>
-                        </i>
-                    </a>
+            <!-- CONTENT -->
+            <div class="column gap-8 grow">
+                <!-- FILES -->
+                <div class="box">
+                    <div class="tab">
+                        <p>Files</p>
+                    </div>
+
+                    <div class="content wall">
+                        <?php foreach ($files as $file): ?>
+                            <div class="brick<?= isset($file['color']) ? " {$file['color']}" : '' ?>">
+                                <a href="/<?= sprintf('%s.%s', $file['id'], $file['extension']) ?>">
+                                    <i title="<?= $file['thumb_title'] ?>">
+                                        <?php if (str_starts_with($file['mime'], 'image/') || str_starts_with($file['mime'], 'video/')): ?>
+                                            <img src="<?= sprintf('%s/%s.webp', FILE_THUMBNAIL_DIRECTORY_PREFIX, $file['id']) ?>"
+                                                alt="No thumbnail." loading="lazy">
+                                        <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>
+                                            <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy"
+                                                class="thumbnail stock">
+                                        <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
+                                            <img src="/static/img/icons/file_text.png" alt="No thumbnail." loading="lazy"
+                                                class="thumbnail stock">
+                                        <?php elseif ($file['mime'] == 'application/x-shockwave-flash'): ?>
+                                            <img src="/static/img/icons/file_flash.png" alt="No thumbnail." loading="lazy"
+                                                class="thumbnail stock">
+                                        <?php else: ?>
+                                            <img src="/static/img/icons/file.png" alt="No thumbnail." class="thumbnail stock">
+                                        <?php endif; ?>
+                                    </i>
+                                </a>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-            <?php endforeach; ?>
-        </section>
+                <!-- SCROLL -->
+                <div class="row">
+                    <div class="box row gap-8">
+                        <?php if ($page - 1 >= 0): ?>
+                            <a href="/catalogue.php?p=<?= $page ?>&sort=<?= $sort_option ?>">
+                                <button>Previous</button>
+                            </a>
+                        <?php endif; ?>
+                        <?php if ($page + 2 <= $max_pages): ?>
+                            <a href="/catalogue.php?p=<?= $page + 2 ?>&sort=<?= $sort_option ?>" style="margin-left:auto">
+                                <button>Next</button>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 </body>
 
