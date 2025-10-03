@@ -113,11 +113,11 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
         exit;
     }
 
-    if (!FILE_SHOW_UPLOADTIME) {
+    if (!FILE_SHOW_UPLOADTIME && !isset($_SESSION['is_moderator'])) {
         unset($file['uploaded_at']);
     }
 
-    if (!FILE_SHOW_VIEWS) {
+    if (!FILE_SHOW_VIEWS && !isset($_SESSION['is_moderator'])) {
         unset($file['views']);
     }
 
@@ -291,7 +291,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                 <p title="<?= $file['uploaded_at'] ?>">Uploaded <?= format_timestamp($file['uploaded_at']) ?> ago
                                 </p>
                             <?php endif; ?>
-                            <?php if (FILE_SHOW_VIEWS && isset($file['views'])): ?>
+                            <?php if ((FILE_SHOW_VIEWS || $_SESSION['is_moderator']) && isset($file['views'])): ?>
                                 <p><?= $file['views'] ?> views</p>
                             <?php endif; ?>
                         </div>
