@@ -170,3 +170,15 @@ function html_footer()
     </footer>
     <?php ;
 }
+
+function html_mini_footer()
+{
+    echo '' ?>
+    <footer class="column justify-center align-bottom gap-8 font-small mini-footer">
+        <p>
+            All trademarks and copyrights belong to their respective owners.
+            The uploader is responsible for any content shared here.
+        </p>
+    </footer>
+    <?php ;
+}

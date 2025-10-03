@@ -298,6 +298,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                     </section>
                 </div>
             <?php endif; ?>
+            <?php html_mini_footer(); ?>
         <?php else: ?>
             <?php html_big_navbar() ?>
 

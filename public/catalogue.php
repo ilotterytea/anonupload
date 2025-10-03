@@ -74,7 +74,7 @@ unset($f);
     <main class="full-size">
         <?php html_mini_navbar('Page ' . ($page + 1) . '/' . $max_pages, "Library of " . INSTANCE_NAME) ?>
 
-        <div class="row gap-8">
+        <div class="grow row gap-8">
             <!-- SIDE BAR -->
             <div class="column gap-8">
                 <form action="/catalogue.php" method="get">
@@ -149,6 +149,7 @@ unset($f);
                 </div>
             </div>
         </div>
+        <?php html_mini_footer() ?>
     </main>
 </body>
 
