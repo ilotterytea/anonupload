@@ -139,6 +139,10 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
     $file['size_formatted'] = sprintf("%.2f", $size / pow(1024, $factor)) . ' ' . $units[$factor];
 
     $file['name'] = $file['title'] ?? sprintf('%s.%s', $file['id'], $file['extension']);
+    $file['download_name'] = $file['name'];
+    if (!str_ends_with($file['download_name'], ".{$file['extension']}")) {
+        $file['download_name'] .= ".{$file['extension']}";
+    }
 
     $file['resolution'] = [];
 
@@ -249,8 +253,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                     <a href="<?= $file['full_url'] ?>">
                                         <button>Full size</button>
                                     </a>
-                                    <a href="<?= $file['full_url'] ?>"
-                                        download="<?= sprintf('%s.%s', $file['name'], $file['extension']) ?>">
+                                    <a href="<?= $file['full_url'] ?>" download="<?= $file['download_name'] ?>">
                                         <button>Download</button>
                                     </a>
                                 </div>
