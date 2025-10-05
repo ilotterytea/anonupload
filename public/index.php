@@ -24,11 +24,10 @@ if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
     $in = !empty($random_viewed_files) ? (str_repeat('?,', count($random_viewed_files) - 1) . '?') : '';
     $in_condition = !empty($random_viewed_files) ? ("id NOT IN ($in) " . ($mime_filter ? " AND " : "")) : "";
     $where_word = $in_condition || $mime_filter ? "WHERE" : "";
-
-    error_log("SELECT id, extension FROM files $where_word $in_condition $mime_filter ORDER BY rand() LIMIT 1");
+    $order_condition = FILE_CATALOG_RANDOM_ORDER ?: "rand()";
 
     do {
-        $stmt = $db->prepare("SELECT id, extension FROM files $where_word $in_condition $mime_filter ORDER BY rand() LIMIT 1");
+        $stmt = $db->prepare("SELECT id, extension FROM files $where_word $in_condition $mime_filter ORDER BY $order_condition LIMIT 1");
         if (empty($random_viewed_files)) {
             $stmt->execute();
         } else {
