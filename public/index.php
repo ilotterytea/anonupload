@@ -159,6 +159,17 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
     }
 
     $file['resolution'] = implode(' ', $file['resolution']) ?: null;
+
+    $file['html_description'] = $file['mime'] . ' - ' . $file['extension'];
+    if (isset($file['views'])) {
+        $file['html_description'] .= " - {$file['views']} views";
+    }
+    if (isset($file['uploaded_at'])) {
+        $file['html_description'] .= ' - Uploaded ' . format_timestamp(strtotime($file['uploaded_at'])) . ' ago';
+    }
+    if (isset($file['resolution'])) {
+        $file['html_description'] .= " - {$file['resolution']}";
+    }
 }
 
 $tos_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/TOS.txt');
@@ -170,17 +181,19 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
     <?php if ($file): ?>
         <title><?= $file['name'] ?> - <?= INSTANCE_NAME ?></title>
         <meta property="og:title" content="<?= $file['name'] ?> - <?= INSTANCE_NAME ?>" />
-        <meta property="og:description" content="<?= $file['size_formatted'] ?> - <?= $file['mime'] ?> &#40;<?= $file['extension'] ?>&#41;
-                        <?php if (isset($file['resolution'])): ?>
-                            - <?= $file['resolution'] ?><?php endif; ?>" />
+        <meta property="og:description" content="<?= $file['html_description'] ?>" />
         <meta property="og:url" content="<?= sprintf("%s/%s.%s", INSTANCE_URL, $file['id'], $file['extension']) ?>" />
         <meta property="og:type" content="website" />
         <?php if (FILE_THUMBNAILS): ?>
             <meta property="og:image"
                 content="<?= sprintf('%s%s/%s.webp', INSTANCE_URL, FILE_THUMBNAIL_DIRECTORY_PREFIX, $file['id']) ?>" />
         <?php endif; ?>
+        <meta name="robots" content="noindex, nofollow">
     <?php else: ?>
         <title><?= INSTANCE_NAME ?></title>
+        <meta name="description"
+            content="<?= INSTANCE_NAME ?> is a simple, free and anonymous file sharing site. We do not store anything other than the files you upload.">
+        <meta name="robots" content="nofollow">
     <?php endif; ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/static/style.css">
