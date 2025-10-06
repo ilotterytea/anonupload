@@ -165,7 +165,7 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
         $file['html_description'] .= " - {$file['views']} views";
     }
     if (isset($file['uploaded_at'])) {
-        $file['html_description'] .= ' - Uploaded ' . format_timestamp(strtotime($file['uploaded_at'])) . ' ago';
+        $file['html_description'] .= ' - Uploaded ' . format_timestamp($file['uploaded_at']) . ' ago';
     }
     if (isset($file['resolution'])) {
         $file['html_description'] .= " - {$file['resolution']}";
