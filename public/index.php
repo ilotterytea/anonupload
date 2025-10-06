@@ -306,7 +306,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                 <p title="<?= $file['uploaded_at'] ?>">Uploaded <?= format_timestamp($file['uploaded_at']) ?> ago
                                 </p>
                             <?php endif; ?>
-                            <?php if ((FILE_SHOW_VIEWS || $_SESSION['is_moderator']) && isset($file['views'])): ?>
+                            <?php if ((FILE_SHOW_VIEWS || isset($_SESSION['is_moderator'])) && isset($file['views'])): ?>
                                 <p><?= $file['views'] ?> views</p>
                             <?php endif; ?>
                         </div>
