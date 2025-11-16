@@ -214,6 +214,18 @@ try {
         unlink($input_path);
     }
 
+    if (
+        ZIPWEBAPP_ENABLE &&
+        $file_data["extension"] === "zip" &&
+        parse_zip_web_archive(
+            $file_path,
+            sprintf("%s/%s", FILE_UPLOAD_DIRECTORY, $file_id),
+        )
+    ) {
+        $file_data["extension"] = "html";
+        $file_data["mime"] = "text/html";
+    }
+
     $file_data['size'] = filesize($file_path);
 
     if (FILE_THUMBNAILS && !is_dir(FILE_THUMBNAIL_DIRECTORY) && !mkdir(FILE_THUMBNAIL_DIRECTORY, 0777, true)) {

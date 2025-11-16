@@ -151,3 +151,94 @@ function remove_video_letterbox(string $input_path, string $output_path)
 
     return $code == 0;
 }
+
+function parse_zip_web_archive(string $input_path, string $output_path)
+{
+    $allowed_extensions = [
+        "html",
+        "js",
+        "css",
+        "png",
+        "jpg",
+        "jpeg",
+        "gif",
+        "mp3",
+        "ogg",
+        "wasm",
+        "atlas",
+        "skin",
+        "txt",
+        "fnt",
+        "json",
+        "glb",
+        "glsl",
+        "map",
+        "teavmdbg",
+        "xml",
+        "ds_store",
+    ];
+    $max_total_uncompressed = 128 * 1024 * 1024;
+    $max_file_size = 32 * 1024 * 1024;
+
+    $zip = new ZipArchive();
+    if ($zip->open($input_path) !== true) {
+        throw new RuntimeException("Invalid ZIP");
+    }
+
+    $is_webapp = false;
+    for ($i = 0; $i < $zip->numFiles; $i++) {
+        $stat = $zip->statIndex($i);
+        $is_webapp = $stat["name"] == "index.html";
+        if ($is_webapp) {
+            break;
+        }
+    }
+
+    if (!$is_webapp) {
+        $zip->close();
+        return $is_webapp;
+    }
+
+    $total_uncompressed = 0;
+    for ($i = 0; $i < $zip->numFiles; $i++) {
+        $stat = $zip->statIndex($i);
+        $path = $stat["name"];
+        if (strpos($path, "..") !== false) {
+            throw new RuntimeException("Invalid file path");
+        }
+
+        if (
+            strpos($path, "__MACOSX/") === 0 ||
+            (basename($path)[0] === "." &&
+                strstr(basename($path), 0, 2) === "._")
+        ) {
+            continue;
+        }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        error_log($ext);
+        if (!in_array($ext, $allowed_extensions) && $stat["size"] > 0) {
+            throw new RuntimeException(
+                "Forbidden file type in the archive: $path",
+            );
+        }
+
+        $total_uncompressed += $stat["size"];
+        if (
+            $total_uncompressed > $max_total_uncompressed ||
+            $stat["size"] > $max_file_size
+        ) {
+            throw new RuntimeException("ZIP too large when uncompressed");
+        }
+    }
+
+    mkdir($output_path, 0755, true);
+    if (!$zip->extractTo($output_path)) {
+        rmdir($output_path);
+        throw new RuntimeException("ZIP extraction failed");
+    }
+
+    $zip->close();
+
+    return $is_webapp;
+}

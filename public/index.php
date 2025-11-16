@@ -83,9 +83,8 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
     ');
     $stmt->execute([$file_id, $file_ext]);
     $file = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-    $file_exists = is_file(FILE_UPLOAD_DIRECTORY . "/$file_id.$file_ext");
 
-    if (!$file || !$file_exists) {
+    if (!$file) {
         http_response_code(404);
         exit();
     }
@@ -100,7 +99,6 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
     $_SESSION['viewed_file_ids'] = $viewed_file_ids;
 
     if (
-        $file_exists &&
         isset($file['expires_at']) &&
         (
             ($file['expires_at'] == $file['uploaded_at'] && $file['views'] > 1) ||
@@ -223,9 +221,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                         <p>Reason: <b><?= $file['ban_reason'] ?></b></p>
                     <?php endif; ?>
                 </section>
-            <?php endif; ?>
-
-            <?php if ($file_exists): ?>
+            <?php else: ?>
                 <div class="row grow justify-center">
                     <section class="file-preview-wrapper" <?= isset($file['width']) ? ('style="max-width:' . max($file['width'], 256) . 'px;"') : '' ?>>
                         <section class="box">
@@ -281,6 +277,13 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                     <audio controls autoplay>
                                         <source src="<?= $file['full_url'] ?>" type="<?= $file['mime'] ?>">
                                     </audio>
+                                <?php elseif (HTML_IFRAME_ENABLE && $file["extension"] === "html" && file_exists(sprintf("%s/%s/index.html", FILE_UPLOAD_DIRECTORY, $file["id"]))): ?>
+                                    <iframe src="<?= sprintf("%s/%s/index.html", FILE_UPLOAD_DIRECTORY_PREFIX, $file["id"]) ?>"
+                                        width="800" height="600" frameborder="0"></iframe>
+                                <?php elseif (HTML_IFRAME_ENABLE && $file["extension"] === "html"): ?>
+                                    <iframe
+                                        src="<?= sprintf("%s/%s.%s", FILE_UPLOAD_DIRECTORY_PREFIX, $file["id"], $file["extension"]) ?>"
+                                        width="800" height="600" frameborder="0"></iframe>
                                 <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
                                     <pre><?= file_get_contents(FILE_UPLOAD_DIRECTORY . "/{$file['id']}.{$file['extension']}") ?></pre>
                                 <?php elseif ($file['mime'] == 'application/x-shockwave-flash' && !empty(RUFFLE_DRIVER_PATH)): ?>
