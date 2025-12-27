@@ -1,8 +1,8 @@
 <?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/utils.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/alert.php';
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 
 session_start();
 
@@ -59,20 +59,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <?php html_mini_navbar() ?>
         <?php display_alert() ?>
         <?php if (isset($_SESSION['is_moderator'])): ?>
-            <h1>Now you can access moderator related panels!</h1>
-            <p><i>TODO: add more mod features here</i></p>
+                <h1>Now you can access moderator related panels!</h1>
+                <p><i>TODO: add more mod features here</i></p>
         <?php else: ?>
-            <h1>Log in to the moderation system</h1>
-            <hr>
-            <form action="/mod.php" method="post">
-                <table>
-                    <tr>
-                        <th>Password:</th>
-                        <td><input type="password" name="password" required></td>
-                    </tr>
-                </table>
-                <button type="submit" class="fancy">Log in</button>
-            </form>
+                <h1>Log in to the moderation system</h1>
+                <hr>
+                <form action="/mod.php" method="post">
+                    <table>
+                        <tr>
+                            <th>Password:</th>
+                            <td><input type="password" name="password" required></td>
+                        </tr>
+                    </table>
+                    <button type="submit" class="fancy">Log in</button>
+                </form>
         <?php endif; ?>
     </main>
 </body>

@@ -1,8 +1,8 @@
 <?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/utils.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/alert.php';
+include_once "{$_SERVER['DOCUMENT_ROOT']}/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 
 session_start();
 
@@ -110,27 +110,27 @@ unset($f);
 
                     <div class="content wall">
                         <?php foreach ($files as $file): ?>
-                            <div class="brick<?= isset($file['color']) ? " {$file['color']}" : '' ?>">
-                                <a href="/<?= sprintf('%s.%s', $file['id'], $file['extension']) ?>">
-                                    <i title="<?= $file['thumb_title'] ?>">
-                                        <?php if (str_starts_with($file['mime'], 'image/') || str_starts_with($file['mime'], 'video/')): ?>
-                                            <img src="<?= sprintf('%s/%s.webp', FILE_THUMBNAIL_DIRECTORY_PREFIX, $file['id']) ?>"
-                                                alt="No thumbnail." loading="lazy">
-                                        <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>
-                                            <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy"
-                                                class="thumbnail stock">
-                                        <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
-                                            <img src="/static/img/icons/file_text.png" alt="No thumbnail." loading="lazy"
-                                                class="thumbnail stock">
-                                        <?php elseif ($file['mime'] == 'application/x-shockwave-flash'): ?>
-                                            <img src="/static/img/icons/file_flash.png" alt="No thumbnail." loading="lazy"
-                                                class="thumbnail stock">
-                                        <?php else: ?>
-                                            <img src="/static/img/icons/file.png" alt="No thumbnail." class="thumbnail stock">
-                                        <?php endif; ?>
-                                    </i>
-                                </a>
-                            </div>
+                                    <div class="brick<?= isset($file['color']) ? " {$file['color']}" : '' ?>">
+                                        <a href="/<?= sprintf('%s.%s', $file['id'], $file['extension']) ?>">
+                                            <i title="<?= $file['thumb_title'] ?>">
+                                                <?php if (str_starts_with($file['mime'], 'image/') || str_starts_with($file['mime'], 'video/')): ?>
+                                                            <img src="<?= sprintf('%s/%s.webp', FILE_THUMBNAIL_DIRECTORY_PREFIX, $file['id']) ?>"
+                                                                alt="No thumbnail." loading="lazy">
+                                                <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>
+                                                            <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy"
+                                                                class="thumbnail stock">
+                                                <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
+                                                            <img src="/static/img/icons/file_text.png" alt="No thumbnail." loading="lazy"
+                                                                class="thumbnail stock">
+                                                <?php elseif ($file['mime'] == 'application/x-shockwave-flash'): ?>
+                                                            <img src="/static/img/icons/file_flash.png" alt="No thumbnail." loading="lazy"
+                                                                class="thumbnail stock">
+                                                <?php else: ?>
+                                                            <img src="/static/img/icons/file.png" alt="No thumbnail." class="thumbnail stock">
+                                                <?php endif; ?>
+                                            </i>
+                                        </a>
+                                    </div>
                         <?php endforeach; ?>
                     </div>
                 </div>
@@ -138,14 +138,14 @@ unset($f);
                 <div class="row">
                     <div class="box row gap-8">
                         <?php if ($page - 1 >= 0): ?>
-                            <a href="/catalogue.php?p=<?= $page ?>&sort=<?= $sort_option ?>">
-                                <button>Previous</button>
-                            </a>
+                                    <a href="/catalogue.php?p=<?= $page ?>&sort=<?= $sort_option ?>">
+                                        <button>Previous</button>
+                                    </a>
                         <?php endif; ?>
                         <?php if ($page + 2 <= $max_pages): ?>
-                            <a href="/catalogue.php?p=<?= $page + 2 ?>&sort=<?= $sort_option ?>" style="margin-left:auto">
-                                <button>Next</button>
-                            </a>
+                                    <a href="/catalogue.php?p=<?= $page + 2 ?>&sort=<?= $sort_option ?>" style="margin-left:auto">
+                                        <button>Next</button>
+                                    </a>
                         <?php endif; ?>
                     </div>
                 </div>

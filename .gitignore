@@ -1,6 +1,7 @@
 config.php
 *.ini
 *.db
+.DS_Store
 userdata/
 
 ruffle/

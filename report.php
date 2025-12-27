@@ -1,8 +1,8 @@
 <?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/utils.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/alert.php';
+include_once "{$_SERVER['DOCUMENT_ROOT']}/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 
 if (!FILE_REPORT) {
     generate_alert(

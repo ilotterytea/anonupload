@@ -1,5 +1,5 @@
 <?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/utils.php';
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 
 function generate_alert(string $redirect, string|null $message, int $code = 200, mixed $data = null)
 {

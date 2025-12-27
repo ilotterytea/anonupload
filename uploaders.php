@@ -1,6 +1,6 @@
 <?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../config.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/../lib/partials.php';
+include_once "{$_SERVER['DOCUMENT_ROOT']}/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 
 session_start();
 
@@ -166,10 +166,10 @@ foreach (FILE_ACCEPTED_MIME_TYPES as $k => $v) {
                     <hr>
                     <table class="vertical">
                         <?php foreach ($file_types as $type => $exts): ?>
-                            <tr>
-                                <th><?= $type ?>:</th>
-                                <td style="text-align: justify"><?= implode(' ', $exts) ?></td>
-                            </tr>
+                                <tr>
+                                    <th><?= $type ?>:</th>
+                                    <td style="text-align: justify"><?= implode(' ', $exts) ?></td>
+                                </tr>
                         <?php endforeach; ?>
                     </table>
                 </div>
