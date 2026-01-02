@@ -1,30 +1,46 @@
 <?php
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 
-function generate_alert(string $redirect, string|null $message, int $code = 200, mixed $data = null)
+function generate_alert(string $redirect, string|null $message, int $code = 200, mixed $data = null, bool $json_only = false)
 {
-    if (IS_JSON_REQUEST) {
-        json_response($data, $message, $code);
-    } else if (isset($message)) {
-        header("Location: $redirect" . (str_contains($redirect, "?") ? "&" : "?") . "es=$code&er=" . urlencode($message));
+    $response = $message;
+
+    if ($json_only || IS_JSON_REQUEST) {
+        http_response_code($code);
+        header('Content-Type: application/json');
+        $response = json_encode([
+            'status_code' => $code,
+            'message' => $message,
+            'data' => $data
+        ], JSON_UNESCAPED_SLASHES);
     } else {
+        if (session_status() != PHP_SESSION_ACTIVE)
+            session_start();
+        $_SESSION['alert'] = [
+            'code' => $code,
+            'message' => $message
+        ];
+        http_response_code(303);
         header("Location: $redirect");
     }
+
+    die($response);
 }
 
 function display_alert()
 {
-    if (!isset($_GET["es"], $_GET["er"])) {
+    if (!isset($_SESSION['alert']))
         return;
+
+    $alert = $_SESSION['alert'];
+    unset($_SESSION['alert']);
+
+    echo '<section class="box alert';
+    if ($alert['code'] > 399) {
+        echo ' red';
     }
+    echo '">';
 
-    $status = $_GET["es"];
-    $reason = urldecode($_GET['er']);
-    $ok = substr($status, 0, 1) == '2';
-
-    echo '' ?>
-    <section class="box alert<?= !$ok ? ' red' : '' ?>">
-        <p><?= $reason ?></p>
-    </section>
-    <?php ;
+    echo "<p>{$alert['message']}</p>";
+    echo '</section>';
 }
