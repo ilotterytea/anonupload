@@ -34,6 +34,29 @@ try {
         $title = null;
     }
 
+    if (!isset($_FILES['file']) && isset($_POST['base64'])) {
+        $_FILES['file'] = [
+            'tmp_name' => '/tmp/php' . bin2hex(random_bytes(5)),
+            'error' => UPLOAD_ERR_OK,
+            'base64' => true
+        ];
+
+        $parts = explode(',', $_POST['base64']);
+        $meta = $parts[0];
+        if (!str_starts_with($meta, 'data:image/') || !str_ends_with($meta, ';base64')) {
+            throw new RuntimeException("Invalid base64 data.");
+        }
+
+        $data = $parts[1];
+
+        $ifp = fopen($_FILES['file']['tmp_name'], 'wb');
+
+        fwrite($ifp, base64_decode($data));
+        fclose($ifp);
+
+        $_FILES['file']['size'] = filesize($_FILES['file']['tmp_name']);
+    }
+
     $url = isset($_POST['url']) ? $_POST['url'] ?: null : null;
     $file = isset($_FILES['file']) ? $_FILES['file'] ?: null : null;
     if (empty($file['tmp_name'])) {
@@ -160,11 +183,11 @@ try {
 
     $file_data['id'] = $file_id;
 
+    $file_path = sprintf('%s/%s.%s', FILE_UPLOAD_DIRECTORY, $file_id, $file_data['extension']);
+
     if (isset($url)) {
         $result = 0;
         $output = [];
-
-        $file_path = FILE_UPLOAD_DIRECTORY . "/$file_id.{$file_data['extension']}";
 
         exec(sprintf(
             'yt-dlp %s -o "%s" %s 2>&1',
@@ -185,9 +208,11 @@ try {
             delete_file($file_id, $file_data['extension']);
             throw new RuntimeException('Invalid file format.');
         }
-    } else if (isset($paste) && !file_put_contents($file_path = FILE_UPLOAD_DIRECTORY . sprintf('/%s.%s', $file_id, $file_data['extension']), $paste)) {
+    } else if (isset($paste) && !file_put_contents($file_path, $paste)) {
         throw new RuntimeException('Failed to paste a text! Try again later.');
-    } else if (isset($file) && !move_uploaded_file($file['tmp_name'], $file_path = FILE_UPLOAD_DIRECTORY . sprintf('/%s.%s', $file_id, $file_data['extension']))) {
+    } else if (isset($file, $file['base64']) && !rename($file['tmp_name'], $file_path)) {
+        throw new RuntimeException("Failed to move the file. Try again later.");
+    } else if (isset($file) && !isset($file['base64']) && !move_uploaded_file($file['tmp_name'], $file_path)) {
         throw new RuntimeException("Failed to save the file. Try again later.");
     }
 
