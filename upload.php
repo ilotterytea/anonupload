@@ -351,12 +351,7 @@ try {
         };
     }
 
-    generate_alert(
-        "/{$file_data['id']}.{$file_data['extension']}",
-        null,
-        201,
-        $file_data
-    );
+    $data_to_send = $file_data;
 
     $file_data['password'] = isset($file_data['password']) ? password_hash($file_data['password'], PASSWORD_DEFAULT) : null;
     $file_data['views'] = 0;
@@ -395,6 +390,13 @@ try {
     $viewed_file_ids = $_SESSION['viewed_file_ids'] ?? [];
     array_push($viewed_file_ids, $file_id);
     $_SESSION['viewed_file_ids'] = $viewed_file_ids;
+
+    generate_alert(
+        "/{$file_data['id']}.{$file_data['extension']}",
+        null,
+        201,
+        $data_to_send
+    );
 } catch (RuntimeException $e) {
     generate_alert(
         "/",
