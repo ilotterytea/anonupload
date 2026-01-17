@@ -1,5 +1,5 @@
 <?php
-define("CONFIG_FILE_PATH", "{$_SERVER['DOCUMENT_ROOT']}/anonupload.ini");
+define("CONFIG_FILE_PATH", "{$_SERVER['DOCUMENT_ROOT']}/anonupload.json");
 
 $cfg = [
     "instance" => [
@@ -9,7 +9,7 @@ $cfg = [
         "footerlinks" => [],
     ],
     "storage" => [
-        "type" => "local"
+        "type" => "file"
     ],
     "database"=> [
         "driver" => "mysql",
@@ -208,7 +208,7 @@ $cfg = [
 ];
 
 if (file_exists(CONFIG_FILE_PATH)) {
-    $contents = parse_ini_file(CONFIG_FILE_PATH, true);
+    $c = json_decode(file_get_contents(CONFIG_FILE_PATH), true);
     foreach ($cfg as $sk => $sv) {
         if (!is_array($sv) || !array_key_exists($sk, $c)) {
             continue;
@@ -216,7 +216,25 @@ if (file_exists(CONFIG_FILE_PATH)) {
 
         foreach ($sv as $k => $v) {
             if (array_key_exists($k, $c[$sk])) {
-                $cfg[$sk][$k] = $c[$sk][$k];
+                $v = $c[$sk][$k];
+
+                if (is_array($cfg[$sk][$k])) {
+                    if ($sk === "filecatalog" && $k === "includemimetypes") {
+                        $v = explode(' ', $v);
+                    } else {
+                        $lines = explode("\n", $v);
+                        $v = [];
+                        foreach ($lines as $line) {
+                            $parts = explode('=', $line, 2);
+                            if (count($parts) != 2) {
+                                continue;
+                            }
+                            $v[$parts[0]] = $parts[1];
+                        }
+                    }
+                }
+
+                $cfg[$sk][$k] = $v;
             }
         }
     }
