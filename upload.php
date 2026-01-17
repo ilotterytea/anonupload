@@ -1,5 +1,5 @@
 <?php
-include_once "{$_SERVER['DOCUMENT_ROOT']}/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/thumbnails.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     exit;
 }
 
-if (!is_dir(FILE_UPLOAD_DIRECTORY) && !mkdir(FILE_UPLOAD_DIRECTORY, 0777, true)) {
+if (!is_dir(CONFIG["files"]["directory"]) && !mkdir(CONFIG["files"]["directory"], 0777, true)) {
     generate_alert(
         '/',
         "Failed to create a directory for user files",
@@ -29,7 +29,7 @@ if (!is_dir(FILE_UPLOAD_DIRECTORY) && !mkdir(FILE_UPLOAD_DIRECTORY, 0777, true))
 
 try {
     $preserve_original_name = boolval($_POST['preserve_original_name'] ?? '0');
-    $title = str_safe($_POST['title'] ?? '', FILE_TITLE_MAX_LENGTH);
+    $title = str_safe($_POST['title'] ?? '', CONFIG["upload"]["titlelength"]);
     if (empty(trim($title))) {
         $title = null;
     }
@@ -63,17 +63,17 @@ try {
         $file = null;
     }
     $paste = isset($_POST['paste']) ? $_POST['paste'] ?: null : null;
-    $password = $_POST['password'] ?? generate_random_char_sequence(FILE_ID_CHARACTERS, FILE_DELETION_KEY_LENGTH);
+    $password = $_POST['password'] ?? generate_random_char_sequence(CONFIG["upload"]["idcharacters"], CONFIG["files"]["deletionkeylength"]);
     $file_data = null;
 
     if (!(isset($file) ^ isset($url) ^ isset($paste)) || (isset($file) && isset($url) && isset($paste))) {
         throw new RuntimeException('You can upload only one type of content: file, URL or text');
     }
 
-    if (FILEEXT_ENABLED && isset($url) && !empty($url)) {
+    if (CONFIG["externalupload"]["enable"] && isset($url) && !empty($url)) {
         $output = [];
-        $fileext_quality = FILEEXT_QUALITY ? ('-f "' . FILEEXT_QUALITY . '"') : "";
-        exec('yt-dlp ' . $fileext_quality . ' --get-filename -o "%(filesize_approx)s %(ext)s %(duration)s" ' . escapeshellarg($url) . '', $output);
+        $CONFIG["externalupload"]["quality"] = CONFIG["externalupload"]["quality"] ? ('-f "' . CONFIG["externalupload"]["quality"] . '"') : "";
+        exec('yt-dlp ' . $CONFIG["externalupload"]["quality"] . ' --get-filename -o "%(filesize_approx)s %(ext)s %(duration)s" ' . escapeshellarg($url) . '', $output);
         if (empty($output)) {
             throw new RuntimeException('Bad URL');
         }
@@ -82,17 +82,17 @@ try {
 
         // TODO: some videos don't have duration
         $duration = intval($output[2]);
-        if ($duration > FILEEXT_MAX_DURATION) {
-            throw new RuntimeException(sprintf("File must be under %d minutes", FILEEXT_MAX_DURATION / 60));
+        if ($duration > CONFIG["externalupload"]["maxduration"]) {
+            throw new RuntimeException(sprintf("File must be under %d minutes", CONFIG["externalupload"]["maxduration"] / 60));
         }
 
-        if (!array_key_exists($output[1], FILE_ACCEPTED_MIME_TYPES)) {
+        if (!array_key_exists($output[1], CONFIG["upload"]["acceptedmimetypes"])) {
             throw new RuntimeException("Unsupported extension: {$output[1]}");
         }
 
         $file_data = [
             'size' => intval($output[0]),
-            'mime' => FILE_ACCEPTED_MIME_TYPES[$output[1]],
+            'mime' => CONFIG["upload"]["acceptedmimetypes"][$output[1]],
             'extension' => $output[1]
         ];
     } else if (isset($paste)) {
@@ -124,19 +124,19 @@ try {
 
         // checking file mimetype
         $finfo = new finfo(FILEINFO_MIME_TYPE);
-        if (false === $file_ext = array_search($finfo->file($file['tmp_name']), FILE_ACCEPTED_MIME_TYPES, true)) {
+        if (false === $file_ext = array_search($finfo->file($file['tmp_name']), CONFIG["upload"]["acceptedmimetypes"], true)) {
             throw new RuntimeException("Invalid file format.");
         }
 
         // verifying file mimetype
-        $file_mime = FILE_ACCEPTED_MIME_TYPES[$file_ext];
+        $file_mime = CONFIG["upload"]["acceptedmimetypes"][$file_ext];
         $is_media = str_starts_with($file_mime, 'image/') || str_starts_with($file_mime, 'video/') || str_starts_with($file_mime, 'audio/');
-        if (FILE_VERIFY_MIMETYPE && $is_media && !verify_mimetype($file['tmp_name'], $file_mime)) {
+        if (CONFIG["upload"]["verifymimetype"] && $is_media && !verify_mimetype($file['tmp_name'], $file_mime)) {
             throw new RuntimeException('Invalid file format.');
         }
 
         // striping exif data
-        if (FILE_STRIP_EXIF && $is_media && !strip_exif($file['tmp_name'])) {
+        if (CONFIG["upload"]["stripexif"] && $is_media && !strip_exif($file['tmp_name'])) {
             throw new RuntimeException('Failed to strip EXIF tags.');
         }
 
@@ -151,11 +151,11 @@ try {
         throw new RuntimeException('No URL or file specified');
     }
 
-    $db = new PDO(DB_URL, DB_USER, DB_PASS);
+    $db = new PDO(CONFIG["database"]["url"], CONFIG["database"]["user"], CONFIG["database"]["pass"]);
 
-    if (FILE_CUSTOM_ID && isset($_POST['id']) && !empty(trim($_POST['id']))) {
+    if (CONFIG["upload"]["customid"] && isset($_POST['id']) && !empty(trim($_POST['id']))) {
         $file_id = $_POST['id'];
-        if (!preg_match(FILE_CUSTOM_ID_REGEX, $file_id) || strlen($file_id) > FILE_CUSTOM_ID_LENGTH) {
+        if (!preg_match(CONFIG["upload"]["customidregex"], $file_id) || strlen($file_id) > CONFIG["upload"]["customidlength"]) {
             throw new RuntimeException('Invalid file ID.');
         }
 
@@ -165,13 +165,13 @@ try {
             throw new RuntimeException('File ID has already been taken.');
         }
     } else {
-        $file_id_length = FILE_ID_LENGTH;
+        $CONFIG["upload"]["idlength"] = CONFIG["upload"]["idlength"];
         $file_id_gen_attempts = 0;
         $sql = 'SELECT id FROM files WHERE id = ? AND extension = ?';
         do {
-            $file_id = FILE_ID_PREFIX . generate_random_char_sequence(FILE_ID_CHARACTERS, $file_id_length);
+            $file_id = CONFIG["upload"]["idprefix"] . generate_random_char_sequence(CONFIG["upload"]["idcharacters"], $CONFIG["upload"]["idlength"]);
             if ($file_id_gen_attempts > 20) {
-                $file_id_length++;
+                $CONFIG["upload"]["idlength"]++;
                 $file_id_gen_attempts = 0;
             }
             $file_id_gen_attempts++;
@@ -183,7 +183,7 @@ try {
 
     $file_data['id'] = $file_id;
 
-    $file_path = sprintf('%s/%s.%s', FILE_UPLOAD_DIRECTORY, $file_id, $file_data['extension']);
+    $file_path = sprintf('%s/%s.%s', CONFIG["files"]["directory"], $file_id, $file_data['extension']);
 
     if (isset($url)) {
         $result = 0;
@@ -191,7 +191,7 @@ try {
 
         exec(sprintf(
             'yt-dlp %s -o "%s" %s 2>&1',
-            FILEEXT_QUALITY ? ('-f "' . FILEEXT_QUALITY . '"') : "",
+            CONFIG["externalupload"]["quality"] ? ('-f "' . CONFIG["externalupload"]["quality"] . '"') : "",
             $file_path,
             escapeshellarg($url)
         ), $output, $result);
@@ -204,7 +204,7 @@ try {
         // verifying file mime type
         $file_mime = $file_data['mime'];
         $is_media = str_starts_with($file_mime, 'image/') || str_starts_with($file_mime, 'video/') || str_starts_with($file_mime, 'audio/');
-        if (FILE_VERIFY_MIMETYPE && $is_media && !verify_mimetype($file_path, $file_mime)) {
+        if (CONFIG["upload"]["verifymimetype"] && $is_media && !verify_mimetype($file_path, $file_mime)) {
             delete_file($file_id, $file_data['extension']);
             throw new RuntimeException('Invalid file format.');
         }
@@ -226,10 +226,10 @@ try {
     }
 
     // remove letterbox
-    $remove_letterbox = FILE_REMOVE_LETTERBOXES && boolval($_POST['remove_letterbox'] ?? '0');
+    $remove_letterbox = CONFIG["upload"]["removeletterboxes"] && boolval($_POST['remove_letterbox'] ?? '0');
     if ($remove_letterbox && str_starts_with($file_data['mime'], 'video/')) {
         $output_path = $file_path;
-        $input_path = FILE_UPLOAD_DIRECTORY . sprintf('/%s.temporary.%s', $file_id, $file_data['extension']);
+        $input_path = CONFIG["files"]["directory"] . sprintf('/%s.temporary.%s', $file_id, $file_data['extension']);
         rename($output_path, $input_path);
         if (!remove_video_letterbox($input_path, $output_path)) {
             rename($input_path, $output_path);
@@ -240,11 +240,11 @@ try {
     }
 
     if (
-        ZIPWEBAPP_ENABLE &&
+        CONFIG["upload"]["zipwebapps"] &&
         $file_data["extension"] === "zip" &&
         parse_zip_web_archive(
             $file_path,
-            sprintf("%s/%s", FILE_UPLOAD_DIRECTORY, $file_id),
+            sprintf("%s/%s", CONFIG["files"]["directory"], $file_id),
         )
     ) {
         $file_data["extension"] = "html";
@@ -253,29 +253,29 @@ try {
 
     $file_data['size'] = filesize($file_path);
 
-    if (FILE_THUMBNAILS && !is_dir(FILE_THUMBNAIL_DIRECTORY) && !mkdir(FILE_THUMBNAIL_DIRECTORY, 0777, true)) {
+    if (CONFIG["thumbnails"]["enable"] && !is_dir(CONFIG["thumbnails"]["directory"]) && !mkdir(CONFIG["thumbnails"]["directory"], 0777, true)) {
         throw new RuntimeException('Failed to create a directory for thumbnails');
     }
 
     if (
-        FILE_THUMBNAILS && (
+        CONFIG["thumbnails"]["enable"] && (
             (
                 str_starts_with($file_data['mime'], 'image/') &&
                 $thumbnail_error = generate_image_thumbnail(
-                    FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_data['extension']}",
-                    FILE_THUMBNAIL_DIRECTORY . "/{$file_id}.webp",
-                    FILE_THUMBNAIL_SIZE[0],
-                    FILE_THUMBNAIL_SIZE[1]
+                    CONFIG["files"]["directory"] . "/{$file_id}.{$file_data['extension']}",
+                    CONFIG["thumbnails"]["directory"] . "/{$file_id}.webp",
+                    CONFIG["thumbnails"]["width"],
+                    CONFIG["thumbnails"]["height"]
                 )
             ) ||
             (
                 str_starts_with($file_data['mime'], 'video/') &&
                 $thumbnail_error = generate_video_thumbnail(
-                    FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_data['extension']}",
-                    FILE_THUMBNAIL_DIRECTORY . "/{$file_id}",
-                    FILE_THUMBNAIL_DIRECTORY . "/{$file_id}.webp",
-                    FILE_THUMBNAIL_SIZE[0],
-                    FILE_THUMBNAIL_SIZE[1]
+                    CONFIG["files"]["directory"] . "/{$file_id}.{$file_data['extension']}",
+                    CONFIG["thumbnails"]["directory"] . "/{$file_id}",
+                    CONFIG["thumbnails"]["directory"] . "/{$file_id}.webp",
+                    CONFIG["thumbnails"]["width"],
+                    CONFIG["thumbnails"]["height"]
                 )
             )
         )
@@ -314,17 +314,17 @@ try {
     }
 
     $file_data['urls'] = [
-        'download_url' => INSTANCE_URL . "/{$file_data['id']}.{$file_data['extension']}"
+        'download_url' => CONFIG["instance"]["url"] . "/{$file_data['id']}.{$file_data['extension']}"
     ];
 
-    if (FILE_DELETION && !empty($password)) {
+    if (CONFIG["files"]["deletion"] && !empty($password)) {
         $file_data['password'] = $password;
-        $file_data['urls']['deletion_url'] = INSTANCE_URL . "/delete.php?f={$file_data['id']}.{$file_data['extension']}&key={$file_data['password']}";
+        $file_data['urls']['deletion_url'] = CONFIG["instance"]["url"] . "/delete.php?f={$file_data['id']}.{$file_data['extension']}&key={$file_data['password']}";
     }
 
     $file_data['expires_at'] = null;
 
-    if (array_key_exists($_POST['expires_in'] ?? '', FILE_EXPIRATION)) {
+    if (array_key_exists($_POST['expires_in'] ?? '', CONFIG["upload"]["expiration"])) {
         $e = $_POST['expires_in'];
         $format = 'Y-m-d H:i:s';
 

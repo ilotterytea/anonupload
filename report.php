@@ -1,10 +1,10 @@
 <?php
-include_once "{$_SERVER['DOCUMENT_ROOT']}/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 
-if (!FILE_REPORT) {
+if (!CONFIG["report"]["enable"]) {
     generate_alert(
         '/',
         'No reports allowed!',
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $file_ext = $file_id[1];
     $file_id = $file_id[0];
 
-    if (!is_file(FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_ext}")) {
+    if (!is_file(CONFIG["files"]["directory"] . "/{$file_id}.{$file_ext}")) {
         generate_alert(
             '/report.php',
             'Invalid file.',
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $email = '(Anonymous)';
     }
 
-    if (!is_dir(FILE_REPORT_DIRECTORY) && !mkdir(FILE_REPORT_DIRECTORY, 0777, true)) {
+    if (!is_dir(CONFIG["report"]["directory"]) && !mkdir(CONFIG["report"]["directory"], 0777, true)) {
         generate_alert(
             '/report.php',
             'Failed to create a folder for reports. Try again later.',
@@ -77,8 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     do {
-        $report_id = generate_random_char_sequence(FILE_ID_CHARACTERS, 16);
-    } while (is_file(FILE_REPORT_DIRECTORY . "/{$report_id}.txt"));
+        $report_id = generate_random_char_sequence(CONFIG["upload"]["idcharacters"], 16);
+    } while (is_file(CONFIG["report"]["directory"] . "/{$report_id}.txt"));
 
     $contents = "File ID: {$file_id}.{$file_ext}
 Feedback Email: {$email}
@@ -86,7 +86,7 @@ Feedback Email: {$email}
 Reason:
 {$reason}";
 
-    if (!file_put_contents(FILE_REPORT_DIRECTORY . "/{$report_id}.txt", $contents)) {
+    if (!file_put_contents(CONFIG["report"]["directory"] . "/{$report_id}.txt", $contents)) {
         generate_alert(
             '/report.php',
             'Failed to save the report. Try again later!',
@@ -107,7 +107,7 @@ Reason:
 
 $file_id = $_GET['f'] ?? '';
 
-if (!is_file(FILE_UPLOAD_DIRECTORY . "/{$file_id}")) {
+if (!is_file(CONFIG["files"]["directory"] . "/{$file_id}")) {
     $file_id = null;
 }
 
@@ -115,8 +115,8 @@ if (!is_file(FILE_UPLOAD_DIRECTORY . "/{$file_id}")) {
 <html>
 
 <head>
-    <title>Report - <?= INSTANCE_NAME ?></title>
-    <meta name="description" content="Report a file that needs to be deleted from the <?= INSTANCE_NAME ?> servers">
+    <title>Report - <?= CONFIG["instance"]["name"] ?></title>
+    <meta name="description" content="Report a file that needs to be deleted from the <?= CONFIG["instance"]["name"] ?> servers">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">

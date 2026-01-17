@@ -1,12 +1,12 @@
 <?php
-include_once "{$_SERVER['DOCUMENT_ROOT']}/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 
 session_start();
 
-if (!FILE_DELETION) {
+if (!CONFIG["files"]["deletion"]) {
     generate_alert(
         '/',
         "File deletion is not allowed",
@@ -40,7 +40,7 @@ if (!preg_match('/^[a-zA-Z0-9_-]+$/', $file_id) || !preg_match('/^[a-zA-Z0-9]+$/
     exit();
 }
 
-$db = new PDO(DB_URL, DB_USER, DB_PASS);
+$db = new PDO(CONFIG["database"]["url"], CONFIG["database"]["user"], CONFIG["database"]["pass"]);
 $stmt = $db->prepare('SELECT password FROM files WHERE id = ? AND extension = ?');
 $stmt->execute([$file_id, $file_ext]);
 

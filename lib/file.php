@@ -1,5 +1,5 @@
 <?php
-include_once "{$_SERVER['DOCUMENT_ROOT']}/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 
 function is_swf_file($filename)
 {
@@ -107,8 +107,8 @@ function verify_mimetype(string $file_path, string $mimetype): bool
 function delete_file(string $file_id, string $file_extension, PDO|null $db = null): bool
 {
     $paths = [
-        FILE_UPLOAD_DIRECTORY . "/{$file_id}.{$file_extension}",
-        FILE_THUMBNAIL_DIRECTORY . "/{$file_id}.webp"
+        CONFIG["files"]["directory"] . "/{$file_id}.{$file_extension}",
+        CONFIG["thumbnails"]["directory"] . "/{$file_id}.webp"
     ];
 
     foreach ($paths as $path) {

@@ -1,20 +1,20 @@
 <?php
-include_once "{$_SERVER['DOCUMENT_ROOT']}/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 
 session_start();
 
-if (!isset($_SESSION['is_moderator']) && !FILE_CATALOG_PUBLIC) {
+if (!isset($_SESSION['is_moderator']) && !CONFIG["filecatalog"]["public"]) {
     http_response_code(403);
     exit;
 }
 
-$db = new PDO(DB_URL, DB_USER, DB_PASS);
+$db = new PDO(CONFIG["database"]["url"], CONFIG["database"]["user"], CONFIG["database"]["pass"]);
 
 $page = max(intval($_GET['p'] ?? '1') - 1, 0);
-$limit = FILE_CATALOG_LIMIT;
+$limit = CONFIG["filecatalog"]["limit"];
 
 $sort_option = $_GET['sort'] ?? 'recent';
 
@@ -62,8 +62,8 @@ unset($f);
 <html>
 
 <head>
-    <title>File Catalogue &lpar;Page <?= $page + 1 ?>/<?= $max_pages ?>&rpar; - <?= INSTANCE_NAME ?></title>
-    <meta name="description" content="Library of <?= INSTANCE_NAME ?>">
+    <title>File Catalogue &lpar;Page <?= $page + 1 ?>/<?= $max_pages ?>&rpar; - <?= CONFIG["instance"]["name"] ?></title>
+    <meta name="description" content="Library of <?= CONFIG["instance"]["name"] ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
@@ -74,7 +74,7 @@ unset($f);
 
 <body>
     <main class="full-size">
-        <?php html_mini_navbar('Page ' . ($page + 1) . '/' . $max_pages, "Library of " . INSTANCE_NAME) ?>
+        <?php html_mini_navbar('Page ' . ($page + 1) . '/' . $max_pages, "Library of " . CONFIG["instance"]["name"]) ?>
 
         <div class="grow row gap-8">
             <!-- SIDE BAR -->
@@ -114,7 +114,7 @@ unset($f);
                                         <a href="/<?= sprintf('%s.%s', $file['id'], $file['extension']) ?>">
                                             <i title="<?= $file['thumb_title'] ?>">
                                                 <?php if (str_starts_with($file['mime'], 'image/') || str_starts_with($file['mime'], 'video/')): ?>
-                                                            <img src="<?= sprintf('%s/%s.webp', FILE_THUMBNAIL_DIRECTORY_PREFIX, $file['id']) ?>"
+                                                            <img src="<?= sprintf('%s/%s.webp', CONFIG["thumbnails"]["url"], $file['id']) ?>"
                                                                 alt="No thumbnail." loading="lazy">
                                                 <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>
                                                             <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy"

@@ -1,12 +1,12 @@
 <?php
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
-include_once "{$_SERVER['DOCUMENT_ROOT']}/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 
 session_start();
 
-$db = new PDO(DB_URL, DB_USER, DB_PASS);
+$db = new PDO(CONFIG["database"]["url"], CONFIG["database"]["user"], CONFIG["database"]["pass"]);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!isset($_POST['password'])) {
@@ -14,12 +14,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     }
 
-    if (!is_file(MOD_FILE) && !file_put_contents(MOD_FILE, '')) {
+    if (!is_file(CONFIG["moderation"]["path"]) && !file_put_contents(CONFIG["moderation"]["path"], '')) {
         generate_alert('/mod.php', 'Failed to create a file for mod passwords!', 500, null);
         exit();
     }
 
-    $password_file = explode(PHP_EOL, file_get_contents(MOD_FILE));
+    $password_file = explode(PHP_EOL, file_get_contents(CONFIG["moderation"]["path"]));
 
     $is_authorized = false;
 
@@ -44,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <html>
 
 <head>
-    <title>Moderation - <?= INSTANCE_NAME ?></title>
-    <meta name="description" content="The moderation panel of <?= INSTANCE_NAME ?>">
+    <title>Moderation - <?= CONFIG["instance"]["name"] ?></title>
+    <meta name="description" content="The moderation panel of <?= CONFIG["instance"]["name"] ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">

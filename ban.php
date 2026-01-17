@@ -1,12 +1,12 @@
 <?php
-include_once "{$_SERVER['DOCUMENT_ROOT']}/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 
 session_start();
 
-if (!MOD_BAN_FILES || !isset($_SESSION['is_moderator'])) {
+if (!CONFIG["moderation"]["banfiles"] || !isset($_SESSION['is_moderator'])) {
     generate_alert(
         '/',
         "File ban is not allowed",
@@ -45,7 +45,7 @@ if (!preg_match('/^[a-zA-Z0-9_-]+$/', $file_id) || !preg_match('/^[a-zA-Z0-9]+$/
     exit();
 }
 
-$file_path = FILE_UPLOAD_DIRECTORY . "/$file_id.$file_ext";
+$file_path = CONFIG["files"]["directory"] . "/$file_id.$file_ext";
 
 if (!is_file($file_path)) {
     generate_alert(
@@ -56,7 +56,7 @@ if (!is_file($file_path)) {
     exit;
 }
 
-$db = new PDO(DB_URL, DB_USER, DB_PASS);
+$db = new PDO(CONFIG["database"]["url"], CONFIG["database"]["user"], CONFIG["database"]["pass"]);
 $stmt = $db->prepare('SELECT f.id FROM files f
     WHERE f.id = ? AND f.extension = ?
     AND f.id NOT IN (SELECT id FROM file_bans)

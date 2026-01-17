@@ -1,12 +1,12 @@
 <?php
-include_once "{$_SERVER['DOCUMENT_ROOT']}/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 
 session_start();
 
 $file_types = [];
 
-foreach (FILE_ACCEPTED_MIME_TYPES as $k => $v) {
+foreach (CONFIG["upload"]["acceptedmimetypes"] as $k => $v) {
     $type = ucfirst(explode('/', $v)[0]);
     if (!array_key_exists($type, $file_types)) {
         $file_types[$type] = [];
@@ -20,8 +20,8 @@ foreach (FILE_ACCEPTED_MIME_TYPES as $k => $v) {
 <html>
 
 <head>
-    <title>Uploaders - <?= INSTANCE_NAME ?></title>
-    <meta name="description" content="<?= INSTANCE_NAME ?> configuration for custom file uploader software">
+    <title>Uploaders - <?= CONFIG["instance"]["name"] ?></title>
+    <meta name="description" content="<?= CONFIG["instance"]["name"] ?> configuration for custom file uploader software">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
@@ -37,7 +37,7 @@ foreach (FILE_ACCEPTED_MIME_TYPES as $k => $v) {
         <section class="column gap-16">
             <div>
                 <h1>File Uploaders</h1>
-                <p>Configure your software to work with <?= INSTANCE_NAME ?></p>
+                <p>Configure your software to work with <?= CONFIG["instance"]["name"] ?></p>
             </div>
 
             <!-- SOFTWARE -->
@@ -51,11 +51,11 @@ foreach (FILE_ACCEPTED_MIME_TYPES as $k => $v) {
                     <table class="vertical">
                         <tr>
                             <th>Name:</th>
-                            <td><code><?= INSTANCE_NAME ?></code></td>
+                            <td><code><?= CONFIG["instance"]["name"] ?></code></td>
                         </tr>
                         <tr>
                             <th>Request URL:</th>
-                            <td><code class="copy"><?= INSTANCE_URL ?>/upload.php</code></td>
+                            <td><code class="copy"><?= CONFIG["instance"]["url"] ?>/upload.php</code></td>
                         </tr>
                         <tr>
                             <th>Destination type:</th>
@@ -103,7 +103,7 @@ foreach (FILE_ACCEPTED_MIME_TYPES as $k => $v) {
                     <table class="vertical">
                         <tr>
                             <th>URL:</th>
-                            <td><code class="copy"><?= INSTANCE_URL ?>/upload.php</code></td>
+                            <td><code class="copy"><?= CONFIG["instance"]["url"] ?>/upload.php</code></td>
                         </tr>
                         <tr>
                             <th>Form field:</th>
@@ -131,7 +131,7 @@ foreach (FILE_ACCEPTED_MIME_TYPES as $k => $v) {
                 <div class="column">
                     <h3>Endpoint</h3>
                     <hr>
-                    <p><code>POST <span class="copy"><?= INSTANCE_URL ?>/upload.php</span></code></p>
+                    <p><code>POST <span class="copy"><?= CONFIG["instance"]["url"] ?>/upload.php</span></code></p>
                 </div>
 
                 <div>

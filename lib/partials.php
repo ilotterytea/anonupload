@@ -1,5 +1,5 @@
 <?php
-include_once "{$_SERVER['DOCUMENT_ROOT']}/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 
 function html_big_navbar()
 {
@@ -30,7 +30,7 @@ function html_big_navbar()
     <section class="column justify-center align-center gap-8 navbar">
         <div class="column align-center justify-center grow">
             <a href="/">
-                <h1><img src="<?= $brand_url ?>" alt="<?= INSTANCE_NAME ?>"></h1>
+                <h1><img src="<?= $brand_url ?>" alt="<?= CONFIG["instance"]["name"] ?>"></h1>
             </a>
             <?php if (isset($line)): ?>
                 <p><i>&quot;<?= $line ?>&quot;</i></p>
@@ -41,12 +41,12 @@ function html_big_navbar()
             <a href="/">
                 <button>Home</button>
             </a>
-            <?php if (FILE_CATALOG_PUBLIC || isset($_SESSION['is_moderator'])): ?>
+            <?php if (CONFIG["filecatalog"]["public"] || isset($_SESSION['is_moderator'])): ?>
                 <a href="/catalogue.php">
                     <button>Catalogue</button>
                 </a>
             <?php endif; ?>
-            <?php if (FILE_CATALOG_RANDOM): ?>
+            <?php if (CONFIG["supriseme"]["enable"]): ?>
                 <a href="/?random">
                     <button>I'm Feeling Lucky</button>
                 </a>
@@ -64,7 +64,7 @@ function html_big_navbar()
     <?php ;
 }
 
-function html_mini_navbar(string|null $subtitle = null, string $title = INSTANCE_NAME)
+function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['instance']['name'])
 {
     $brand_url = '/static/img/brand/mini.webp';
     $static_folder = '/static/img/brand/mini';
@@ -95,12 +95,12 @@ function html_mini_navbar(string|null $subtitle = null, string $title = INSTANCE
             <a href="/">
                 <button>Home</button>
             </a>
-            <?php if (FILE_CATALOG_PUBLIC || isset($_SESSION['is_moderator'])): ?>
+            <?php if (CONFIG["filecatalog"]["public"] || isset($_SESSION['is_moderator'])): ?>
                 <a href="/catalogue.php">
                     <button>Catalogue</button>
                 </a>
             <?php endif; ?>
-            <?php if (FILE_CATALOG_RANDOM): ?>
+            <?php if (CONFIG["supriseme"]["enable"]): ?>
                 <a href="/?random">
                     <button>I'm Feeling Lucky</button>
                 </a>
@@ -120,7 +120,7 @@ function html_mini_navbar(string|null $subtitle = null, string $title = INSTANCE
 
 function html_footer()
 {
-    $db = new PDO(DB_URL, DB_USER, DB_PASS);
+    $db = new PDO(CONFIG["database"]["url"], CONFIG["database"]["user"], CONFIG["database"]["pass"]);
     $stmt = $db->query('SELECT COUNT(*) AS file_count, SUM(size) AS file_overall_size FROM files WHERE id NOT IN (SELECT id FROM file_bans)');
     $stmt->execute();
 
@@ -146,27 +146,27 @@ function html_footer()
 
     echo '' ?>
     <footer class="column justify-center align-center gap-8">
-        <?php if (array_key_exists(INSTANCE_URL, INSTANCE_MIRRORS)): ?>
-            <p>You are using a mirror for <?= INSTANCE_MIRRORS[INSTANCE_URL] ?>. <a href="<?= INSTANCE_ORIGINAL_URL ?>">[ Check
+        <?php if (array_key_exists(CONFIG["instance"]["url"], CONFIG["instance"]["mirrors"])): ?>
+            <p>You are using a mirror for <?= CONFIG["instance"]["mirrors"][CONFIG["instance"]["url"]] ?>. <a href="<?= CONFIG["instance"]["url"] ?>">[ Check
                     out the origin website ]</a></p>
-        <?php elseif (!empty(INSTANCE_MIRRORS)): ?>
+        <?php elseif (!empty(CONFIG["instance"]["mirrors"])): ?>
             <div class="row gap-8">
                 <p>Mirrors:</p>
                 <ul class="row gap-4" style="list-style: none;">
-                    <?php foreach (INSTANCE_MIRRORS as $url => $name): ?>
+                    <?php foreach (CONFIG["instance"]["mirrors"] as $url => $name): ?>
                         <li><a href="<?= $url ?>"><?= $name ?></a></li>
                     <?php endforeach; ?>
                 </ul>
             </div>
         <?php endif; ?>
         <div class="row gap-8">
-            <?php foreach (INSTANCE_FOOTER_LINKS as $title => $link): ?>
+            <?php foreach (CONFIG["instance"]["footerlinks"] as $title => $link): ?>
                 <p><a href="<?= $link ?>"><?= $title ?></a></p>
             <?php endforeach; ?>
         </div>
         <p>
             Serving <?= $file_count ?> files and <?= $file_size ?> of active content
-            <?php if (STATS_PUBLIC): ?>
+            <?php if (CONFIG["stats"]["enable"]): ?>
                 <a href="/stats.php">
                     <img src="/static/img/icons/stats.png" alt="[Stats]">
                 </a>

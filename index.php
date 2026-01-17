@@ -1,5 +1,5 @@
 <?php
-include_once "{$_SERVER['DOCUMENT_ROOT']}/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
@@ -7,15 +7,15 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 
 session_start();
 
-$db = new PDO(DB_URL, DB_USER, DB_PASS);
+$db = new PDO(CONFIG["database"]["url"], CONFIG["database"]["user"], CONFIG["database"]["pass"]);
 
-if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
+if (CONFIG["supriseme"]["enable"] && isset($_GET['random'])) {
     $random_viewed_files = $_SESSION['random_viewed_files'] ?? [];
 
     $mime_filter = "";
-    if (!empty(FILE_CATALOG_INCLUDE_MIMETYPES)) {
+    if (!empty(CONFIG["filecatalog"]["includemimetypes"])) {
         $mime_filter = [];
-        foreach (FILE_CATALOG_INCLUDE_MIMETYPES as $k) {
+        foreach (CONFIG["filecatalog"]["includemimetypes"] as $k) {
             array_push($mime_filter, "mime LIKE '$k'");
         }
         $mime_filter = '(' . implode(' OR ', $mime_filter) . ')';
@@ -24,7 +24,7 @@ if (FILE_CATALOG_RANDOM && isset($_GET['random'])) {
     $in = !empty($random_viewed_files) ? (str_repeat('?,', count($random_viewed_files) - 1) . '?') : '';
     $in_condition = !empty($random_viewed_files) ? ("id NOT IN ($in) " . ($mime_filter ? " AND " : "")) : "";
     $where_word = $in_condition || $mime_filter ? "WHERE" : "";
-    $order_condition = FILE_CATALOG_RANDOM_ORDER ?: "rand()";
+    $order_condition = CONFIG["supriseme"]["order"] ?: "rand()";
 
     do {
         $stmt = $db->prepare("SELECT id, extension FROM files $where_word $in_condition $mime_filter ORDER BY $order_condition LIMIT 1");
@@ -58,7 +58,7 @@ if (strlen($url['path']) > 1) {
     $file_id = basename($url['path']);
 }
 
-if (FILE_CATALOG_FANCY_VIEW && $file_id) {
+if (CONFIG["files"]["fancyview"] && $file_id) {
     $file_id = explode('.', $file_id);
     if (count($file_id) != 2) {
         http_response_code(404);
@@ -110,24 +110,24 @@ if (FILE_CATALOG_FANCY_VIEW && $file_id) {
         exit;
     }
 
-    if (!FILE_SHOW_UPLOADTIME && !isset($_SESSION['is_moderator'])) {
+    if (!CONFIG["files"]["showuploadtime"] && !isset($_SESSION['is_moderator'])) {
         unset($file['uploaded_at']);
     }
 
-    if (!FILE_SHOW_VIEWS && !isset($_SESSION['is_moderator'])) {
+    if (!CONFIG["files"]["showviews"] && !isset($_SESSION['is_moderator'])) {
         unset($file['views']);
     }
 
     if (IS_JSON_REQUEST) {
         unset($file['password']);
         $file['urls'] = [
-            'download_url' => INSTANCE_ORIGINAL_URL . "/{$file['id']}.{$file['extension']}"
+            'download_url' => CONFIG["instance"]["url"] . "/{$file['id']}.{$file['extension']}"
         ];
         json_response($file, null);
         exit;
     }
 
-    $file['full_url'] = FILE_UPLOAD_DIRECTORY_PREFIX . "/{$file['id']}.{$file['extension']}";
+    $file['full_url'] = CONFIG["files"]["url"] . "/{$file['id']}.{$file['extension']}";
 
     // formatting the file size
     $size = $file['size'];
@@ -177,20 +177,20 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 
 <head>
     <?php if ($file): ?>
-                    <title><?= $file['name'] ?> - <?= INSTANCE_NAME ?></title>
-                    <meta property="og:title" content="<?= $file['name'] ?> - <?= INSTANCE_NAME ?>" />
+                    <title><?= $file['name'] ?> - <?= CONFIG["instance"]["name"] ?></title>
+                    <meta property="og:title" content="<?= $file['name'] ?> - <?= CONFIG["instance"]["name"] ?>" />
                     <meta property="og:description" content="<?= $file['html_description'] ?>" />
-                    <meta property="og:url" content="<?= sprintf("%s/%s.%s", INSTANCE_URL, $file['id'], $file['extension']) ?>" />
+                    <meta property="og:url" content="<?= sprintf("%s/%s.%s", CONFIG["instance"]["url"], $file['id'], $file['extension']) ?>" />
                     <meta property="og:type" content="website" />
-                    <?php if (FILE_THUMBNAILS): ?>
+                    <?php if (CONFIG["thumbnails"]["enable"]): ?>
                                     <meta property="og:image"
-                                        content="<?= sprintf('%s%s/%s.webp', INSTANCE_URL, FILE_THUMBNAIL_DIRECTORY_PREFIX, $file['id']) ?>" />
+                                        content="<?= sprintf('%s%s/%s.webp', CONFIG["instance"]["url"], CONFIG["thumbnails"]["url"], $file['id']) ?>" />
                     <?php endif; ?>
                     <meta name="robots" content="noindex, nofollow">
     <?php else: ?>
-                    <title><?= INSTANCE_NAME ?></title>
+                    <title><?= CONFIG["instance"]["name"] ?></title>
                     <meta name="description"
-                        content="<?= INSTANCE_NAME ?> is a simple, free and anonymous file sharing site. We do not store anything other than the files you upload.">
+                        content="<?= CONFIG["instance"]["name"] ?> is a simple, free and anonymous file sharing site. We do not store anything other than the files you upload.">
                     <meta name="robots" content="nofollow">
     <?php endif; ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -215,7 +215,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                         <?php if ($file['is_banned']): ?>
                                         <section class="box red">
                                             <p>Sorry&comma; you cannot access this file as it violated the TOS and was banned from the
-                                                <?= INSTANCE_NAME ?> servers.
+                                                <?= CONFIG["instance"]["name"] ?> servers.
                                             </p>
                                             <?php if (isset($file['ban_reason'])): ?>
                                                             <p>Reason: <b><?= $file['ban_reason'] ?></b></p>
@@ -244,7 +244,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                                                             <a href="/delete.php?f=<?= $file['id'] ?>.<?= $file['extension'] ?>">
                                                                                 <button>Delete</button>
                                                                             </a>
-                                                                            <?php if (MOD_BAN_FILES): ?>
+                                                                            <?php if (CONFIG["moderation"]["banfiles"]): ?>
                                                                                             <form action="/ban.php" method="post" class="row gap-4">
                                                                                                 <input type="text" name="f" value="<?= $file['id'] ?>.<?= $file['extension'] ?>"
                                                                                                     style="display:none">
@@ -253,7 +253,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                                                                             </form>
                                                                             <?php endif; ?>
                                                             <?php endif; ?>
-                                                            <?php if (FILE_REPORT): ?>
+                                                            <?php if (CONFIG["report"]["enable"]): ?>
                                                                             <a href="/report.php?f=<?= $file['id'] ?>.<?= $file['extension'] ?>">
                                                                                 <button>Report</button>
                                                                             </a>
@@ -277,16 +277,16 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                                                         <audio controls autoplay>
                                                                             <source src="<?= $file['full_url'] ?>" type="<?= $file['mime'] ?>">
                                                                         </audio>
-                                                        <?php elseif (HTML_IFRAME_ENABLE && $file["extension"] === "html" && file_exists(sprintf("%s/%s/index.html", FILE_UPLOAD_DIRECTORY, $file["id"]))): ?>
-                                                                        <iframe src="<?= sprintf("%s/%s/index.html", FILE_UPLOAD_DIRECTORY_PREFIX, $file["id"]) ?>"
+                                                        <?php elseif (CONFIG["files"]["displayhtml"] && $file["extension"] === "html" && file_exists(sprintf("%s/%s/index.html", CONFIG["files"]["directory"], $file["id"]))): ?>
+                                                                        <iframe src="<?= sprintf("%s/%s/index.html", CONFIG["files"]["url"], $file["id"]) ?>"
                                                                             width="800" height="600" frameborder="0"></iframe>
-                                                        <?php elseif (HTML_IFRAME_ENABLE && $file["extension"] === "html"): ?>
+                                                        <?php elseif (CONFIG["files"]["displayhtml"] && $file["extension"] === "html"): ?>
                                                                         <iframe
-                                                                            src="<?= sprintf("%s/%s.%s", FILE_UPLOAD_DIRECTORY_PREFIX, $file["id"], $file["extension"]) ?>"
+                                                                            src="<?= sprintf("%s/%s.%s", CONFIG["files"]["url"], $file["id"], $file["extension"]) ?>"
                                                                             width="800" height="600" frameborder="0"></iframe>
                                                         <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
-                                                                        <pre><?= file_get_contents(FILE_UPLOAD_DIRECTORY . "/{$file['id']}.{$file['extension']}") ?></pre>
-                                                        <?php elseif ($file['mime'] == 'application/x-shockwave-flash' && !empty(RUFFLE_DRIVER_PATH)): ?>
+                                                                        <pre><?= file_get_contents(CONFIG["files"]["directory"] . "/{$file['id']}.{$file['extension']}") ?></pre>
+                                                        <?php elseif ($file['mime'] == 'application/x-shockwave-flash' && !empty(CONFIG["driver"]["ruffle"])): ?>
                                                                         <noscript>JavaScript is required to play Flash</noscript>
                                                                         <object>
                                                                             <embed src="<?= $file['full_url'] ?>" width="<?= $file['width'] - 4 ?>"
@@ -309,7 +309,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                                                     <p title="<?= $file['uploaded_at'] ?>">Uploaded <?= format_timestamp($file['uploaded_at']) ?> ago
                                                                     </p>
                                                     <?php endif; ?>
-                                                    <?php if ((FILE_SHOW_VIEWS || isset($_SESSION['is_moderator'])) && isset($file['views'])): ?>
+                                                    <?php if ((CONFIG["files"]["showviews"] || isset($_SESSION['is_moderator'])) && isset($file['views'])): ?>
                                                                     <p><?= $file['views'] ?> views</p>
                                                     <?php endif; ?>
                                                 </div>
@@ -324,11 +324,11 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 
                         <section class="box">
                             <div class="tab">
-                                <p>What is <?= INSTANCE_NAME ?>?</p>
+                                <p>What is <?= CONFIG["instance"]["name"] ?>?</p>
                             </div>
                             <div class="content">
                                 <p>
-                                    <?= INSTANCE_NAME ?> is a simple, free and anonymous file sharing site.
+                                    <?= CONFIG["instance"]["name"] ?> is a simple, free and anonymous file sharing site.
                                     We do not store anything other than the files you upload.
                                     They are stored <b>publicly</b> until the heat death of the universe occurs or you hit the DELETE
                                     button.
@@ -375,14 +375,14 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                     <p class="remove-script">File:</p>
                                     <hr class="remove-script">
                                     <input type="file" name="file"
-                                        accept="<?= implode(', ', array_unique(array_values(FILE_ACCEPTED_MIME_TYPES))) ?>" multiple
+                                        accept="<?= implode(', ', array_unique(array_values(CONFIG["upload"]["acceptedmimetypes"]))) ?>" multiple
                                         id="form-file">
 
                                     <div class="column gap-8" id="form-upload-wrapper">
                                         <button type="button" style="display: none;">
                                             <h1>Click, drop, or paste files here</h1>
                                         </button>
-                                        <?php if (FILEEXT_ENABLED): ?>
+                                        <?php if (CONFIG["externalupload"]["enable"]): ?>
                                                         <div class="row gap-8">
                                                             <p>URL:</p>
                                                             <div class="column grow">
@@ -390,7 +390,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                                                     placeholder="Instagram, YouTube and other links">
                                                                 <ul class="row gap-8 font-small" style="list-style:none">
                                                                     <li>
-                                                                        <p>Max duration: <b><?= FILEEXT_MAX_DURATION / 60 ?> minutes</b></p>
+                                                                        <p>Max duration: <b><?= CONFIG["externalupload"]["maxduration"] / 60 ?> minutes</b></p>
                                                                     </li>
                                                                     <li><a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md"
                                                                             target="_blank">Supported
@@ -422,11 +422,11 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                         <p class="remove-script">Details:</p>
                                         <hr class="remove-script">
                                         <table class="vertical left" id="form-upload-options">
-                                            <?php if (FILE_CUSTOM_ID): ?>
+                                            <?php if (CONFIG["upload"]["customid"]): ?>
                                                             <tr>
                                                                 <th>File ID:</th>
                                                                 <td><input type="text" name="id" placeholder="Leave empty for a random ID"
-                                                                        maxlength="<?= FILE_CUSTOM_ID_LENGTH ?>">
+                                                                        maxlength="<?= CONFIG["upload"]["customidlength"] ?>">
                                                                 </td>
                                                             </tr>
                                             <?php endif; ?>
@@ -434,22 +434,22 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                                 <th>Title:</th>
                                                 <td>
                                                     <input type="text" name="title" placeholder="Leave empty if you want a random title"
-                                                        maxlength="<?= FILE_TITLE_MAX_LENGTH ?>">
+                                                        maxlength="<?= CONFIG["upload"]["titlelength"] ?>">
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <th>Password<span class="help" title="For file deletion">[?]</span>:</th>
                                                 <td><input type="text" name="password"
                                                         placeholder="Leave empty if you want the file to be non-deletable"
-                                                        value="<?= generate_random_char_sequence(FILE_ID_CHARACTERS, FILE_DELETION_KEY_LENGTH) ?>">
+                                                        value="<?= generate_random_char_sequence(CONFIG["upload"]["idcharacters"], CONFIG["files"]["deletionkeylength"]) ?>">
                                                 </td>
                                             </tr>
-                                            <?php if (!empty(FILE_EXPIRATION)): ?>
+                                            <?php if (!empty(CONFIG["upload"]["expiration"])): ?>
                                                             <tr>
                                                                 <th>File expiration:</th>
                                                                 <td>
                                                                     <select name="expires_in">
-                                                                        <?php foreach (FILE_EXPIRATION as $v => $n): ?>
+                                                                        <?php foreach (CONFIG["upload"]["expiration"] as $v => $n): ?>
                                                                                         <option value="<?= $v ?>"><?= $n ?></option>
                                                                         <?php endforeach; ?>
                                                                     </select>
@@ -460,13 +460,13 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                                 <th>Preserve original filename:</th>
                                                 <td><input type="checkbox" name="preserve_original_name" value="1"></td>
                                             </tr>
-                                            <?php if (FILE_STRIP_EXIF): ?>
+                                            <?php if (CONFIG["upload"]["stripexif"]): ?>
                                                             <tr>
                                                                 <th>Strip EXIF data:</th>
                                                                 <td><input type="checkbox" name="strip_exif_data" value="1" checked></td>
                                                             </tr>
                                             <?php endif; ?>
-                                            <?php if (FILE_REMOVE_LETTERBOXES): ?>
+                                            <?php if (CONFIG["upload"]["removeletterboxes"]): ?>
                                                             <tr>
                                                                 <th>Remove letterboxing<span class="help"
                                                                         title="Removes black bars from the video, may be inaccurate, and only applies to videos">[?]</span>:
@@ -507,8 +507,8 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
         </main>
 </body>
 
-<?php if ($file && $file['mime'] == 'application/x-shockwave-flash' && !empty(RUFFLE_DRIVER_PATH)): ?>
-                <script src="<?= RUFFLE_DRIVER_PATH ?>"></script>
+<?php if ($file && $file['mime'] == 'application/x-shockwave-flash' && !empty(CONFIG["driver"]["ruffle"])): ?>
+                <script src="<?= CONFIG["driver"]["ruffle"] ?>"></script>
 <?php endif; ?>
 
 <?php if ($file): ?>
@@ -531,7 +531,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
 <?php elseif (!$file): ?>
                 <script>
                     const formTabs = document.getElementById('form-upload-tabs');
-                    const thumbnailPathPrefix = "<?= FILE_THUMBNAIL_DIRECTORY_PREFIX ?>";
+                    const thumbnailPathPrefix = "<?= CONFIG["thumbnails"]["url"] ?>";
                 </script>
                 <script src="/static/scripts/audiorecorder.js"></script>
                 <script src="/static/scripts/options.js"></script>
