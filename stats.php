@@ -165,8 +165,8 @@ $file_stats['approx_filesize'] = format_filesize($file_stats['approx_filesize'])
     </main>
 </body>
 
-<?php if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/static/scripts/chart.js')): ?>
-    <script src="/static/scripts/chart.js"></script>
+<?php if (isset(CONFIG['driver']['chart'])): ?>
+    <script src="<?= CONFIG['driver']['chart'] ?>"></script>
     <script>
         new Chart("uploaded-files-chart", {
             type: "bar",
