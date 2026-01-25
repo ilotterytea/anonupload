@@ -162,6 +162,7 @@ $file_stats['approx_filesize'] = format_filesize($file_stats['approx_filesize'])
                 <?php endif; ?>
             </table>
         </div>
+        <?php html_mini_footer(); ?>
     </main>
 </body>
 

@@ -120,6 +120,13 @@ footer {
     padding-top: 4px;
 }
 
+footer.mini {
+    font-size: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
 code {
     background: var(--box-tab-background);
     padding: 4px 8px;
@@ -321,6 +328,27 @@ button[type=submit].fancy:hover {
     height: auto;
 }
 
+/** DEBUG */
+.debug-info {
+    display: flex;
+    flex-direction: row;
+    font-size: 10px;
+}
+
+.debug-info>p {
+    padding: 0 4px;
+    border-left: var(--box-border) solid 1px;
+}
+
+.debug-info>p:first-child {
+    border-left: unset;
+    padding-left: unset;
+}
+
+.debug-info>p:last-child {
+    padding-right: unset;
+}
+
 /** SHORTCUTS */
 .column {
     display: flex;
@@ -405,6 +433,10 @@ button[type=submit].fancy:hover {
 @media screen and (max-width: 1000px) {
     main {
         width: 100%;
+    }
+
+    footer.mini {
+        flex-direction: column;
     }
 
     .file-preview-wrapper,

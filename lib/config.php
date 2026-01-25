@@ -1,4 +1,5 @@
 <?php
+define('GEN_TIMESTAMP', floor(microtime(true) * 1000));
 define("CONFIG_FILE_PATH", "{$_SERVER['DOCUMENT_ROOT']}/anonupload.json");
 
 $cfg = [

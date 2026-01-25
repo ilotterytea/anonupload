@@ -1,6 +1,7 @@
 <?php
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 
 function html_big_navbar()
 {
@@ -136,11 +137,6 @@ function html_footer()
 
     $file_size = sprintf('%.2f%s', $file_size, $suffix);
 
-    $commit = [
-        'timestamp' => (int) trim(shell_exec('git show -s --format=%ct HEAD')),
-        'sha' => trim(shell_exec('git rev-parse HEAD'))
-    ];
-
     echo '' ?>
     <footer class="column justify-center align-center gap-8">
         <?php if (array_key_exists(CONFIG["instance"]["url"], CONFIG["instance"]["mirrors"])): ?>
@@ -170,14 +166,7 @@ function html_footer()
                 </a>
             <?php endif; ?>
         </p>
-        <?php if (isset($commit)): ?>
-            <p style="font-size:10px;">
-                Last updated <?= format_timestamp((new DateTime())->setTimestamp($commit['timestamp'])) ?> ago
-                <a href="https://git.ilt.su/services/anonupload.git/commit/?id=<?= $commit['sha'] ?>">
-                    (commit <?= substr($commit['sha'], 0, 7) ?>)
-                </a>
-            </p>
-        <?php endif; ?>
+        <?php html_debug_info(); ?>
     </footer>
     <?php ;
 }
@@ -185,11 +174,40 @@ function html_footer()
 function html_mini_footer()
 {
     echo '' ?>
-    <footer class="column justify-center align-bottom gap-8 font-small mini-footer">
-        <p>
-            All trademarks and copyrights belong to their respective owners.
-            The uploader is responsible for any content shared here.
-        </p>
+    <footer class="mini">
+        <?php html_debug_info(); ?>
+        <div class="right">
+            <p>
+                All trademarks and copyrights belong to their respective owners.
+                The uploader is responsible for any content shared here.
+            </p>
+        </div>
     </footer>
+    <?php ;
+}
+
+function html_debug_info()
+{
+    $compile_time = (floor(microtime(true) * 1000) - GEN_TIMESTAMP) / 1000;
+
+    $commit = [
+        'timestamp' => (int) trim(shell_exec('git show -s --format=%ct HEAD')),
+        'sha' => trim(shell_exec('git rev-parse HEAD'))
+    ];
+
+    echo '' ?>
+    <div class="debug-info">
+        <p>Page generated in <?= $compile_time ?>s</p>
+        <?php if (!empty($commit['sha'])): ?>
+            <p>
+                Last updated
+                <?= format_timestamp((new DateTime())->setTimestamp($commit['timestamp'])) ?> ago
+                <a href="https://git.ilt.su/services/anonupload.git/commit/?id=<?= $commit['sha'] ?>">
+                    (commit
+                    <?= substr($commit['sha'], 0, 7) ?>)
+                </a>
+            </p>
+        <?php endif; ?>
+    </div>
     <?php ;
 }
