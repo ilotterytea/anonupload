@@ -202,6 +202,7 @@ $cfg = [
     ],
     "users" => [
         "path" => "{$_SERVER['DOCUMENT_ROOT']}/.anonuploadpasswd",
+        "cookietime" => 60 * 60 * 24 * 30
     ],
     "stats" => [
         "enable" => true,

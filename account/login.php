@@ -36,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $_SESSION['user'] = $user;
+    setcookie('token', $user->token, time() + CONFIG['users']['cookietime'], '/');
 
     generate_alert('/account/index.php', 'Authorized!');
 }
