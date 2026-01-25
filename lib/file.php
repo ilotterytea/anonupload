@@ -1,6 +1,56 @@
 <?php
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 
+function get_file_metadata(string $file_path): array|null
+{
+    $ext = explode('.', basename($file_path));
+    $ext = $ext[count($ext) - 1];
+    $mime = CONFIG['upload']['acceptedmimetypes'][$ext];
+
+    if (str_starts_with($mime, 'image/')) {
+        [$width, $height] = explode('x', trim(shell_exec('magick identify -format "%wx%h" ' . escapeshellarg($file_path) . '[0]')));
+        return [
+            'width' => intval($width),
+            'height' => intval($height),
+            'duration' => null,
+            'line_count' => null
+        ];
+    } else if (str_starts_with($mime, 'video/')) {
+        $info = shell_exec('ffprobe -v error -select_streams v:0 -show_entries stream=width,height,duration -of csv=p=0 ' . escapeshellarg($file_path));
+        [$width, $height, $duration] = explode(',', trim($info));
+        return [
+            'width' => intval($width),
+            'height' => intval($height),
+            'duration' => $duration == 'N/A' ? null : intval(round($duration, 2)),
+            'line_count' => null
+        ];
+    } else if (str_starts_with($mime, 'audio/')) {
+        return [
+            'width' => null,
+            'height' => null,
+            'duration' => intval(round(trim(shell_exec('ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ' . escapeshellarg($file_path))), 2)),
+            'line_count' => null
+        ];
+    } else if (str_starts_with($mime, 'text/')) {
+        return [
+            'width' => null,
+            'height' => null,
+            'duration' => null,
+            'line_count' => intval(trim(shell_exec('wc -l < ' . escapeshellarg($file_path))))
+        ];
+    } else if ($mime === 'application/x-shockwave-flash') {
+        [$width, $height] = parse_swf_file($file_path);
+        return [
+            'width' => $width,
+            'height' => $height,
+            'duration' => null,
+            'line_count' => null
+        ];
+    } else {
+        return null;
+    }
+}
+
 function is_swf_file($filename)
 {
     if (!is_readable($filename)) {
@@ -357,7 +407,9 @@ class File
                 'size' => filesize($path),
                 'views' => null,
                 'password' => null,
-                'expires_at' => null
+                'expires_at' => null,
+                'uploaded_at' => filectime($path),
+                'metadata' => get_file_metadata($path)
             ];
         } else {
             return null;

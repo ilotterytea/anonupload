@@ -282,25 +282,7 @@ try {
     $metadata_should_be_created = in_array(explode('/', $file_data['mime'])[0], ['image', 'video', 'audio', 'text']) || $file_data['mime'] == 'application/x-shockwave-flash';
     $file_path_escaped = escapeshellarg($file_path);
 
-    if (str_starts_with($file_data['mime'], 'image/')) {
-        [$width, $height] = explode('x', trim(shell_exec('identify -format "%wx%h" ' . escapeshellarg($file_path) . '[0]')));
-        $file_data['metadata']['width'] = intval($width);
-        $file_data['metadata']['height'] = intval($height);
-    } else if (str_starts_with($file_data['mime'], 'video/')) {
-        $info = shell_exec('ffprobe -v error -select_streams v:0 -show_entries stream=width,height,duration -of csv=p=0 ' . escapeshellarg($file_path));
-        [$width, $height, $duration] = explode(',', trim($info));
-        $file_data['metadata']['width'] = intval($width);
-        $file_data['metadata']['height'] = intval($height);
-        $file_data['metadata']['duration'] = $duration == 'N/A' ? null : intval(round($duration, 2));
-    } else if (str_starts_with($file_data['mime'], 'audio/')) {
-        $file_data['metadata']['duration'] = intval(round(trim(shell_exec('ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ' . escapeshellarg($file_path))), 2));
-    } else if (str_starts_with($file_data['mime'], 'text/')) {
-        $file_data['metadata']['line_count'] = intval(trim(shell_exec('wc -l < ' . escapeshellarg($file_path))));
-    } else if ($file_data['mime'] == 'application/x-shockwave-flash') {
-        [$width, $height] = parse_swf_file($file_path);
-        $file_data['metadata']['width'] = $width;
-        $file_data['metadata']['height'] = $height;
-    }
+    $file_data['metadata'] = get_file_metadata($file_path);
 
     $file_data['urls'] = [
         'download_url' => CONFIG["instance"]["url"] . "/{$file_data['id']}.{$file_data['extension']}"
