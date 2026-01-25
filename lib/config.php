@@ -35,8 +35,8 @@ $cfg = [
     "files" => [
         "fancyview" => true,
         "countviews" => true,
-        "showuploadtime" => false,
-        "showviews" => false,
+        "showuploadtime" => true,
+        "showviews" => true,
         "displayhtml" => true,
         "title" => true,
         "directory" => "{$_SERVER['DOCUMENT_ROOT']}/userdata/uploads",
@@ -150,7 +150,6 @@ $cfg = [
             'z' => 'application/x-compress',
             'zip' => 'application/zip',
             'zsh' => 'text/x-scriptzsh',
-            'nigger' => 'application/x-nigger',
             'lua' => 'text/x-lua'
         ],
         "verifymimetype" => true,
@@ -202,7 +201,7 @@ $cfg = [
     ],
     "stats" => [
         "enable" => true,
-        "lastfiles" => false,
+        "lastfiles" => true,
         "mostviewed" => true,
         "disksize" => 0
     ]
