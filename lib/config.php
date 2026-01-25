@@ -200,6 +200,9 @@ $cfg = [
         "banfiles" => true,
         "hashpath" => "{$_SERVER['DOCUMENT_ROOT']}/.bannedhashes"
     ],
+    "users" => [
+        "path" => "{$_SERVER['DOCUMENT_ROOT']}/.anonuploadpasswd",
+    ],
     "stats" => [
         "enable" => true,
         "lastfiles" => true,
