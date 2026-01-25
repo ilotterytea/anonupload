@@ -2,6 +2,7 @@
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/user.php";
 
 function html_big_navbar()
 {
@@ -29,7 +30,7 @@ function html_big_navbar()
     }
 
     echo '' ?>
-    <section class="column justify-center align-center gap-8 navbar">
+    <navbar class="large">
         <div class="column align-center justify-center grow">
             <a href="/">
                 <h1><img src="<?= $brand_url ?>" alt="<?= CONFIG["instance"]["name"] ?>"></h1>
@@ -39,7 +40,7 @@ function html_big_navbar()
             <?php endif; ?>
         </div>
 
-        <div class="row gap-8 justify-center">
+        <div class="links row gap-8 justify-center">
             <a href="/">
                 <button>Home</button>
             </a>
@@ -62,7 +63,20 @@ function html_big_navbar()
                 </a>
             <?php endif; ?>
         </div>
-    </section>
+
+        <?php if (isset($_SESSION['user'])): ?>
+            <div class="row gap-8 justify-center">
+                <p>Signed in as <span class="username <?= $_SESSION['user']->role->name ?>">
+                        <?= $_SESSION['user']->name ?>
+                    </span></p>
+                <a href="/account/logout.php"><img src="/static/img/icons/logout.png" alt="[Log out]" title="Log out"></a>
+            </div>
+        <?php else: ?>
+            <div class="row gap-8 justify-center">
+                <a href="/account/login.php"><img src="/static/img/icons/login.png" alt="[Log in]" title="Log in"></a>
+            </div>
+        <?php endif; ?>
+    </navbar>
     <?php ;
 }
 
@@ -82,7 +96,7 @@ function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['
     }
 
     echo '' ?>
-    <section class="row align-bottom gap-8 navbar wrap">
+    <navbar>
         <a href="/" class="row gap-8 align-bottom" style="text-decoration:none;color:inherit;">
             <img src="<?= $brand_url ?>" alt="">
             <div class="column">
@@ -93,7 +107,7 @@ function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['
             </div>
         </a>
 
-        <div class="row gap-8 align-bottom">
+        <div class="links row gap-8 align-bottom">
             <a href="/">
                 <button>Home</button>
             </a>
@@ -116,7 +130,19 @@ function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['
                 </a>
             <?php endif; ?>
         </div>
-    </section>
+
+        <?php if (isset($_SESSION['user'])): ?>
+            <div>
+                <p>Signed in as <span
+                        class="username <?= $_SESSION['user']->role->name ?>"><?= $_SESSION['user']->name ?></span></p>
+                <a href="/account/logout.php"><img src="/static/img/icons/logout.png" alt="[Log out]" title="Log out"></a>
+            </div>
+        <?php else: ?>
+            <div>
+                <a href="/account/login.php"><img src="/static/img/icons/login.png" alt="[Log in]" title="Log in"></a>
+            </div>
+        <?php endif; ?>
+    </navbar>
     <?php ;
 }
 

@@ -102,6 +102,27 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
+navbar {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+navbar>div {
+    display: flex;
+    flex-direction: row;
+    align-items: end;
+}
+
+navbar>.links {
+    flex-grow: 1;
+}
+
+navbar.large {
+    display: flex;
+    flex-direction: column;
+}
+
 main {
     max-width: 50%;
     flex-grow: 1;
@@ -347,6 +368,12 @@ button[type=submit].fancy:hover {
 
 .debug-info>p:last-child {
     padding-right: unset;
+}
+
+/** USERNAMES */
+.username.Moderator {
+    color: blue;
+    font-weight: bold;
 }
 
 /** SHORTCUTS */
