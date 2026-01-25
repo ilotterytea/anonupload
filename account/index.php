@@ -5,8 +5,7 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/user.php";
 
-session_start();
-if (!isset($_SESSION['user'])) {
+if (!USER->authorize_with_cookie()) {
     http_response_code(303);
     header('Location: /account/login.php');
     exit("You must be authorized!");

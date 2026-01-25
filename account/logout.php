@@ -11,6 +11,12 @@ if (!isset($_SESSION['user'])) {
     exit("You are not authorized!");
 }
 
+$user = $_SESSION['user'];
+$user->token = bin2hex(random_bytes(16));
+if (!USER->save($user)) {
+    generate_alert('/account/index.php', 'Failed to log out! Try again later.');
+}
+
 unset($_SESSION['user']);
 unset($_COOKIE['token']);
 

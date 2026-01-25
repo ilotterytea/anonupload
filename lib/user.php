@@ -9,7 +9,7 @@ enum UserRole
 
     public static function parse(string $name): UserRole|null
     {
-        return match ($name) {
+        return match (strtolower($name)) {
             "user" => UserRole::User,
             "moderator" => UserRole::Moderator,
             default => null
@@ -44,6 +44,61 @@ class UserManager
         if ($type === FileStorageType::Database) {
             $this->db = new PDO(CONFIG['database']['url'], CONFIG['database']['name'], CONFIG['database']['pass']);
         }
+    }
+
+    public function save(User $user): bool
+    {
+        if ($this->type === FileStorageType::Database) {
+            $stmt = $this->db->prepare('INSERT INTO users(id, `name`, `password`, `role`, token)
+                VALUES (?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    `name` = ?,
+                    `password` = ?,
+                    `role` = ?,
+                    token = ?
+            ');
+            $stmt->execute([
+                $user->id,
+                $user->name,
+                $user->password,
+                $user->role->name,
+                $user->token,
+                $user->name,
+                $user->password,
+                $user->role->name,
+                $user->token
+            ]);
+            return true;
+        } else {
+            if (!is_file(CONFIG['users']['path']) && !file_put_contents(CONFIG['users']['path'], '')) {
+                return false;
+            }
+
+            $contents = "";
+
+            $lines = explode(PHP_EOL, file_get_contents(CONFIG['users']['path']));
+
+            foreach ($lines as $line) {
+                if (empty($line)) {
+                    continue;
+                }
+
+                [$id, $name, $password, $role, $token] = explode(" ", $line);
+
+                if ($id == $user->id) {
+                    $name = $user->name;
+                    $password = $user->password;
+                    $role = $user->role->name;
+                    $token = $user->token;
+                }
+
+                $contents .= "$id $name $password $role $token" . PHP_EOL;
+            }
+
+            file_put_contents(CONFIG['users']['path'], $contents);
+        }
+
+        return true;
     }
 
     public function get_user_by_name(string $name): User|null
@@ -92,24 +147,26 @@ class UserManager
         return null;
     }
 
-    public function is_not_authorized(): bool
+    public function authorize_with_cookie(): bool
     {
         if (!isset($_COOKIE['token'])) {
-            return true;
-        }
-
-        $user = $this->get_user_by_token($_COOKIE['token']);
-        if ($user === null) {
-            return true;
+            return false;
         }
 
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
 
+        $user = $this->get_user_by_token($_COOKIE['token']);
+        if ($user === null) {
+            unset($_SESSION['user']);
+            unset($_COOKIE['token']);
+            return false;
+        }
+
         $_SESSION['user'] = $user;
 
-        return false;
+        return true;
     }
 
     public function get_type(): FileStorageType
@@ -127,6 +184,9 @@ class UserManager
 
         $lines = explode(PHP_EOL, file_get_contents(CONFIG['users']['path']));
         foreach ($lines as $line) {
+            if (empty($line)) {
+                continue;
+            }
             [$id, $name, $password, $role, $token] = explode(" ", $line);
             $user = new User(
                 $id,
