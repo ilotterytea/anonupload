@@ -91,7 +91,7 @@ button:hover {
 }
 
 body {
-    background: linear-gradient(0deg, var(--background-2), var(--background));
+    background: linear-gradient(0deg, var(--background-2), var(--background)) fixed;
     color: var(--foreground);
 
     width: 100%;
