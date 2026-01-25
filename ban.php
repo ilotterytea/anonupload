@@ -45,25 +45,7 @@ if (!preg_match('/^[a-zA-Z0-9_-]+$/', $file_id) || !preg_match('/^[a-zA-Z0-9]+$/
     exit();
 }
 
-$file_path = CONFIG["files"]["directory"] . "/$file_id.$file_ext";
-
-if (!is_file($file_path)) {
-    generate_alert(
-        '/',
-        "File not found",
-        404
-    );
-    exit;
-}
-
-$db = new PDO(CONFIG["database"]["url"], CONFIG["database"]["user"], CONFIG["database"]["pass"]);
-$stmt = $db->prepare('SELECT f.id FROM files f
-    WHERE f.id = ? AND f.extension = ?
-    AND f.id NOT IN (SELECT id FROM file_bans)
-');
-$stmt->execute([$file_id, $file_ext]);
-
-$file = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+$file = File::load("$file_id.$file_ext");
 
 if (!$file) {
     generate_alert(
@@ -74,9 +56,9 @@ if (!$file) {
     exit();
 }
 
-$file_sha = hash_file('sha256', $file_path);
+$file_sha = hash_file('sha256', $file->path);
 
-if (!delete_file($file_id, $file_ext)) {
+if (!STORAGE->ban_file($file, $file_sha, $reason)) {
     generate_alert(
         "/$file_id.$file_ext",
         'Failed to remove files. Try again later',
@@ -84,12 +66,6 @@ if (!delete_file($file_id, $file_ext)) {
     );
     exit();
 }
-
-$db->prepare('INSERT IGNORE INTO hash_bans(sha256, reason) VALUES (?,?)')
-    ->execute([$file_sha, $reason]);
-
-$db->prepare('INSERT INTO file_bans(id, hash_ban) VALUES (?,?)')
-    ->execute([$file_id, $file_sha]);
 
 generate_alert(
     $_GET['r'] ?? '/',

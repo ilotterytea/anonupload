@@ -12,39 +12,19 @@ if (!CONFIG["stats"]["enable"] && !isset($_SESSION['is_moderator'])) {
     exit;
 }
 
-$db = new PDO(CONFIG["database"]["url"], CONFIG["database"]["user"], CONFIG["database"]["pass"]);
 
 // uploaded files stats
-$stmt = $db->query("SELECT YEAR(uploaded_at) AS year, QUARTER(uploaded_at) AS quarter, COUNT(*) AS file_count
-    FROM files
-    WHERE uploaded_at >= DATE_SUB(CURDATE(), INTERVAL 5 YEAR)
-    GROUP BY YEAR(uploaded_at), QUARTER(uploaded_at)
-    ORDER BY year, quarter
-");
-$uploaded_files = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$uploaded_files = STORAGE->get_upload_timeline();
 
 // recent images & videos
 if (CONFIG["stats"]["lastfiles"]) {
-    $stmt = $db->query("SELECT id, extension FROM files WHERE mime LIKE 'image/%' ORDER BY uploaded_at DESC LIMIT 5");
-    $recent_images = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $stmt = $db->query("SELECT id, extension FROM files WHERE mime LIKE 'video/%' ORDER BY uploaded_at DESC LIMIT 5");
-    $recent_videos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $recent_images = STORAGE->get_recent_files_by_mime("image/%", 5);
+    $recent_videos = STORAGE->get_recent_files_by_mime("video/%", 5);
 }
 
 // the most viewed files
 if (CONFIG["stats"]["mostviewed"]) {
-    $stmt = $db->query("SELECT id, extension, mime FROM files ORDER BY views DESC LIMIT 5");
-    $most_viewed_files = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    foreach ($most_viewed_files as &$f) {
-        if (str_starts_with($f['mime'], 'video/')) {
-            $f['color'] = 'blue';
-        } else if ($f['mime'] == 'application/x-shockwave-flash') {
-            $f['color'] = 'red';
-        }
-    }
-    unset($f);
+    $most_viewed_files = STORAGE->get_most_viewed_files(5);
 }
 
 // --- file stats
@@ -60,12 +40,7 @@ function format_filesize($file_size)
 
     return sprintf('%.2f%s', $file_size, $suffix);
 }
-$stmt = $db->query("SELECT COUNT(*) AS file_count, SUM(size) AS active_content, AVG(size) AS approx_filesize,
-    COUNT(*) / TIMESTAMPDIFF(MINUTE, MIN(uploaded_at), MAX(uploaded_at)) AS avg_upload_rate
-    FROM files
-    WHERE id NOT IN (SELECT id FROM file_bans)
-");
-$file_stats = $stmt->fetchAll(PDO::FETCH_ASSOC)[0];
+$file_stats = STORAGE->get_stats();
 
 if (CONFIG["stats"]["disksize"] > 0) {
     $file_stats['future_file_count'] = floor(CONFIG["stats"]["disksize"] / $file_stats['approx_filesize']);
@@ -103,56 +78,56 @@ $file_stats['approx_filesize'] = format_filesize($file_stats['approx_filesize'])
         <h2>Files uploaded &lpar;per quarter&rpar;</h2>
         <canvas id="uploaded-files-chart"></canvas>
         <?php if (isset($recent_images)): ?>
-                    <h2>Recent images</h2>
-                    <div class="wall">
-                        <?php foreach ($recent_images as $i): ?>
-                                    <div class="brick">
-                                        <a href="/<?= sprintf('%s.%s', $i['id'], $i['extension']) ?>">
-                                            <img src="<?= sprintf('%s/%s.webp', CONFIG["thumbnails"]["url"], $i['id']) ?>"
-                                                alt="No thumbnail." loading="lazy">
-                                        </a>
-                                    </div>
-                        <?php endforeach; ?>
+            <h2>Recent images</h2>
+            <div class="wall">
+                <?php foreach ($recent_images as $i): ?>
+                    <div class="brick">
+                        <a href="/<?= "{$i->id}.{$i->extension}" ?>">
+                            <img src="<?= sprintf('%s/%s.webp', CONFIG["thumbnails"]["url"], $i->id) ?>" alt="No thumbnail."
+                                loading="lazy">
+                        </a>
                     </div>
+                <?php endforeach; ?>
+            </div>
         <?php endif; ?>
         <?php if (isset($recent_videos)): ?>
-                    <h2>Recent videos</h2>
-                    <div class="wall">
-                        <?php foreach ($recent_videos as $i): ?>
-                                    <div class="brick blue">
-                                        <a href="/<?= sprintf('%s.%s', $i['id'], $i['extension']) ?>">
-                                            <img src="<?= sprintf('%s/%s.webp', CONFIG["thumbnails"]["url"], $i['id']) ?>"
-                                                alt="No thumbnail." loading="lazy">
-                                        </a>
-                                    </div>
-                        <?php endforeach; ?>
+            <h2>Recent videos</h2>
+            <div class="wall">
+                <?php foreach ($recent_videos as $i): ?>
+                    <div class="brick blue">
+                        <a href="/<?= "{$i->id}.{$i->extension}" ?>">
+                            <img src="<?= sprintf('%s/%s.webp', CONFIG["thumbnails"]["url"], $i->id) ?>" alt="No thumbnail."
+                                loading="lazy">
+                        </a>
                     </div>
+                <?php endforeach; ?>
+            </div>
         <?php endif; ?>
         <?php if (isset($most_viewed_files)): ?>
-                    <h2>The most viewed files</h2>
-                    <div class="wall">
-                        <?php foreach ($most_viewed_files as $file): ?>
-                                    <div class="brick<?= isset($file['color']) ? " {$file['color']}" : '' ?>">
-                                        <a href="/<?= sprintf('%s.%s', $file['id'], $file['extension']) ?>">
-                                            <?php if (str_starts_with($file['mime'], 'image/') || str_starts_with($file['mime'], 'video/')): ?>
-                                                        <img src="<?= sprintf('%s/%s.webp', CONFIG["thumbnails"]["url"], $file['id']) ?>"
-                                                            alt="No thumbnail." loading="lazy">
-                                            <?php elseif (str_starts_with($file['mime'], 'audio/')): ?>
-                                                        <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy"
-                                                            class="thumbnail stock">
-                                            <?php elseif (str_starts_with($file['mime'], 'text/')): ?>
-                                                        <img src="/static/img/icons/file_text.png" alt="No thumbnail." loading="lazy"
-                                                            class="thumbnail stock">
-                                            <?php elseif ($file['mime'] == 'application/x-shockwave-flash'): ?>
-                                                        <img src="/static/img/icons/file_flash.png" alt="No thumbnail." loading="lazy"
-                                                            class="thumbnail stock">
-                                            <?php else: ?>
-                                                        <img src="/static/img/icons/file.png" alt="No thumbnail." class="thumbnail stock">
-                                            <?php endif; ?>
-                                        </a>
-                                    </div>
-                        <?php endforeach; ?>
+            <h2>The most viewed files</h2>
+            <div class="wall">
+                <?php foreach ($most_viewed_files as $file): ?>
+                    <div class="brick<?= isset($file->color) ? " {$file->color}" : '' ?>">
+                        <a href="/<?= "{$file->id}.{$file->extension}" ?>">
+                            <?php if (str_starts_with($file->mime, 'image/') || str_starts_with($file->mime, 'video/')): ?>
+                                <img src="<?= sprintf('%s/%s.webp', CONFIG["thumbnails"]["url"], $file->id) ?>" alt="No thumbnail."
+                                    loading="lazy">
+                            <?php elseif (str_starts_with($file->mime, 'audio/')): ?>
+                                <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy"
+                                    class="thumbnail stock">
+                            <?php elseif (str_starts_with($file->mime, 'text/')): ?>
+                                <img src="/static/img/icons/file_text.png" alt="No thumbnail." loading="lazy"
+                                    class="thumbnail stock">
+                            <?php elseif ($file->mime == 'application/x-shockwave-flash'): ?>
+                                <img src="/static/img/icons/file_flash.png" alt="No thumbnail." loading="lazy"
+                                    class="thumbnail stock">
+                            <?php else: ?>
+                                <img src="/static/img/icons/file.png" alt="No thumbnail." class="thumbnail stock">
+                            <?php endif; ?>
+                        </a>
                     </div>
+                <?php endforeach; ?>
+            </div>
         <?php endif; ?>
         <h2>About files</h2>
         <div>
@@ -174,16 +149,16 @@ $file_stats['approx_filesize'] = format_filesize($file_stats['approx_filesize'])
                     <td><?= $file_stats["avg_upload_rate"] ?></td>
                 </tr>
                 <?php if (isset($file_stats["future_file_count"])): ?>
-                            <tr>
-                                <th>How many files can be uploaded</th>
-                                <td>~<?= $file_stats["future_file_count"] ?></td>
-                            </tr>
+                    <tr>
+                        <th>How many files can be uploaded</th>
+                        <td>~<?= $file_stats["future_file_count"] ?></td>
+                    </tr>
                 <?php endif; ?>
                 <?php if (isset($file_stats["estimated_time"])): ?>
-                            <tr>
-                                <th>Estimated date of hard disk space running out</th>
-                                <td><?= $file_stats["estimated_time"] ?></td>
-                            </tr>
+                    <tr>
+                        <th>Estimated date of hard disk space running out</th>
+                        <td><?= $file_stats["estimated_time"] ?></td>
+                    </tr>
                 <?php endif; ?>
             </table>
         </div>
@@ -191,31 +166,31 @@ $file_stats['approx_filesize'] = format_filesize($file_stats['approx_filesize'])
 </body>
 
 <?php if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/static/scripts/chart.js')): ?>
-            <script src="/static/scripts/chart.js"></script>
-            <script>
-                new Chart("uploaded-files-chart", {
-                    type: "bar",
-                    data: {
-                        labels: <?= sprintf('[%s]', implode(', ', array_map(
-                            fn($x) =>
-                            sprintf("'%s-%s'", $x['year'], $x['quarter']),
-                            $uploaded_files
-                        ))) ?>,
-                        datasets: [{
-                            data: <?= sprintf('[%s]', implode(', ', array_map(
-                                fn($x) => $x['file_count'],
-                                $uploaded_files
-                            ))) ?> }]
+    <script src="/static/scripts/chart.js"></script>
+    <script>
+        new Chart("uploaded-files-chart", {
+            type: "bar",
+            data: {
+                labels: <?= sprintf('[%s]', implode(', ', array_map(
+                    fn($x) =>
+                    sprintf("'%s-%s'", $x['year'], $x['quarter']),
+                    $uploaded_files
+                ))) ?>,
+                datasets: [{
+                    data: <?= sprintf('[%s]', implode(', ', array_map(
+                        fn($x) => $x['file_count'],
+                        $uploaded_files
+                    ))) ?> }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false
                     },
-                    options: {
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                        }
-                    }
-                });
-            </script>
+                }
+            }
+        });
+    </script>
 <?php endif; ?>
 
 </html>

@@ -40,12 +40,7 @@ if (!preg_match('/^[a-zA-Z0-9_-]+$/', $file_id) || !preg_match('/^[a-zA-Z0-9]+$/
     exit();
 }
 
-$db = new PDO(CONFIG["database"]["url"], CONFIG["database"]["user"], CONFIG["database"]["pass"]);
-$stmt = $db->prepare('SELECT password FROM files WHERE id = ? AND extension = ?');
-$stmt->execute([$file_id, $file_ext]);
-
-$file = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-
+$file = File::load("$file_id.$file_ext");
 if (!$file) {
     generate_alert(
         "/",
@@ -55,7 +50,7 @@ if (!$file) {
     exit();
 }
 
-if (!isset($_SESSION['is_moderator']) && !isset($file['password'])) {
+if (!isset($_SESSION['is_moderator']) && !isset($file->password)) {
     generate_alert(
         "/$file_id.$file_ext",
         "File $file_id does not have a password. File cannot be deleted!",
@@ -73,7 +68,7 @@ if (!isset($_SESSION['is_moderator']) && !isset($password)) {
     exit();
 }
 
-if (!isset($_SESSION['is_moderator']) && !password_verify($password, $file['password'])) {
+if (!isset($_SESSION['is_moderator']) && !password_verify($password, $file->password)) {
     generate_alert(
         "/$file_id.$file_ext",
         'Unauthorized',
@@ -82,7 +77,7 @@ if (!isset($_SESSION['is_moderator']) && !password_verify($password, $file['pass
     exit();
 }
 
-if (!delete_file($file_id, $file_ext, $db)) {
+if (!STORAGE->delete_file($file)) {
     generate_alert(
         "/$file_id.$file_ext",
         'Failed to remove files. Try again later',

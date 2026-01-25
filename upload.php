@@ -151,23 +151,18 @@ try {
         throw new RuntimeException('No URL or file specified');
     }
 
-    $db = new PDO(CONFIG["database"]["url"], CONFIG["database"]["user"], CONFIG["database"]["pass"]);
-
     if (CONFIG["upload"]["customid"] && isset($_POST['id']) && !empty(trim($_POST['id']))) {
         $file_id = $_POST['id'];
         if (!preg_match(CONFIG["upload"]["customidregex"], $file_id) || strlen($file_id) > CONFIG["upload"]["customidlength"]) {
             throw new RuntimeException('Invalid file ID.');
         }
 
-        $stmt = $db->prepare('SELECT id FROM files WHERE id = ?');
-        $stmt->execute([$file_id]);
-        if ($stmt->rowCount() > 0) {
+        if (STORAGE->has_id($file_id, $file_ext)) {
             throw new RuntimeException('File ID has already been taken.');
         }
     } else {
         $CONFIG["upload"]["idlength"] = CONFIG["upload"]["idlength"];
         $file_id_gen_attempts = 0;
-        $sql = 'SELECT id FROM files WHERE id = ? AND extension = ?';
         do {
             $file_id = CONFIG["upload"]["idprefix"] . generate_random_char_sequence(CONFIG["upload"]["idcharacters"], $CONFIG["upload"]["idlength"]);
             if ($file_id_gen_attempts > 20) {
@@ -175,10 +170,7 @@ try {
                 $file_id_gen_attempts = 0;
             }
             $file_id_gen_attempts++;
-
-            $stmt = $db->prepare($sql);
-            $stmt->execute([$file_id, $file_data['extension']]);
-        } while ($stmt->rowCount() > 0);
+        } while (STORAGE->has_id($file_id, $file_data['extension']));
     }
 
     $file_data['id'] = $file_id;
@@ -205,7 +197,7 @@ try {
         $file_mime = $file_data['mime'];
         $is_media = str_starts_with($file_mime, 'image/') || str_starts_with($file_mime, 'video/') || str_starts_with($file_mime, 'audio/');
         if (CONFIG["upload"]["verifymimetype"] && $is_media && !verify_mimetype($file_path, $file_mime)) {
-            delete_file($file_id, $file_data['extension']);
+            STORAGE->delete_file_by_id($file_id, $file_data['extension']);
             throw new RuntimeException('Invalid file format.');
         }
     } else if (isset($paste) && !file_put_contents($file_path, $paste)) {
@@ -217,12 +209,9 @@ try {
     }
 
     // checking if this is a banned file
-    $file_sha = hash_file('sha256', $file_path);
-    $stmt = $db->prepare('SELECT reason FROM hash_bans WHERE sha256 = ?');
-    $stmt->execute([$file_sha]);
-    if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        delete_file($file_id, $file_data['extension']);
-        throw new RuntimeException('This file is not allowed for upload.' . (isset($row['reason']) ? ' Reason: ' . $row['reason'] : ''));
+    if ($reason = STORAGE->is_sha256_banned(hash_file('sha256', $file_path))) {
+        STORAGE->delete_file_by_id($file_id, $file_data['extension']);
+        throw new RuntimeException('This file is not allowed for upload.' . (is_string($reason) ? " Reason: $reason" : ''));
     }
 
     // remove letterbox
@@ -233,7 +222,7 @@ try {
         rename($output_path, $input_path);
         if (!remove_video_letterbox($input_path, $output_path)) {
             rename($input_path, $output_path);
-            delete_file($file_id, $file_data['extension']);
+            STORAGE->delete_file_by_id($file_id, $file_data['extension']);
             throw new RuntimeException('Failed to remove letterbox from the video');
         }
         unlink($input_path);
@@ -317,7 +306,7 @@ try {
         'download_url' => CONFIG["instance"]["url"] . "/{$file_data['id']}.{$file_data['extension']}"
     ];
 
-    if (CONFIG["files"]["deletion"] && !empty($password)) {
+    if (CONFIG["files"]["deletion"] && CONFIG['storage']['type'] !== 'file' && !empty($password)) {
         $file_data['password'] = $password;
         $file_data['urls']['deletion_url'] = CONFIG["instance"]["url"] . "/delete.php?f={$file_data['id']}.{$file_data['extension']}&key={$file_data['password']}";
     }
@@ -369,21 +358,11 @@ try {
         }
     }
 
-    $db->prepare('INSERT INTO files(id, mime, extension, size, title, password, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
-        ->execute([
-            $file_data['id'],
-            $file_data['mime'],
-            $file_data['extension'],
-            $file_data['size'],
-            $file_data['original_name'] ?? null,
-            $file_data['password'],
-            $file_data['expires_at']
-        ]);
+    $file_data = File::from($file_data);
 
-    if ($metadata_should_be_created) {
-        $file_data['metadata']['id'] = $file_data['id'];
-        $db->prepare('INSERT INTO file_metadata(width, height, duration, line_count, id) VALUES (?, ?, ?, ?, ?)')
-            ->execute(array_values($file_data['metadata']));
+    if (!STORAGE->save($file_data)) {
+        STORAGE->delete_file($file_data);
+        throw new RuntimeException('Failed to save the file');
     }
 
     // don't add a view from the owner
@@ -392,7 +371,7 @@ try {
     $_SESSION['viewed_file_ids'] = $viewed_file_ids;
 
     generate_alert(
-        "/{$file_data['id']}.{$file_data['extension']}",
+        "/{$file_data->id}.{$file_data->extension}",
         null,
         201,
         $data_to_send

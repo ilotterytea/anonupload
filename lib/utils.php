@@ -13,8 +13,9 @@ function json_response(mixed $data, string|null $message, int $code = 200)
     ], JSON_UNESCAPED_SLASHES);
 }
 
-function generate_random_char_sequence(array $chars, int $length): string
+function generate_random_char_sequence(string $chars, int $length): string
 {
+    $chars = str_split($chars);
     $o = "";
 
     for ($i = 0; $i < $length; $i++) {

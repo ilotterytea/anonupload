@@ -1,5 +1,6 @@
 <?php
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
 
 function html_big_navbar()
 {
@@ -120,14 +121,10 @@ function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['
 
 function html_footer()
 {
-    $db = new PDO(CONFIG["database"]["url"], CONFIG["database"]["user"], CONFIG["database"]["pass"]);
-    $stmt = $db->query('SELECT COUNT(*) AS file_count, SUM(size) AS file_overall_size FROM files WHERE id NOT IN (SELECT id FROM file_bans)');
-    $stmt->execute();
+    $out = STORAGE->count_file_and_size();
 
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    $file_count = $row['file_count'];
-    $file_size = $row['file_overall_size'];
+    $file_count = $out['file_count'];
+    $file_size = $out['file_overall_size'];
 
     $suffix = 'MB';
     $file_size /= 1024 * 1024; // MB
@@ -147,7 +144,8 @@ function html_footer()
     echo '' ?>
     <footer class="column justify-center align-center gap-8">
         <?php if (array_key_exists(CONFIG["instance"]["url"], CONFIG["instance"]["mirrors"])): ?>
-            <p>You are using a mirror for <?= CONFIG["instance"]["mirrors"][CONFIG["instance"]["url"]] ?>. <a href="<?= CONFIG["instance"]["url"] ?>">[ Check
+            <p>You are using a mirror for <?= CONFIG["instance"]["mirrors"][CONFIG["instance"]["url"]] ?>. <a
+                    href="<?= CONFIG["instance"]["url"] ?>">[ Check
                     out the origin website ]</a></p>
         <?php elseif (!empty(CONFIG["instance"]["mirrors"])): ?>
             <div class="row gap-8">

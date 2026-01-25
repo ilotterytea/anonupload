@@ -11,7 +11,7 @@ $cfg = [
     "storage" => [
         "type" => "file"
     ],
-    "database"=> [
+    "database" => [
         "driver" => "mysql",
         "host" => "localhost",
         "port" => 3306,
@@ -174,7 +174,7 @@ $cfg = [
             '3h' => '3 hours',
             '5m' => '5 minutes',
             're' => 'Burn after seeing'
-        ],  
+        ],
     ],
     "externalupload" => [
         "enable" => true,
@@ -198,6 +198,7 @@ $cfg = [
     "moderation" => [
         "path" => "{$_SERVER['DOCUMENT_ROOT']}/.anonuploadpasswd",
         "banfiles" => true,
+        "hashpath" => "{$_SERVER['DOCUMENT_ROOT']}/.bannedhashes"
     ],
     "stats" => [
         "enable" => true,
