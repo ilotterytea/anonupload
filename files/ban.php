@@ -3,77 +3,74 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/user.php";
 
-session_start();
+if (!USER->authorize_with_cookie()) {
+    http_response_code(303);
+    header('Location: /account/login.php');
+    exit("You must be authorized!");
+}
 
-if (!CONFIG["moderation"]["banfiles"] || !isset($_SESSION['is_moderator'])) {
+$redirect = urldecode($_GET['r'] ?? '%2F');
+
+if ($_SESSION['user']->role->as_value() < UserRole::Moderator->as_value()) {
+    generate_alert('/', 'You are not a moderator!', 401);
+}
+
+if (!CONFIG["moderation"]["banfiles"]) {
     generate_alert(
-        '/',
+        $redirect,
         "File ban is not allowed",
         403
     );
-    exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-    http_response_code(405);
-    exit;
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    generate_alert(
+        $redirect,
+        "Method Not Allowed",
+        405
+    );
 }
 
-$file_id = $_POST['f'] ?? null;
+$file_id = $_POST['id'] ?? null;
 $reason = $_POST['reason'] ?? null;
 
 if (!isset($file_id)) {
     generate_alert(
-        '/',
+        $redirect,
         "File ID must be set!",
         400
     );
     exit();
 }
 
-$file_id = explode('.', $file_id);
-$file_ext = $file_id[1];
-$file_id = $file_id[0];
-
-if (!preg_match('/^[a-zA-Z0-9_-]+$/', $file_id) || !preg_match('/^[a-zA-Z0-9]+$/', $file_ext)) {
-    generate_alert(
-        '/',
-        "File not found",
-        404
-    );
-    exit();
-}
-
-$file = File::load("$file_id.$file_ext");
+$file = File::load($file_id);
 
 if (!$file) {
     generate_alert(
-        "/",
+        $redirect,
         "File not found",
         404
     );
-    exit();
 }
 
 $file_sha = hash_file('sha256', $file->path);
 
 if (!STORAGE->ban_file($file, $file_sha, $reason)) {
     generate_alert(
-        "/$file_id.$file_ext",
+        $redirect,
         'Failed to remove files. Try again later',
         500
     );
-    exit();
 }
 
 generate_alert(
-    $_GET['r'] ?? '/',
+    $redirect,
     'Successfully banned the file',
     200,
     [
         'id' => $file_id,
-        'extension' => $file_ext,
         'sha256' => $file_sha,
         'reason' => $reason
     ]

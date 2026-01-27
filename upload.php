@@ -290,7 +290,7 @@ try {
 
     if (CONFIG["files"]["deletion"] && CONFIG['storage']['type'] !== 'file' && !empty($password)) {
         $file_data['password'] = $password;
-        $file_data['urls']['deletion_url'] = CONFIG["instance"]["url"] . "/delete.php?f={$file_data['id']}.{$file_data['extension']}&key={$file_data['password']}";
+        $file_data['urls']['deletion_url'] = CONFIG["instance"]["url"] . "/files/delete.php?id={$file_data['id']}.{$file_data['extension']}&key={$file_data['password']}";
     }
 
     $file_data['expires_at'] = null;

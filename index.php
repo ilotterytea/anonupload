@@ -208,12 +208,12 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                 </div>
                                 <div class="grow row gap-8 justify-end align-center wrap" id="file-tab-buttons">
                                     <?php if (isset($_SESSION['is_moderator'])): ?>
-                                        <a href="/delete.php?f=<?= $file->id ?>.<?= $file->extension ?>">
+                                        <a href="/files/delete.php?id=<?= "{$file->id}.{$file->extension}" ?>">
                                             <button>Delete</button>
                                         </a>
                                         <?php if (CONFIG["moderation"]["banfiles"]): ?>
-                                            <form action="/ban.php" method="post" class="row gap-4">
-                                                <input type="text" name="f" value="<?= $file->id ?>.<?= $file->extension ?>"
+                                            <form action="/files/ban.php" method="post" class="row gap-4">
+                                                <input type="text" name="id" value="<?= "{$file->id}.{$file->extension}" ?>"
                                                     style="display:none">
                                                 <input type="text" name="reason" placeholder="Ban reason">
                                                 <button type="submit">Ban</button>
