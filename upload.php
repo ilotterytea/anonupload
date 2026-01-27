@@ -340,6 +340,13 @@ try {
         }
     }
 
+    // setting visibility
+    $visibility = intval($_GET['visibility'] ?? CONFIG['files']['defaultvisibility']);
+    if (CONFIG['files']['defaultvisibility'] !== 2) {
+        $visibility = max(0, min(1, $visibility));
+    }
+    $file_data['visibility'] = $visibility;
+
     $file_data = File::from($file_data);
 
     if (!STORAGE->save($file_data)) {

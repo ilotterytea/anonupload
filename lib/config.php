@@ -43,7 +43,8 @@ $cfg = [
         "directory" => "{$_SERVER['DOCUMENT_ROOT']}/userdata/uploads",
         "url" => "/userdata/uploads",
         "deletion" => true,
-        "deletionkeylength" => 16
+        "deletionkeylength" => 16,
+        "defaultvisibility" => 1
     ],
     "upload" => [
         "acceptedmimetypes" => [

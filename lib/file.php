@@ -277,7 +277,7 @@ class File
 {
     public string $id, $mime, $extension, $path, $color;
     public int $size;
-    public int|null $views, $width, $height, $duration, $line_count;
+    public int|null $views, $visibility, $width, $height, $duration, $line_count;
     public string|null $password, $ban_reason, $title;
     public bool $is_banned;
     public DateTime|null $expires_at, $uploaded_at;
@@ -294,6 +294,7 @@ class File
             'extension' => $this->extension,
             'size' => $this->size,
             'views' => $this->views,
+            'visibility' => $this->visibility,
             'password' => $this->password,
             'expires_at' => $this->expires_at,
             'uploaded_at' => $this->uploaded_at,
@@ -327,6 +328,7 @@ class File
         $f->is_banned = $data['is_banned'] ?? false;
         $f->ban_reason = $data['ban_reason'] ?? null;
         $f->title = $data['title'] ?? null;
+        $f->visibility = $data['visibility'] ?? null;
 
         if (isset($data['metadata'])) {
             $f->width = $data['metadata']['width'] ?? null;
@@ -798,6 +800,7 @@ class FileMetadataStorage
             $stmt = $this->db->query("SELECT f.id, f.mime, f.extension
                 FROM files f
                 WHERE f.id NOT IN (SELECT id FROM file_bans)
+                    AND f.visibility = 2
                 $sort
                 LIMIT $limit OFFSET $offset
             ");
@@ -817,7 +820,11 @@ class FileMetadataStorage
                 if (!$file->isFile()) {
                     continue;
                 }
-                array_push($files, File::load($file->getPathname()));
+                $f = File::load($file->getPathname());
+                if ($f->visibility !== null && $f->visibility !== 1) {
+                    continue;
+                }
+                array_push($files, $f);
             }
 
             switch ($sort) {
@@ -840,6 +847,40 @@ class FileMetadataStorage
 
             return $files;
         }
+    }
+
+    public function get_files_by_visibility(int $visibility): array
+    {
+        $files = [];
+
+        if ($this->type === FileStorageType::Database) {
+            $stmt = $this->db->query("SELECT f.id, f.mime, f.extension
+                FROM files f
+                WHERE f.id NOT IN (SELECT id FROM file_bans) AND f.visibility = ?
+            ");
+            $stmt->execute([$visibility]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rows as $row) {
+                array_push($files, File::from($row));
+            }
+        } elseif ($this->type === FileStorageType::Json) {
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(CONFIG['files']['directory'], FilesystemIterator::SKIP_DOTS)
+            );
+
+            foreach ($iterator as $file) {
+                if (!$file->isFile()) {
+                    continue;
+                }
+                $f = File::load($file->getPathname());
+                if ($f->visibility === null || $f->visibility !== $visibility) {
+                    continue;
+                }
+                array_push($files, $f);
+            }
+        }
+
+        return $files;
     }
 
     public function delete_file(File $file): bool

@@ -395,6 +395,16 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                             value="<?= generate_random_char_sequence(CONFIG["upload"]["idcharacters"], CONFIG["files"]["deletionkeylength"]) ?>">
                                     </td>
                                 </tr>
+                                <tr>
+                                    <th>Visibility:</th>
+                                    <td>
+                                        <select name="visibility" id="file-visibility">
+                                            <option value="1" <?= CONFIG['files']['defaultvisibility'] >= 1 ? 'selected' : '' ?>>Public</option>
+                                            <option value="0" <?= CONFIG['files']['defaultvisibility'] === 0 ? 'selected' : '' ?>>Unlisted</option>
+                                        </select>
+                                        <p class="hint" id="file-visibility-hint"></p>
+                                    </td>
+                                </tr>
                                 <?php if (!empty(CONFIG["upload"]["expiration"])): ?>
                                     <tr>
                                         <th>File expiration:</th>
@@ -491,6 +501,18 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
     <script src="/static/scripts/favorites.js"></script>
     <script src="/static/scripts/form.js"></script>
     <script>
+        window.onload = () => {
+            const fileVisibility = document.getElementById("file-visibility");
+            fileVisibility.addEventListener("change", () => {
+                const hint = document.getElementById("file-visibility-hint");
+                hint.innerHTML = fileVisibility.value === "1"
+                    ? 'File can be <b>accessed anytime by anyone</b> via "Surprise Me" or the file catalog.'
+                    : 'File is accessible only through a shared link.';
+            });
+
+            initOptions();
+        };
+
         document.querySelectorAll(".remove-script").forEach((x) => {
             x.remove();
         });

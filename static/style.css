@@ -453,6 +453,10 @@ button[type=submit].fancy:hover {
     vertical-align: top;
 }
 
+.hint {
+    font-size: 10px;
+}
+
 .right {
     float: right;
 }
