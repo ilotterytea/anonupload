@@ -32,23 +32,31 @@ if (strlen($url['path']) > 1) {
 }
 
 if (CONFIG["files"]["fancyview"] && $file_id) {
-    $file_id = explode('.', $file_id);
-    if (count($file_id) != 2) {
-        http_response_code(404);
+    $filename = parse_file_name($file_id);
+    if ($filename === null) {
+        $error = "404 Not Found";
+        include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/pages/error.php";
         exit();
     }
-    $file_ext = $file_id[1];
-    $file_id = $file_id[0];
+    $file_id = $filename['name'];
+    $file_ext = $filename['extension'];
 
     if (!preg_match('/^[a-zA-Z0-9_-]+$/', $file_id) || !preg_match('/^[a-zA-Z0-9]+$/', $file_ext)) {
-        http_response_code(404);
+        include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/pages/404.php";
         exit();
     }
 
     $file = File::load("$file_id.$file_ext");
 
     if (!$file) {
-        http_response_code(404);
+        $error = "404 Not Found";
+        include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/pages/error.php";
+        exit();
+    }
+
+    if ($file->is_banned) {
+        $error = "451 Unavailable For Legal Reasons";
+        include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/pages/error.php";
         exit();
     }
 
@@ -71,8 +79,9 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
         )
     ) {
         STORAGE->delete_file_by_id($file_id, $file_ext);
-        http_response_code(404);
-        exit;
+        $error = "404 Not Found";
+        include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/pages/error.php";
+        exit();
     }
 
     if (!CONFIG["files"]["showuploadtime"] && !isset($_SESSION['is_moderator'])) {
