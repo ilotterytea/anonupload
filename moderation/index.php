@@ -12,11 +12,15 @@ if (!USER->authorize_with_cookie()) {
 }
 
 $user = $_SESSION['user'];
+
+if ($user->role->as_value() < UserRole::Moderator->as_value()) {
+    generate_alert('/account/', 'You are not a moderator!', 401);
+}
 ?>
 <html>
 
 <head>
-    <title>Account - <?= CONFIG["instance"]["name"] ?></title>
+    <title>Moderation - <?= CONFIG["instance"]["name"] ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
@@ -29,18 +33,20 @@ $user = $_SESSION['user'];
     <main>
         <?php html_mini_navbar() ?>
         <?php display_alert() ?>
-        <h1>Hello, <?= $user->name ?></h1>
+        <h1>Moderation</h1>
         <hr>
-        <?php if ($user->role->as_value() > UserRole::User->as_value()): ?>
-            <div>
-                <h2>Related links</h2>
-                <div class="row gap-8">
-                    <?php if ($user->role === UserRole::Moderator): ?>
-                        <a href="/moderation/index.php">Moderation</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        <?php endif; ?>
+        <div>
+            <table class="vertical left">
+                <tr>
+                    <th><a href="/moderation/approve.php">[Media Pending Approval]</a></th>
+                    <td>Approve files.</td>
+                </tr>
+                <tr>
+                    <th><a href="/catalogue.php">[File catalogue]</a></th>
+                    <td>View all files</td>
+                </tr>
+            </table>
+        </div>
     </main>
 </body>
 
