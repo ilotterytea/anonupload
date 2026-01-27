@@ -81,12 +81,7 @@ $file_stats['approx_filesize'] = format_filesize($file_stats['approx_filesize'])
             <h2>Recent images</h2>
             <div class="wall">
                 <?php foreach ($recent_images as $i): ?>
-                    <div class="brick">
-                        <a href="/<?= "{$i->id}.{$i->extension}" ?>">
-                            <img src="<?= sprintf('%s/%s.webp', CONFIG["thumbnails"]["url"], $i->id) ?>" alt="No thumbnail."
-                                loading="lazy">
-                        </a>
-                    </div>
+                    <?php html_file_brick($i); ?>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
@@ -94,12 +89,7 @@ $file_stats['approx_filesize'] = format_filesize($file_stats['approx_filesize'])
             <h2>Recent videos</h2>
             <div class="wall">
                 <?php foreach ($recent_videos as $i): ?>
-                    <div class="brick blue">
-                        <a href="/<?= "{$i->id}.{$i->extension}" ?>">
-                            <img src="<?= sprintf('%s/%s.webp', CONFIG["thumbnails"]["url"], $i->id) ?>" alt="No thumbnail."
-                                loading="lazy">
-                        </a>
-                    </div>
+                    <?php html_file_brick($i); ?>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
@@ -107,25 +97,7 @@ $file_stats['approx_filesize'] = format_filesize($file_stats['approx_filesize'])
             <h2>The most viewed files</h2>
             <div class="wall">
                 <?php foreach ($most_viewed_files as $file): ?>
-                    <div class="brick<?= isset($file->color) ? " {$file->color}" : '' ?>">
-                        <a href="/<?= "{$file->id}.{$file->extension}" ?>">
-                            <?php if (str_starts_with($file->mime, 'image/') || str_starts_with($file->mime, 'video/')): ?>
-                                <img src="<?= sprintf('%s/%s.webp', CONFIG["thumbnails"]["url"], $file->id) ?>" alt="No thumbnail."
-                                    loading="lazy">
-                            <?php elseif (str_starts_with($file->mime, 'audio/')): ?>
-                                <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy"
-                                    class="thumbnail stock">
-                            <?php elseif (str_starts_with($file->mime, 'text/')): ?>
-                                <img src="/static/img/icons/file_text.png" alt="No thumbnail." loading="lazy"
-                                    class="thumbnail stock">
-                            <?php elseif ($file->mime == 'application/x-shockwave-flash'): ?>
-                                <img src="/static/img/icons/file_flash.png" alt="No thumbnail." loading="lazy"
-                                    class="thumbnail stock">
-                            <?php else: ?>
-                                <img src="/static/img/icons/file.png" alt="No thumbnail." class="thumbnail stock">
-                            <?php endif; ?>
-                        </a>
-                    </div>
+                    <?php html_file_brick($file); ?>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>

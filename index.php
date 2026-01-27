@@ -234,33 +234,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                 </div>
                             </div>
                             <div class="content column file-preview">
-                                <?php if (str_starts_with($file->mime, 'image/')): ?>
-                                    <img src="<?= $file_full_url ?>" alt="Image file.">
-                                <?php elseif (str_starts_with($file->mime, 'video/')): ?>
-                                    <video controls autoplay loop>
-                                        <source src="<?= $file_full_url ?>" type="<?= $file->mime ?>">
-                                    </video>
-                                <?php elseif (str_starts_with($file->mime, 'audio/')): ?>
-                                    <audio controls autoplay>
-                                        <source src="<?= $file_full_url ?>" type="<?= $file->mime ?>">
-                                    </audio>
-                                <?php elseif (CONFIG["files"]["displayhtml"] && $file->extension === "html" && file_exists(sprintf("%s/%s/index.html", CONFIG["files"]["directory"], $file->id))): ?>
-                                    <iframe src="<?= sprintf("%s/%s/index.html", CONFIG["files"]["url"], $file->id) ?>" width="800"
-                                        height="600" frameborder="0"></iframe>
-                                <?php elseif (CONFIG["files"]["displayhtml"] && $file->extension === "html"): ?>
-                                    <iframe src="<?= sprintf("%s/%s.%s", CONFIG["files"]["url"], $file->id, $file->extension) ?>"
-                                        width="800" height="600" frameborder="0"></iframe>
-                                <?php elseif (str_starts_with($file->mime, 'text/')): ?>
-                                    <pre><?= file_get_contents(CONFIG["files"]["directory"] . "/{$file->id}.{$file->extension}") ?></pre>
-                                <?php elseif ($file->mime == 'application/x-shockwave-flash' && !empty(CONFIG["driver"]["ruffle"])): ?>
-                                    <noscript>JavaScript is required to play Flash</noscript>
-                                    <object>
-                                        <embed src="<?= $file_full_url ?>" width="<?= $file->width - 4 ?>"
-                                            height="<?= $file->height ?>">
-                                    </object>
-                                <?php else: ?>
-                                    <p><i>This file cannot be displayed.</i></p>
-                                <?php endif; ?>
+                                <?php html_file_full($file); ?>
                             </div>
 
                         </section>

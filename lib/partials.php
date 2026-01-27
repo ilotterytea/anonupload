@@ -237,3 +237,64 @@ function html_debug_info()
     </div>
     <?php ;
 }
+
+function html_file_brick(File $file, string|null $custom_url = null)
+{
+    if ($custom_url === null) {
+        $custom_url = "/{$file->id}.{$file->extension}";
+    }
+    echo '' ?>
+    <div class="brick<?= isset($file->color) ? " {$file->color}" : '' ?>">
+        <a href="<?= $custom_url ?>">
+            <i title="<?= $file->title ?>">
+                <?php if (str_starts_with($file->mime, 'image/') || str_starts_with($file->mime, 'video/')): ?>
+                    <img src="<?= sprintf('%s/%s.webp', CONFIG["thumbnails"]["url"], $file->id) ?>" alt="No thumbnail."
+                        loading="lazy">
+                <?php elseif (str_starts_with($file->mime, 'audio/')): ?>
+                    <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy" class="thumbnail stock">
+                <?php elseif (str_starts_with($file->mime, 'text/')): ?>
+                    <img src="/static/img/icons/file_text.png" alt="No thumbnail." loading="lazy" class="thumbnail stock">
+                <?php elseif ($file->mime == 'application/x-shockwave-flash'): ?>
+                    <img src="/static/img/icons/file_flash.png" alt="No thumbnail." loading="lazy" class="thumbnail stock">
+                <?php else: ?>
+                    <img src="/static/img/icons/file.png" alt="No thumbnail." class="thumbnail stock">
+                <?php endif; ?>
+            </i>
+        </a>
+    </div>
+    <?php ;
+}
+
+function html_file_full(File $file)
+{
+    $file_full_url = CONFIG["files"]["url"] . "/{$file->id}.{$file->extension}";
+    if (str_starts_with($file->mime, 'image/')) {
+        echo "<img src='$file_full_url' alt='Image file.'>";
+    } elseif (str_starts_with($file->mime, 'video/')) {
+        echo "<video controls autoplay loop>";
+        echo "<source src='$file_full_url' type='{$file->mime}'>";
+        echo "</video>";
+    } elseif (str_starts_with($file->mime, 'audio/')) {
+        echo "<audio controls autoplay>";
+        echo "<source src='$file_full_url' type='{$file->mime}'>";
+        echo "</audio>";
+    } elseif (CONFIG["files"]["displayhtml"] && $file->extension === "html" && file_exists(sprintf("%s/%s/index.html", CONFIG["files"]["directory"], $file->id))) {
+        $src = sprintf("%s/%s/index.html", CONFIG["files"]["url"], $file->id);
+        echo "<iframe src='$src' width='800' height='600' frameborder='0'></iframe>";
+    } elseif (CONFIG["files"]["displayhtml"] && $file->extension === "html") {
+        $src = sprintf("%s/%s.%s", CONFIG["files"]["url"], $file->id, $file->extension);
+        echo "<iframe src='$src' width='800' height='600' frameborder='0'></iframe>";
+    } elseif (str_starts_with($file->mime, 'text/')) {
+        echo '<pre>';
+        echo file_get_contents(CONFIG["files"]["directory"] . "/{$file->id}.{$file->extension}");
+        echo '</pre>';
+    } elseif ($file->mime == 'application/x-shockwave-flash' && !empty(CONFIG["driver"]["ruffle"])) {
+        $width = $file->width - 4;
+        echo '<noscript>JavaScript is required to play Flash</noscript>';
+        echo '<object>';
+        echo "<embed src='$file_full_url' width='$width' height='{$file->height}'>";
+        echo '</object>';
+    } else {
+        echo '<p><i>This file cannot be displayed.</i></p>';
+    }
+}

@@ -82,27 +82,7 @@ unset($f);
 
                     <div class="content wall">
                         <?php foreach ($files as $file): ?>
-                            <div class="brick<?= isset($file->color) ? " {$file->color}" : '' ?>">
-                                <a href="/<?= "{$file->id}.{$file->extension}" ?>">
-                                    <i title="<?= $file->title ?>">
-                                        <?php if (str_starts_with($file->mime, 'image/') || str_starts_with($file->mime, 'video/')): ?>
-                                            <img src="<?= sprintf('%s/%s.webp', CONFIG["thumbnails"]["url"], $file->id) ?>"
-                                                alt="No thumbnail." loading="lazy">
-                                        <?php elseif (str_starts_with($file->mime, 'audio/')): ?>
-                                            <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy"
-                                                class="thumbnail stock">
-                                        <?php elseif (str_starts_with($file->mime, 'text/')): ?>
-                                            <img src="/static/img/icons/file_text.png" alt="No thumbnail." loading="lazy"
-                                                class="thumbnail stock">
-                                        <?php elseif ($file->mime == 'application/x-shockwave-flash'): ?>
-                                            <img src="/static/img/icons/file_flash.png" alt="No thumbnail." loading="lazy"
-                                                class="thumbnail stock">
-                                        <?php else: ?>
-                                            <img src="/static/img/icons/file.png" alt="No thumbnail." class="thumbnail stock">
-                                        <?php endif; ?>
-                                    </i>
-                                </a>
-                            </div>
+                            <?php html_file_brick($file); ?>
                         <?php endforeach; ?>
                     </div>
                 </div>
