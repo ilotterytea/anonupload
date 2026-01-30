@@ -6,12 +6,23 @@ enum UserRole
 {
     case User;
     case Moderator;
+    case Administrator;
+
+    public function as_value(): int
+    {
+        return match ($this) {
+            UserRole::Moderator => 10,
+            UserRole::Administrator => 99,
+            default => 1
+        };
+    }
 
     public static function parse(string $name): UserRole|null
     {
         return match (strtolower($name)) {
             "user" => UserRole::User,
             "moderator" => UserRole::Moderator,
+            "administrator" => UserRole::Administrator,
             default => null
         };
     }
