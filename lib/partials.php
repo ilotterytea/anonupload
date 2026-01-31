@@ -57,11 +57,9 @@ function html_big_navbar()
             <a href="/uploaders.php">
                 <button>Uploaders</button>
             </a>
-            <?php if (isset($_SESSION['is_moderator'])): ?>
-                <a href="/mod.php">
-                    <button>Moderation</button>
-                </a>
-            <?php endif; ?>
+            <a href="/account/index.php">
+                <button>Account</button>
+            </a>
         </div>
 
         <?php if (isset($_SESSION['user'])): ?>
@@ -70,10 +68,6 @@ function html_big_navbar()
                         <?= $_SESSION['user']->name ?>
                     </span></p>
                 <a href="/account/logout.php"><img src="/static/img/icons/logout.png" alt="[Log out]" title="Log out"></a>
-            </div>
-        <?php else: ?>
-            <div class="row gap-8 justify-center">
-                <a href="/account/login.php"><img src="/static/img/icons/login.png" alt="[Log in]" title="Log in"></a>
             </div>
         <?php endif; ?>
     </navbar>
@@ -124,11 +118,9 @@ function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['
             <a href="/uploaders.php">
                 <button>Uploaders</button>
             </a>
-            <?php if (isset($_SESSION['is_moderator'])): ?>
-                <a href="/mod.php">
-                    <button>Moderation</button>
-                </a>
-            <?php endif; ?>
+            <a href="/account/">
+                <button>Account</button>
+            </a>
         </div>
 
         <?php if (isset($_SESSION['user'])): ?>
