@@ -992,6 +992,47 @@ class FileMetadataStorage
         }
     }
 
+    public function count_registered_files(): int
+    {
+        if ($this->type === FileStorageType::Database) {
+            $stmt = $this->db->query("SELECT COUNT(id) AS all_files FROM files WHERE id NOT IN (SELECT id FROM file_bans)");
+            $stmt->execute();
+
+            return $stmt->fetch(PDO::FETCH_ASSOC)['all_files'] ?: 0;
+        } else if ($this->type === FileStorageType::Json) {
+            $count = 0;
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(CONFIG['metadata']['directory'], FilesystemIterator::SKIP_DOTS)
+            );
+
+            foreach ($iterator as $file) {
+                if ($file->isFile()) {
+                    $count++;
+                }
+            }
+
+            return $count;
+        } else {
+            return $this->count_uploaded_files();
+        }
+    }
+
+    public function count_uploaded_files(): int
+    {
+        $count = 0;
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(CONFIG['files']['directory'], FilesystemIterator::SKIP_DOTS)
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->isFile()) {
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+
     public function get_type(): FileStorageType
     {
         return $this->type;
