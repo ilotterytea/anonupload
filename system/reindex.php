@@ -3,6 +3,14 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 
+if (!USER->authorize_with_cookie()) {
+    generate_alert('/account/', 'You must be authorized!', 303);
+}
+
+if ($_SESSION['user']->role->as_value() < UserRole::Administrator->as_value()) {
+    generate_alert('/account/', 'You are not allowed to make changes on this page!', 401);
+}
+
 $iterator = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator(CONFIG['files']['directory'], FilesystemIterator::SKIP_DOTS)
 );

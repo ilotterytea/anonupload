@@ -38,8 +38,11 @@ $user = $_SESSION['user'];
                     <?php if ($user->role === UserRole::Moderator): ?>
                         <a href="/moderation/index.php">Moderation</a>
                     <?php endif; ?>
+                    <?php if ($user->role === UserRole::Administrator): ?>
+                            <a href="/system/index.php">System</a>
+                        <?php endif; ?>
+                    </div>
                 </div>
-            </div>
         <?php endif; ?>
     </main>
 </body>

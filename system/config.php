@@ -3,6 +3,14 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 
+if (!USER->authorize_with_cookie()) {
+    generate_alert('/account/', 'You must be authorized!', 303);
+}
+
+if ($_SESSION['user']->role->as_value() < UserRole::Administrator->as_value() && file_exists(CONFIG_FILE_PATH)) {
+    generate_alert('/account/', 'You are not allowed to make changes on this page!', 401);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $c = CONFIG;
 
@@ -31,13 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!array_key_exists($section, $c)) {
             $c[$section] = [];
-        }
-
-        else if ($v === 'on') {
+        } else if ($v === 'on') {
             $v = true;
-        }
-
-        else if (is_numeric($v)) {
+        } else if (is_numeric($v)) {
             $v += 0;
         }
 
@@ -74,9 +78,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if (!file_exists(CONFIG_FILE_PATH)): ?>
             <div class="box alert">
                 <p>This message confirms the instance is nearly ready. The configuration below shows the default
-                            settings.</p>
+                    settings.</p>
             </div>
-            <?php endif; ?>
+        <?php endif; ?>
         <hr>
         <form action="/system/config.php" method="post">
             <h2>Instance</h2>
@@ -90,16 +94,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <th>Mirrors</th>
                     <td>
                         <textarea name="instance_mirrors"
-                            placeholder="One line per mirror. The line should follow this formatting: url=name."
-                            ><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['instance']['mirrors']), CONFIG['instance']['mirrors'])) ?></textarea>
+                            placeholder="One line per mirror. The line should follow this formatting: url=name."><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['instance']['mirrors']), CONFIG['instance']['mirrors'])) ?></textarea>
                     </td>
                 </tr>
                 <tr>
                     <th>Footer links</th>
                     <td>
                         <textarea name="instance_footerlinks"
-                            placeholder="One line per link. The line should follow this formatting: name=url."
-                            ><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['instance']['footerlinks']), CONFIG['instance']['footerlinks'])) ?></textarea>
+                            placeholder="One line per link. The line should follow this formatting: name=url."><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['instance']['footerlinks']), CONFIG['instance']['footerlinks'])) ?></textarea>
                     </td>
                 </tr>
             </table>
@@ -111,9 +113,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <th>Type</th>
                     <td>
                         <select name="storage_type">
-                            <option value="json" <?= CONFIG["storage"]["type"] === "file" ? 'selected' : '' ?>>Files only</option>
-                            <option value="json" <?= CONFIG["storage"]["type"] === "json" ? 'selected' : '' ?>>JSON-based</option>
-                            <option value="database" <?= CONFIG["storage"]["type"] === "database" ? 'selected' : '' ?>>Database</option>
+                            <option value="json" <?= CONFIG["storage"]["type"] === "file" ? 'selected' : '' ?>>Files only
+                            </option>
+                            <option value="json" <?= CONFIG["storage"]["type"] === "json" ? 'selected' : '' ?>>JSON-based
+                            </option>
+                            <option value="database" <?= CONFIG["storage"]["type"] === "database" ? 'selected' : '' ?>>
+                                Database</option>
                         </select>
                     </td>
                 </tr>
@@ -144,7 +149,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </tr>
                 <tr>
                     <th>Password</th>
-                    <td><input type="text" name="database_pass" value="<?= !empty(CONFIG['database']['pass']) ? '****' : '' ?>"></td>
+                    <td><input type="text" name="database_pass"
+                            value="<?= !empty(CONFIG['database']['pass']) ? '****' : '' ?>"></td>
                 </tr>
             </table>
 
@@ -171,8 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>Public access:</th>
                     <td>
-                        <input type="checkbox" name="filecatalog_public" value="on"
-                            <?= CONFIG['filecatalog']['public'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="filecatalog_public" value="on" <?= CONFIG['filecatalog']['public'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
@@ -184,7 +189,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>Include only MIME-types:</th>
                     <td>
-                        <input type="text" name="filecatalog_includemimetypes" value="<?= implode(' ', CONFIG['filecatalog']['includemimetypes']) ?>">
+                        <input type="text" name="filecatalog_includemimetypes"
+                            value="<?= implode(' ', CONFIG['filecatalog']['includemimetypes']) ?>">
                     </td>
                 </tr>
             </table>
@@ -195,8 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>Enable:</th>
                     <td>
-                        <input type="checkbox" name="supriseme_enable" value="on"
-                            <?= CONFIG['supriseme']['enable'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="supriseme_enable" value="on" <?= CONFIG['supriseme']['enable'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
@@ -213,15 +218,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>Fancy view:</th>
                     <td>
-                        <input type="checkbox" name="files_fancyview" value="on"
-                            <?= CONFIG['files']['fancyview'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="files_fancyview" value="on" <?= CONFIG['files']['fancyview'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
                     <th>Count views:</th>
                     <td>
-                        <input type="checkbox" name="files_countviews" value="on"
-                            <?= CONFIG['files']['countviews'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="files_countviews" value="on" <?= CONFIG['files']['countviews'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
@@ -234,15 +237,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>Show views:</th>
                     <td>
-                        <input type="checkbox" name="files_showviews" value="on"
-                            <?= CONFIG['files']['showviews'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="files_showviews" value="on" <?= CONFIG['files']['showviews'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
                     <th>Display uploaded HTML-pages:</th>
                     <td>
-                        <input type="checkbox" name="files_displayhtml" value="on"
-                            <?= CONFIG['files']['displayhtml'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="files_displayhtml" value="on" <?= CONFIG['files']['displayhtml'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
@@ -260,14 +261,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>Deletion:</th>
                     <td>
-                        <input type="checkbox" name="files_deletion" value="on"
-                            <?= CONFIG['files']['deletion'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="files_deletion" value="on" <?= CONFIG['files']['deletion'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
                     <th>Deletion key length:</th>
                     <td>
-                        <input type="number" name="files_deletionkeylength" value="<?= CONFIG['files']['deletionkeylength'] ?>">
+                        <input type="number" name="files_deletionkeylength"
+                            value="<?= CONFIG['files']['deletionkeylength'] ?>">
                         characters
                     </td>
                 </tr>
@@ -286,8 +287,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>Strip EXIF information:</th>
                     <td>
-                        <input type="checkbox" name="upload_stripexif" value="on"
-                            <?= CONFIG['upload']['stripexif'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="upload_stripexif" value="on" <?= CONFIG['upload']['stripexif'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
@@ -312,8 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>Custom ID:</th>
                     <td>
-                        <input type="checkbox" name="upload_customid" value="on"
-                            <?= CONFIG['upload']['customid'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="upload_customid" value="on" <?= CONFIG['upload']['customid'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
@@ -325,7 +324,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>Max custom ID length:</th>
                     <td>
-                        <input type="number" name="upload_customidlength" value="<?= CONFIG['upload']['customidlength'] ?>">
+                        <input type="number" name="upload_customidlength"
+                            value="<?= CONFIG['upload']['customidlength'] ?>">
                         characters
                     </td>
                 </tr>
@@ -339,8 +339,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>Unpack ZIP web applications:</th>
                     <td>
-                        <input type="checkbox" name="upload_zipwebapps" value="on"
-                            <?= CONFIG['upload']['zipwebapps'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="upload_zipwebapps" value="on" <?= CONFIG['upload']['zipwebapps'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
@@ -354,16 +353,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <th>File expiration:</th>
                     <td>
                         <textarea name="upload_expiration"
-                            placeholder="One expiration per line. Format: timeout=name. For example: ne=never, 14d=2 weeks, 12h=12 hours, 5m=5 minutes"
-                            ><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['upload']['expiration']), CONFIG['upload']['expiration'])) ?></textarea>
+                            placeholder="One expiration per line. Format: timeout=name. For example: ne=never, 14d=2 weeks, 12h=12 hours, 5m=5 minutes"><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['upload']['expiration']), CONFIG['upload']['expiration'])) ?></textarea>
                     </td>
                 </tr>
                 <tr>
                     <th>Accepted MIME-types:</th>
                     <td>
                         <textarea name="upload_acceptedmimetypes"
-                            placeholder="One MIME-type per line. Format: extension=mime. For example: jpg=image/jpeg"
-                            ><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['upload']['acceptedmimetypes']), CONFIG['upload']['acceptedmimetypes'])) ?></textarea>
+                            placeholder="One MIME-type per line. Format: extension=mime. For example: jpg=image/jpeg"><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['upload']['acceptedmimetypes']), CONFIG['upload']['acceptedmimetypes'])) ?></textarea>
                     </td>
                 </tr>
             </table>
@@ -381,14 +378,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>Max duration:</th>
                     <td>
-                        <input type="number" name="externalupload_maxduration" value="<?= CONFIG['externalupload']['maxduration'] ?>">
+                        <input type="number" name="externalupload_maxduration"
+                            value="<?= CONFIG['externalupload']['maxduration'] ?>">
                         seconds
                     </td>
                 </tr>
                 <tr>
                     <th>Quality:</th>
                     <td>
-                        <input type="text" name="externalupload_quality" value="<?= CONFIG['externalupload']['quality'] ?>">
+                        <input type="text" name="externalupload_quality"
+                            value="<?= CONFIG['externalupload']['quality'] ?>">
                     </td>
                 </tr>
             </table>
@@ -399,8 +398,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>Enable:</th>
                     <td>
-                        <input type="checkbox" name="thumbnails_enable" value="on"
-                            <?= CONFIG['thumbnails']['enable'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="thumbnails_enable" value="on" <?= CONFIG['thumbnails']['enable'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
@@ -442,8 +440,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>Enable:</th>
                     <td>
-                        <input type="checkbox" name="report_enable" value="on"
-                            <?= CONFIG['report']['enable'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="report_enable" value="on" <?= CONFIG['report']['enable'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
@@ -460,8 +457,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>File ban permission:</th>
                     <td>
-                        <input type="checkbox" name="moderation_banfiles" value="on"
-                            <?= CONFIG['moderation']['banfiles'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="moderation_banfiles" value="on" <?= CONFIG['moderation']['banfiles'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
@@ -478,22 +474,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <th>Enable:</th>
                     <td>
-                        <input type="checkbox" name="stats_enable" value="on"
-                            <?= CONFIG['stats']['enable'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="stats_enable" value="on" <?= CONFIG['stats']['enable'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
                     <th>Display last files:</th>
                     <td>
-                        <input type="checkbox" name="stats_lastfiles" value="on"
-                            <?= CONFIG['stats']['lastfiles'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="stats_lastfiles" value="on" <?= CONFIG['stats']['lastfiles'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
                     <th>Display the most viewed files:</th>
                     <td>
-                        <input type="checkbox" name="stats_mostviewed" value="on"
-                            <?= CONFIG['stats']['mostviewed'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="stats_mostviewed" value="on" <?= CONFIG['stats']['mostviewed'] ? 'checked' : '' ?>>
                     </td>
                 </tr>
                 <tr>
