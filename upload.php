@@ -4,6 +4,7 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/thumbnails.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/user.php";
 
 session_start();
 

@@ -230,7 +230,7 @@ $privacy_exists = is_file($_SERVER['DOCUMENT_ROOT'] . '/static/PRIVACY.txt');
                                         <?php endif; ?>
                                     <?php endif; ?>
                                     <?php if (CONFIG["report"]["enable"]): ?>
-                                        <a href="/report.php?f=<?= $file->id ?>.<?= $file->extension ?>">
+                                        <a href="/report.php?f=<?= "{$file->id}.{$file->extension}" ?>">
                                             <button>Report</button>
                                         </a>
                                     <?php endif; ?>

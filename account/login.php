@@ -14,12 +14,8 @@ if (isset($_SESSION['user'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_POST['password'])) {
-        generate_alert('/account/login.php', 'No password set!', 400);
-    }
-
-    if (!isset($_POST['username'])) {
-        generate_alert('/account/login.php', 'No username set!', 400);
+    if (!isset($_POST['password'], $_POST['username'])) {
+        generate_alert('/account/login.php', 'No credentials set!', 400);
     }
 
     if (
@@ -57,10 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <main>
         <?php html_mini_navbar() ?>
         <?php display_alert() ?>
-        <h1>Log in to account</h1>
+        <h1>
+            Log in to <?= CONFIG['instance']['name'] ?> account
+        </h1>
         <hr>
         <form action="/account/login.php" method="post">
-            <table class="vertical">
+            <table class="vertical left">
                 <tr>
                     <th>Username:</th>
                     <td><input type="text" name="username" required></td>
@@ -70,7 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <td><input type="password" name="password" required></td>
                 </tr>
             </table>
-            <button type="submit" class="fancy">Log in</button>
+            <div class="row gap-8 align-center">
+                <button type="submit" class="fancy">Log in</button>
+            </div>
         </form>
     </main>
 </body>
