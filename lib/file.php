@@ -1,6 +1,26 @@
 <?php
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 
+function parse_file_name(string|null $filename): array|null
+{
+    if ($filename === null) {
+        return null;
+    }
+
+    $parts = explode(".", $filename);
+    if (count($parts) < 2) {
+        return null;
+    }
+
+    $ext = $parts[count($parts) - 1];
+    unset($parts[count($parts) - 1]);
+
+    return [
+        'name' => implode(".", $parts),
+        'extension' => $ext
+    ];
+}
+
 function get_file_metadata(string $file_path): array|null
 {
     $ext = explode('.', basename($file_path));
@@ -381,9 +401,13 @@ class File
         $file_name = basename($file_name);
         $path = CONFIG['files']['directory'] . "/$file_name";
 
-        $id = explode('.', $file_name);
-        $ext = $id[1];
-        $id = $id[0];
+        $file_name = parse_file_name($file_name);
+        if ($file_name === null) {
+            return null;
+        }
+
+        $id = $file_name['name'];
+        $ext = $file_name['extension'];
 
         $data = null;
 
