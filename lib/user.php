@@ -17,6 +17,15 @@ enum UserRole
         };
     }
 
+    public function as_string(): string
+    {
+        return match ($this) {
+            UserRole::Moderator => "moderator",
+            UserRole::Administrator => "administrator",
+            default => "user"
+        };
+    }
+
     public static function parse(string $name): UserRole|null
     {
         return match (strtolower($name)) {
