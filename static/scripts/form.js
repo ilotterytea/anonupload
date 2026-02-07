@@ -5,7 +5,8 @@ document.onpaste = () => {
         var item = items[index];
         if (item.kind === 'file') {
             file = item.getAsFile();
-            showFile(file);
+            files = [file];
+            showFile(files);
         }
     }
 };
