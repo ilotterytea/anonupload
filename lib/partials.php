@@ -129,10 +129,6 @@ function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['
                         class="username <?= $_SESSION['user']->role->name ?>"><?= $_SESSION['user']->name ?></span></p>
                 <a href="/account/logout.php"><img src="/static/img/icons/logout.png" alt="[Log out]" title="Log out"></a>
             </div>
-        <?php else: ?>
-            <div>
-                <a href="/account/login.php"><img src="/static/img/icons/login.png" alt="[Log in]" title="Log in"></a>
-            </div>
         <?php endif; ?>
     </navbar>
     <?php ;
