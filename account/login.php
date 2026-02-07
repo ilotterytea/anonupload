@@ -18,14 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         generate_alert('/account/login.php', 'No credentials set!', 400);
     }
 
-    if (
-        USER->get_type() !== FileStorageType::Database &&
-        !is_file(CONFIG['users']['path']) &&
-        !file_put_contents(CONFIG['users']['path'], '')
-    ) {
-        generate_alert('/account/login.php', 'Failed to create a file for mod passwords!', 500);
-    }
-
     $user = USER->get_user_by_name($_POST['username']);
     if ($user === null || !password_verify($_POST['password'], $user->password)) {
         generate_alert('/account/login.php', 'Invalid credentials!', 401);
@@ -37,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     generate_alert('/account/index.php', 'Authorized!');
 }
 ?>
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -70,6 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </table>
             <div class="row gap-8 align-center">
                 <button type="submit" class="fancy">Log in</button>
+                <?php if (CONFIG['users']['allowregistration'] || !file_exists(CONFIG['users']['path'])): ?>
+                    <a href="/account/register.php">Register</a>
+                <?php endif; ?>
             </div>
         </form>
     </main>

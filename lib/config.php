@@ -203,7 +203,12 @@ $cfg = [
     ],
     "users" => [
         "path" => "{$_SERVER['DOCUMENT_ROOT']}/.anonuploadpasswd",
-        "cookietime" => 60 * 60 * 24 * 30
+        "cookietime" => 60 * 60 * 24 * 30,
+        "allowregistration" => true,
+        "usernameregex" => '/^[A-za-z0-9]+$/',
+        "usernameminlength" => 3,
+        "usernamemaxlength" => 25,
+        "passwordminlength" => 8
     ],
     "stats" => [
         "enable" => true,

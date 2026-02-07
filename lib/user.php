@@ -167,6 +167,27 @@ class UserManager
         return null;
     }
 
+    public function create(string $username, string $password, UserRole $role = UserRole::User): bool
+    {
+        $password = password_hash($password, PASSWORD_DEFAULT);
+        $token = bin2hex(random_bytes(16));
+        if ($this->type === FileStorageType::Database) {
+            $this->db->prepare('INSERT INTO users(`name`, `password`, `role`, token) VALUES (?, ?, ?, ?)')
+                ->execute([
+                    $username,
+                    $password,
+                    $role->as_value(),
+                    $token
+                ]);
+            return true;
+        } else {
+            $users = $this->load_local_users() ?? [];
+            $next_id = count($users) + 1;
+
+            return file_put_contents(CONFIG['users']['path'], "$next_id $username $password {$role->as_string()} $token" . PHP_EOL, FILE_APPEND);
+        }
+    }
+
     public function authorize_with_cookie(): bool
     {
         if (!isset($_COOKIE['token'])) {
