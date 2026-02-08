@@ -222,6 +222,8 @@ function html_debug_info()
                 </a>
             </p>
         <?php endif; ?>
+        <a href="/tos.php">Terms of Service</a>
+        <a href="/privacy.php">Privacy Policy</a>
     </div>
     <?php ;
 }

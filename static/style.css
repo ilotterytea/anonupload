@@ -356,17 +356,17 @@ button[type=submit].fancy:hover {
     font-size: 10px;
 }
 
-.debug-info>p {
+.debug-info>* {
     padding: 0 4px;
     border-left: var(--box-border) solid 1px;
 }
 
-.debug-info>p:first-child {
+.debug-info>*:first-child {
     border-left: unset;
     padding-left: unset;
 }
 
-.debug-info>p:last-child {
+.debug-info>*:last-child {
     padding-right: unset;
 }
 
