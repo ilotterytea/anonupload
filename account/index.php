@@ -35,14 +35,14 @@ $user = $_SESSION['user'];
             <div>
                 <h2>Related links</h2>
                 <div class="row gap-8">
-                    <?php if ($user->role === UserRole::Moderator): ?>
+                    <?php if ($user->role->as_value() >= UserRole::Moderator->as_value()): ?>
                         <a href="/moderation/index.php">Moderation</a>
                     <?php endif; ?>
-                    <?php if ($user->role === UserRole::Administrator): ?>
-                            <a href="/system/index.php">System</a>
-                        <?php endif; ?>
-                    </div>
+                    <?php if ($user->role->as_value() >= UserRole::Administrator->as_value()): ?>
+                        <a href="/system/index.php">System</a>
+                    <?php endif; ?>
                 </div>
+            </div>
         <?php endif; ?>
     </main>
 </body>
