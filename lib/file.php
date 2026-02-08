@@ -396,8 +396,12 @@ class File
         return $f;
     }
 
-    public static function load(string $file_name): File|null
+    public static function load(string|null $file_name): File|null
     {
+        if ($file_name === null) {
+            return null;
+        }
+
         $file_name = basename($file_name);
         $path = CONFIG['files']['directory'] . "/$file_name";
 
@@ -423,22 +427,25 @@ class File
             ');
             $stmt->execute([$id, $ext]);
             $data = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-        } else if (file_exists(CONFIG['metadata']['directory'] . "/$id.json")) {
+        }
+
+        if ($data == null && file_exists(CONFIG['metadata']['directory'] . "/$id.json")) {
             $data = json_decode(file_get_contents(CONFIG['metadata']['directory'] . "/$id.json"), true);
-        } else if (file_exists($path)) {
+        }
+
+        if ($data == null && file_exists($path)) {
             $data = [
                 'id' => $id,
                 'extension' => $ext,
                 'mime' => CONFIG['upload']['acceptedmimetypes'][$ext],
                 'size' => filesize($path),
-                'views' => null,
+                'views' => 0,
                 'password' => null,
                 'expires_at' => null,
+                'visibility' => CONFIG['files']['defaultvisibility'],
                 'uploaded_at' => filectime($path),
                 'metadata' => get_file_metadata($path)
             ];
-        } else {
-            return null;
         }
 
         return File::from($data);
@@ -536,17 +543,53 @@ class FileMetadataStorage
                 return true;
             }
             case FileStorageType::Database: {
-                $this->db->prepare('INSERT INTO files
-                (id, mime, extension, `size`, `password`, expires_at) VALUES
-                (?, ?, ?, ?, ?, ?)
+                $stmt = $this->db->prepare('SELECT id FROM files WHERE id = ? AND extension = ?');
+                $stmt->execute([$file->id, $file->extension]);
+
+                if ($stmt->rowCount() === 0) {
+                    $this->db->prepare('INSERT INTO files
+                (id, mime, extension, `size`, `password`, visibility, expires_at, uploaded_at) VALUES
+                (?, ?, ?, ?, ?, ?, ?, ?)
                 ')->execute([
-                            $file->id,
-                            $file->mime,
-                            $file->extension,
-                            $file->size,
-                            $file->password,
-                            $file->expires_at->getTimestamp()
-                        ]);
+                                $file->id,
+                                $file->mime,
+                                $file->extension,
+                                $file->size,
+                                $file->password,
+                                $file->visibility ?? CONFIG['files']['defaultvisibility'],
+                                $file->expires_at === null ? null : $file->expires_at->format('Y-m-d H:i:s'),
+                                ($file->uploaded_at ?? new DateTime())->format('Y-m-d H:i:s')
+                            ]);
+                }
+
+                $this->db->prepare('UPDATE files
+                SET
+                    mime = ?,
+                    extension = ?,
+                    `size` = ?,
+                    title = ?,
+                    `password` = ?,
+                    visibility = ?,
+                    uploaded_at = ?,
+                    expires_at = ?,
+                    views = ?
+                WHERE
+                    id = ? AND
+                    extension = ?')
+                    ->execute([
+                        $file->mime,
+                        $file->extension,
+                        $file->size,
+                        $file->title,
+                        $file->password,
+                        $file->visibility ?? CONFIG['files']['defaultvisibility'],
+                        ($file->uploaded_at ?? new DateTime())->format('Y-m-d H:i:s'),
+                        $file->expires_at === null ? null : $file->expires_at->format('Y-m-d H:i:s'),
+                        $file->views ?? 0,
+                        $file->id,
+                        $file->extension
+                    ]);
+
                 return true;
             }
             case FileStorageType::Json: {
@@ -570,6 +613,7 @@ class FileMetadataStorage
 
             $mime_filter = "";
             if (!empty(CONFIG["filecatalog"]["includemimetypes"])) {
+                var_dump(CONFIG["filecatalog"]["includemimetypes"]);
                 $mime_filter = [];
                 foreach (CONFIG["filecatalog"]["includemimetypes"] as $k) {
                     array_push($mime_filter, "mime LIKE '$k'");
@@ -582,7 +626,14 @@ class FileMetadataStorage
             $where_word = $in_condition || $mime_filter ? "WHERE" : "";
             $order_condition = CONFIG["supriseme"]["order"] ?: "rand()";
 
+            $file_id = null;
+            $file_path = null;
+            $attempts = 0;
+
             do {
+                $file_id = null;
+                $file_path = null;
+
                 $stmt = $this->db->prepare("SELECT id, extension FROM files $where_word $in_condition $mime_filter ORDER BY $order_condition LIMIT 1");
                 if (empty($viewed_files)) {
                     $stmt->execute();
@@ -597,7 +648,9 @@ class FileMetadataStorage
                     $viewed_files = array_diff($viewed_files, $viewed_files);
                     $in_condition = '';
                 }
-            } while (!$file_id || in_array($file_id, $viewed_files));
+
+                $attempts++;
+            } while ((!$file_id || in_array($file_id, $viewed_files)) && $attempts < 256);
         } else {
             $files = glob(CONFIG['files']['directory'] . '/*.*');
             $count = count($files);
@@ -821,11 +874,18 @@ class FileMetadataStorage
         $files = [];
 
         if ($this->type === FileStorageType::Database) {
-            $stmt = $this->db->query("SELECT f.id, f.mime, f.extension
+            $sort_sql = match ($sort) {
+                "oldest" => "ORDER BY f.uploaded_at ASC",
+                "recent" => "ORDER BY f.uploaded_at DESC",
+                "most_viewed" => "ORDER BY f.views DESC",
+                "least_viewed" => "ORDER BY f.views ASC",
+            };
+
+            $stmt = $this->db->query("SELECT f.id, f.mime, f.extension, f.size
                 FROM files f
                 WHERE f.id NOT IN (SELECT id FROM file_bans)
-                    AND f.visibility = 2
-                $sort
+                    AND f.visibility = 1
+                $sort_sql
                 LIMIT $limit OFFSET $offset
             ");
             $stmt->execute();
