@@ -754,7 +754,7 @@ class FileMetadataStorage
     public function get_recent_files_by_mime(string $mime = "%/%", int $limit = 0): array
     {
         if ($this->type === FileStorageType::Database) {
-            $stmt = $this->db->query("SELECT id, extension FROM files WHERE mime LIKE '$mime' ORDER BY uploaded_at DESC" . ($limit > 0 ? " LIMIT $limit" : ''));
+            $stmt = $this->db->query("SELECT id, extension, mime, `size` FROM files WHERE mime LIKE '$mime' ORDER BY uploaded_at DESC" . ($limit > 0 ? " LIMIT $limit" : ''));
             return array_map(fn($x) => File::from($x), $stmt->fetchAll(PDO::FETCH_ASSOC));
         } else {
             $mime = explode('/', $mime);
@@ -793,7 +793,7 @@ class FileMetadataStorage
     public function get_most_viewed_files(int $limit = 0): array
     {
         if ($this->type === FileStorageType::Database) {
-            $stmt = $this->db->query("SELECT id, extension, mime FROM files ORDER BY views DESC" . ($limit > 0 ? " LIMIT $limit" : ''));
+            $stmt = $this->db->query("SELECT id, extension, mime, `size` FROM files ORDER BY views DESC" . ($limit > 0 ? " LIMIT $limit" : ''));
             return array_map(fn($x) => File::from($x), $stmt->fetchAll(PDO::FETCH_ASSOC));
         } else {
             $paths = glob(CONFIG['metadata']['directory'] . '/*.*');
@@ -818,7 +818,7 @@ class FileMetadataStorage
                 FROM files
                 WHERE id NOT IN (SELECT id FROM file_bans)
             ");
-            $file_stats = $stmt->fetchAll(PDO::FETCH_ASSOC)[0];
+            return $stmt->fetchAll(PDO::FETCH_ASSOC)[0];
         } else {
             $file_count = 0;
             $active_content = 0;
@@ -938,7 +938,7 @@ class FileMetadataStorage
         $files = [];
 
         if ($this->type === FileStorageType::Database) {
-            $stmt = $this->db->query("SELECT f.id, f.mime, f.extension
+            $stmt = $this->db->prepare("SELECT f.id, f.mime, f.extension, f.size
                 FROM files f
                 WHERE f.id NOT IN (SELECT id FROM file_bans) AND f.visibility = ?
             ");
