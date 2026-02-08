@@ -156,7 +156,7 @@ $cfg = [
         ],
         "verifymimetype" => true,
         "stripexif" => true,
-        "idcharacters" => "ABCDEF",
+        "idcharacters" => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_",
         "idlength" => 5,
         "idprefix" => false,
         "customid" => true,
