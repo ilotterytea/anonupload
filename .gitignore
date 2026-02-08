@@ -1,4 +1,9 @@
+.vscode
+
 anonupload.json
+.bannedhashes
+.anonuploadpasswd
+
 *.ini
 *.db
 .DS_Store
