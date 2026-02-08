@@ -22,8 +22,9 @@ $assets = [
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($assets as $asset => $path) {
+        $full_path = "{$_SERVER['DOCUMENT_ROOT']}/$path";
+
         if (isset($_FILES[$asset])) {
-            $full_path = "{$_SERVER['DOCUMENT_ROOT']}/$path";
             if (!is_dir($full_path) && !mkdir($full_path, 0777, true)) {
                 generate_alert('/system/assets.php', "Failed to make a $asset directory", 500);
             }
@@ -36,43 +37,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             generate_alert('/system/assets.php', "Uploaded a new $asset image!", 201);
         }
-    }
 
-    if (isset($_POST['action'])) {
-        switch ($_POST['action']) {
-            case "deletebanner":
-                if (!isset($_POST['name']) || empty($_POST['name'])) {
-                    generate_alert('/system/assets.php', 'Banner name must be specified!', 400);
-                }
+        if (isset($_POST['action']) && $_POST['action'] === "delete$asset") {
+            if (!isset($_POST['name']) || empty($_POST['name'])) {
+                generate_alert('/system/assets.php', "$asset name must be specified!", 400);
+            }
 
-                $name = $_POST['name'];
-                if (!unlink("$full_banner_path/$name")) {
-                    generate_alert('/system/assets.php', 'Failed to remove the banner', 500);
-                }
+            $name = $_POST['name'];
+            if (!unlink("$full_path/$name")) {
+                generate_alert('/system/assets.php', "Failed to remove the $asset", 500);
+            }
 
-                if (count(glob("$full_banner_path/*.*")) === 0 && !rmdir($full_banner_path)) {
-                    generate_alert('/system/assets.php', 'Failed to remove the banner directory', 500);
-                }
+            if (count(glob("$full_path/*.*")) === 0 && !rmdir($full_path)) {
+                generate_alert('/system/assets.php', "Failed to remove the $asset directory", 500);
+            }
 
-                generate_alert('/system/assets.php', "Deleted banner $name!", 200);
-            case "deletelogo":
-                if (!isset($_POST['name']) || empty($_POST['name'])) {
-                    generate_alert('/system/assets.php', 'Logo name must be specified!', 400);
-                }
-
-                $name = $_POST['name'];
-                if (!unlink("$full_logo_path/$name")) {
-                    generate_alert('/system/assets.php', 'Failed to remove the logo', 500);
-                }
-
-                if (count(glob("$full_logo_path/*.*")) === 0 && !rmdir($full_logo_path)) {
-                    generate_alert('/system/assets.php', 'Failed to remove the logo directory', 500);
-                }
-
-                generate_alert('/system/assets.php', "Deleted logo $name!", 200);
-            default:
-                generate_alert('/system/assets.php', 'Unsupported action', 400);
-                break;
+            generate_alert('/system/assets.php', "Deleted $asset $name!", 200);
         }
     }
 }
