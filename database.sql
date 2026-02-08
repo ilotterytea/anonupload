@@ -1,10 +1,19 @@
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `name` TEXT NOT NULL UNIQUE,
+    `password` TEXT NOT NULL,
+    `role` SMALLINT NOT NULL DEFAULT 1,
+    token TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS files (
     id CHAR(32) NOT NULL PRIMARY KEY,
     mime TEXT NOT NULL,
     extension TEXT NOT NULL,
-    size BIGINT NOT NULL,
+    `size` BIGINT NOT NULL,
     title TEXT,
-    password TEXT,
+    `password` TEXT,
+    visibility SMALLINT NOT NULL,
     uploaded_at TIMESTAMP NOT NULL DEFAULT UTC_TIMESTAMP,
     expires_at TIMESTAMP,
     views BIGINT NOT NULL DEFAULT 0
