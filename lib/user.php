@@ -26,14 +26,24 @@ enum UserRole
         };
     }
 
-    public static function parse(string $name): UserRole|null
+    public static function parse(mixed $name): UserRole|null
     {
-        return match (strtolower($name)) {
-            "user" => UserRole::User,
-            "moderator" => UserRole::Moderator,
-            "administrator" => UserRole::Administrator,
-            default => null
-        };
+        if (is_string($name)) {
+            return match (strtolower($name)) {
+                "user" => UserRole::User,
+                "moderator" => UserRole::Moderator,
+                "administrator" => UserRole::Administrator,
+                default => null
+            };
+        } elseif (is_numeric($name)) {
+            return match (intval($name)) {
+                1 => UserRole::User,
+                10 => UserRole::Moderator,
+                99 => UserRole::Administrator
+            };
+        }
+
+        return null;
     }
 }
 
