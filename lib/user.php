@@ -62,7 +62,7 @@ class UserManager
     {
         $this->type = $type;
         if ($type === FileStorageType::Database) {
-            $this->db = new PDO(CONFIG['database']['url'], CONFIG['database']['name'], CONFIG['database']['pass']);
+            $this->db = new PDO(CONFIG['database']['url'], CONFIG['database']['user'], CONFIG['database']['pass']);
         }
     }
 
