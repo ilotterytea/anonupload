@@ -16,6 +16,7 @@ if ($_SESSION['user']->role->as_value() < UserRole::Administrator->as_value()) {
 $registered_files = STORAGE->count_registered_files();
 $uploaded_files = STORAGE->count_uploaded_files();
 ?>
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -46,6 +47,12 @@ $uploaded_files = STORAGE->count_uploaded_files();
                             <?= $uploaded_files ?> files registered.
                         </p>
                     </td>
+                </tr>
+                <tr>
+                    <th>
+                        <a href="/system/assets.php">[System assets]</a>
+                    </th>
+                    <td>Change instance's logo, banners and error images.</td>
                 </tr>
                 <tr>
                     <th>

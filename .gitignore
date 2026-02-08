@@ -3,6 +3,10 @@
 anonupload.json
 .bannedhashes
 .anonuploadpasswd
+big/
+mini/
+404/
+403/
 
 *.ini
 *.db
