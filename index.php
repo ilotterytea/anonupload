@@ -123,7 +123,7 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
     }
 
     if (isset($file->duration)) {
-        $dur = format_timestamp(new DateTime()->setTimestamp(time() + $file->duration));
+        $dur = format_timestamp((new DateTime())->setTimestamp(time() + $file->duration));
         array_push($file_resolution, empty($file_resolution) ? $dur : "($dur)");
     }
 

@@ -39,9 +39,9 @@ enum UserRole
 
 class User
 {
-    final public int $id;
-    final public string $name, $password, $token;
-    final public UserRole $role;
+    public int $id;
+    public string $name, $password, $token;
+    public UserRole $role;
 
     public function __construct(int $id, string $name, string $password, UserRole $role, string $token)
     {
@@ -138,7 +138,11 @@ class UserManager
             }
             return $user;
         } elseif ($users = $this->load_local_users()) {
-            return array_find($users, fn($x) => $x->name === $name);
+            foreach ($users as $user) {
+                if ($user->name === $name) {
+                    return $user;
+                }
+            }
         }
 
         return null;
@@ -161,7 +165,11 @@ class UserManager
             }
             return $user;
         } elseif ($users = $this->load_local_users()) {
-            return array_find($users, fn($x) => $x->token === $token);
+            foreach ($users as $user) {
+                if ($user->token === $token) {
+                    return $user;
+                }
+            }
         }
 
         return null;
