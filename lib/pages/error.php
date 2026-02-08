@@ -35,7 +35,7 @@ if (is_dir($dir_path)) {
     $names = glob("$dir_path/*.*");
     $c = count($names);
     if ($c > 0) {
-        $image_name = $names[random_int(0, $c - 1)];
+        $image_name = basename($names[random_int(0, $c - 1)]);
     }
 }
 ?>
@@ -68,7 +68,7 @@ if (is_dir($dir_path)) {
                     </div>
                     <div class="content column file-preview">
                         <?php if (isset($image_name)): ?>
-                            <img src="/static/img/<?= "$error_code/$image" ?>" alt="There is nothing to see here.">
+                            <img src="/static/img/<?= "$error_code/$image_name" ?>" alt="There is nothing to see here.">
                         <?php else: ?>
                             <p>There is nothing to see here.</p>
                         <?php endif; ?>
