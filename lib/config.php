@@ -231,11 +231,12 @@ if (file_exists(CONFIG_FILE_PATH)) {
 
                 if (is_array($cfg[$sk][$k])) {
                     if ($sk === "filecatalog" && $k === "includemimetypes") {
-                        $v = explode(' ', $v);
+                        $v = $v === "" ? [] : explode(' ', $v);
                     } else {
-                        $lines = explode("\n", $v);
+                        $lines = explode(PHP_EOL, $v);
                         $v = [];
                         foreach ($lines as $line) {
+                            $line = trim($line);
                             $parts = explode('=', $line, 2);
                             if (count($parts) != 2) {
                                 continue;
