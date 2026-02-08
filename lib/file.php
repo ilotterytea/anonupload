@@ -27,8 +27,8 @@ function get_file_metadata(string $file_path): array|null
     $ext = $ext[count($ext) - 1];
     $mime = CONFIG['upload']['acceptedmimetypes'][$ext];
 
-    if (str_starts_with($mime, 'image/')) {
-        [$width, $height] = explode('x', trim(shell_exec('magick identify -format "%wx%h" ' . escapeshellarg($file_path) . '[0]')));
+    if (str_starts_with($mime, 'image/') && IMAGEMAGICK_COMMAND) {
+        [$width, $height] = explode('x', trim(shell_exec(IMAGEMAGICK_COMMAND['identify'] . ' -format "%wx%h" ' . escapeshellarg($file_path) . '[0]')));
         return [
             'width' => intval($width),
             'height' => intval($height),
@@ -160,8 +160,8 @@ function verify_mimetype(string $file_path, string $mimetype): bool
     $output = [];
     $exitCode = 0;
 
-    if (str_starts_with($mimetype, 'image/')) {
-        $output = shell_exec("magick identify -quiet -ping $path");
+    if (str_starts_with($mimetype, 'image/') && IMAGEMAGICK_COMMAND) {
+        $output = shell_exec(IMAGEMAGICK_COMMAND['identify'] . " -quiet -ping $path");
         return !empty($output);
     } else if (str_starts_with($mimetype, 'video/') || str_starts_with($mimetype, 'audio/')) {
         $cmd = "ffprobe -v error -i $path 2>&1";

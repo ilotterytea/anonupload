@@ -257,3 +257,20 @@ if (!empty($cfg['database']['host'])) {
 
 define("CONFIG", $cfg);
 define("CLIENT_REQUIRES_JSON", isset($_SERVER["HTTP_ACCEPT"]) && $_SERVER["HTTP_ACCEPT"] == "application/json");
+
+// library existence check
+$imagemagick = null;
+
+if (shell_exec("which magick")) {
+    $imagemagick = [
+        "identify" => "magick identify",
+        "convert" => "magick"
+    ];
+} else if (shell_exec("which identify") && shell_exec("which convert")) {
+    $imagemagick = [
+        "identify" => "identify",
+        "convert" => "convert"
+    ];
+}
+
+define("IMAGEMAGICK_COMMAND", $imagemagick);
