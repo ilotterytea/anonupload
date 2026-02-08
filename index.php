@@ -84,11 +84,11 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
         exit();
     }
 
-    if (!CONFIG["files"]["showuploadtime"] && !isset($_SESSION['is_moderator'])) {
+    if (!CONFIG["files"]["showuploadtime"] && (!isset($_SESSION['user']) || $_SESSION['user']->role->as_value() < UserRole::Moderator->as_value())) {
         $file->uploaded_at = null;
     }
 
-    if (!CONFIG["files"]["showviews"] && !isset($_SESSION['is_moderator'])) {
+    if (!CONFIG["files"]["showviews"] && (!isset($_SESSION['user']) || $_SESSION['user']->role->as_value() < UserRole::Moderator->as_value())) {
         $file->views = null;
     }
 
@@ -213,7 +213,7 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
                                     <?php endif; ?>
                                 </div>
                                 <div class="grow row gap-8 justify-end align-center wrap" id="file-tab-buttons">
-                                    <?php if (isset($_SESSION['is_moderator'])): ?>
+                                    <?php if (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value()): ?>
                                         <a href="/files/delete.php?id=<?= "{$file->id}.{$file->extension}" ?>">
                                             <button>Delete</button>
                                         </a>
@@ -256,7 +256,7 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
                                     <?= format_timestamp($file->uploaded_at) ?> ago
                                 </p>
                             <?php endif; ?>
-                            <?php if ((CONFIG["files"]["showviews"] || isset($_SESSION['is_moderator'])) && isset($file->views)): ?>
+                            <?php if ((CONFIG["files"]["showviews"] || (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() > UserRole::Moderator->as_value())) && isset($file->views)): ?>
                                 <p><?= $file->views ?> views</p>
                             <?php endif; ?>
                         </div>
@@ -463,7 +463,7 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
     <script src="/static/scripts/favorites.js"></script>
 <?php endif; ?>
 
-<?php if ($file && !isset($_SESSION['is_moderator'])): ?>
+<?php if ($file && isset($_SESSION['user']) && $_SESSION['user']->role->as_value() > UserRole::Moderator->as_value()): ?>
     <script>
         // adding deletion button
         const files = JSON.parse(localStorage.getItem('uploaded_files') ?? '[]');

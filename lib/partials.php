@@ -44,8 +44,8 @@ function html_big_navbar()
             <a href="/">
                 <button>Home</button>
             </a>
-            <?php if (CONFIG["filecatalog"]["public"] || isset($_SESSION['is_moderator'])): ?>
-                <a href="/catalogue.php">
+            <?php if (CONFIG["filecatalog"]["public"] || (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value())): ?>
+                <a href="/files/index.php">
                     <button>Catalogue</button>
                 </a>
             <?php endif; ?>
@@ -105,8 +105,8 @@ function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['
             <a href="/">
                 <button>Home</button>
             </a>
-            <?php if (CONFIG["filecatalog"]["public"] || isset($_SESSION['is_moderator'])): ?>
-                <a href="/catalogue.php">
+            <?php if (CONFIG["filecatalog"]["public"] || (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value())): ?>
+                <a href="/files/index.php">
                     <button>Catalogue</button>
                 </a>
             <?php endif; ?>

@@ -42,7 +42,7 @@ if ($user->role->as_value() < UserRole::Moderator->as_value()) {
                     <td>Approve files.</td>
                 </tr>
                 <tr>
-                    <th><a href="/catalogue.php">[File catalogue]</a></th>
+                    <th><a href="/files/index.php">[File catalogue]</a></th>
                     <td>View all files</td>
                 </tr>
             </table>

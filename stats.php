@@ -4,14 +4,13 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/user.php";
 
-session_start();
+USER->authorize_with_cookie();
 
-if (!CONFIG["stats"]["enable"] && !isset($_SESSION['is_moderator'])) {
-    http_response_code(403);
-    exit;
+if (!CONFIG["stats"]["enable"] && (!isset($_SESSION['user']) || $_SESSION['user']->role->as_value() < UserRole::Moderator->as_value())) {
+    generate_alert('/account/', 'You are not allowed to access this page!', 403);
 }
-
 
 // uploaded files stats
 $uploaded_files = STORAGE->get_upload_timeline();

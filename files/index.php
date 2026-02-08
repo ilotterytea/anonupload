@@ -3,12 +3,12 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/user.php";
 
-session_start();
+USER->authorize_with_cookie();
 
-if (!isset($_SESSION['is_moderator']) && !CONFIG["filecatalog"]["public"]) {
-    http_response_code(403);
-    exit;
+if (!CONFIG["filecatalog"]["public"] && (!isset($_SESSION['user']) || $_SESSION['user']->role->as_value() < UserRole::Moderator->as_value())) {
+    generate_alert('/account/', 'You are not allowed to access this page!', 403);
 }
 
 $page = max(intval($_GET['p'] ?? '1') - 1, 0);
@@ -51,7 +51,7 @@ unset($f);
         <div class="grow row gap-8">
             <!-- SIDE BAR -->
             <div class="column gap-8">
-                <form action="/catalogue.php" method="get">
+                <form action="/files/index.php" method="get">
                     <div class="box">
                         <div class="tab">
                             Search
@@ -90,12 +90,12 @@ unset($f);
                 <div class="row">
                     <div class="box row gap-8">
                         <?php if ($page - 1 >= 0): ?>
-                            <a href="/catalogue.php?p=<?= $page ?>&sort=<?= $sort ?>">
+                            <a href="/files/index.php?p=<?= $page ?>&sort=<?= $sort ?>">
                                 <button>Previous</button>
                             </a>
                         <?php endif; ?>
                         <?php if ($page + 2 <= $max_pages): ?>
-                            <a href="/catalogue.php?p=<?= $page + 2 ?>&sort=<?= $sort ?>" style="margin-left:auto">
+                            <a href="/files/index.php?p=<?= $page + 2 ?>&sort=<?= $sort ?>" style="margin-left:auto">
                                 <button>Next</button>
                             </a>
                         <?php endif; ?>
