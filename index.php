@@ -461,6 +461,7 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
         fileTabButtons.innerHTML += `<button onclick="navigator.clipboard.writeText('${window.location.href}')">Copy URL</button>`;
     </script>
     <script src="/static/scripts/favorites.js"></script>
+    <script src="/static/scripts/player.js"></script>
 <?php endif; ?>
 
 <?php if ($file && isset($_SESSION['user']) && $_SESSION['user']->role->as_value() > UserRole::Moderator->as_value()): ?>

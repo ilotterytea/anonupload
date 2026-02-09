@@ -261,7 +261,7 @@ function html_file_full(File $file)
     if (str_starts_with($file->mime, 'image/')) {
         echo "<img src='$file_full_url' alt='Image file.'>";
     } elseif (str_starts_with($file->mime, 'video/')) {
-        echo "<video controls autoplay loop>";
+        echo "<video controls autoplay loop id='video-playback'>";
         echo "<source src='$file_full_url' type='{$file->mime}'>";
         echo "</video>";
     } elseif (str_starts_with($file->mime, 'audio/')) {
