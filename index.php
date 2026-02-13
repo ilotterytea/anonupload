@@ -145,33 +145,10 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
     }
 }
 ?>
+<!DOCTYPE html>
 <html>
 
-<head>
-    <?php if ($file): ?>
-        <title><?= $file_name ?> - <?= CONFIG["instance"]["name"] ?></title>
-        <meta property="og:title" content="<?= $file_name ?> - <?= CONFIG["instance"]["name"] ?>" />
-        <meta property="og:description" content="<?= $file_html_description ?>" />
-        <meta property="og:url"
-            content="<?= sprintf("%s/%s.%s", CONFIG["instance"]["url"], $file->id, $file->extension) ?>" />
-        <meta property="og:type" content="website" />
-        <?php if (CONFIG["thumbnails"]["enable"]): ?>
-            <meta property="og:image"
-                content="<?= sprintf('%s%s/%s.webp', CONFIG["instance"]["url"], CONFIG["thumbnails"]["url"], $file->id) ?>" />
-        <?php endif; ?>
-        <meta name="robots" content="noindex, nofollow">
-    <?php else: ?>
-        <title><?= CONFIG["instance"]["name"] ?></title>
-        <meta name="description"
-            content="<?= CONFIG["instance"]["name"] ?> is a simple, free and anonymous file sharing site. We do not store anything other than the files you upload.">
-        <meta name="robots" content="nofollow">
-    <?php endif; ?>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
-    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-    <meta name="theme-color" content="#ffe1d4">
-</head>
+<head><?php html_head($file_name, $file_html_description, $file); ?></head>
 
 <body>
     <main<?= $file ? ' class="full-size"' : '' ?>>

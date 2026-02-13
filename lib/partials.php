@@ -4,6 +4,41 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/user.php";
 
+function html_head(string|null $title = null, string|null $description = null, File|null $file = null)
+{
+    $ititle = CONFIG['instance']['name'];
+    if (!$description) {
+        $description = "$ititle is a simple, free and anonymous file sharing site. We do not store anything other than the files you upload.";
+    }
+
+    $title = ($title ? "$title - " : '') . $ititle;
+    echo "<title>$title</title>";
+    echo "<meta property='og:title' content='$title' />";
+    echo '<meta property="og:type" content="website" />';
+    echo "<meta property='og:description' content='$description' />";
+    echo "<meta property='description' content='$description' />";
+
+
+    if (isset($file)) {
+        echo '<meta property="og:url" content="' . sprintf("%s/%s.%s", CONFIG["instance"]["url"], $file->id, $file->extension) . '" />';
+        if (CONFIG['thumbnails']['enable']) {
+            echo '<meta property="og:image" content="' . sprintf("%s/%s.webp", CONFIG["instance"]["url"], $file->id) . '" />';
+        }
+    }
+
+    echo '<meta name="viewport" content="width=device-width, initial-scale=1" />';
+    echo '<link rel="stylesheet" href="/static/style.css" />';
+    echo '<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />';
+    echo '<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />';
+    echo '<meta name="theme-color" content="#ffe1d4" />';
+
+    if ($_SERVER['PHP_SELF'] === '/index.php') {
+        echo '<meta name="robots" content="nofollow" />';
+    } else {
+        echo '<meta name="robots" content="noindex, nofollow" />';
+    }
+}
+
 function html_big_navbar()
 {
     $brand_url = '/static/img/brand/big.webp';

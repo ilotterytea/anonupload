@@ -60,16 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html>
 
-<head>
-    <title>System assets - <?= CONFIG["instance"]["name"] ?></title>
-    <meta name="description" content="The system panel of <?= CONFIG["instance"]["name"] ?>">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
-    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-    <meta name="theme-color" content="#ffe1d4">
-    <meta name="robots" content="noindex, nofollow">
-</head>
+<head><?php html_head("System assets"); ?></head>
 
 <body>
     <main>

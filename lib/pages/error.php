@@ -39,21 +39,10 @@ if (is_dir($dir_path)) {
     }
 }
 ?>
+<!DOCTYPE html>
 <html>
 
-<head>
-    <title>
-        <?= "$error_code $error_reason" ?> - <?= CONFIG["instance"]["name"] ?>
-    </title>
-    <meta name="description" content="<?= CONFIG["instance"]["name"] ?> is a simple, free and anonymous file sharing
-    site. We do not store anything other than the files you upload.">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
-    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-    <meta name="theme-color" content="#ffe1d4">
-    <meta name="robots" content="noindex, nofollow">
-</head>
+<head><?php html_head("$error_code $error_reason"); ?></head>
 
 <body>
     <main class="full-size">

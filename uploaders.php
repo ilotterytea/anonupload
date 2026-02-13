@@ -17,18 +17,10 @@ foreach (CONFIG["upload"]["acceptedmimetypes"] as $k => $v) {
     }
 }
 ?>
+<!DOCTYPE html>
 <html>
 
-<head>
-    <title>Uploaders - <?= CONFIG["instance"]["name"] ?></title>
-    <meta name="description" content="<?= CONFIG["instance"]["name"] ?> configuration for custom file uploader software">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
-    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-    <meta name="theme-color" content="#ffe1d4">
-    <meta name="robots" content="noindex, nofollow">
-</head>
+<head><?php html_head("Uploaders"); ?></head>
 
 <body>
     <main>
@@ -166,10 +158,10 @@ foreach (CONFIG["upload"]["acceptedmimetypes"] as $k => $v) {
                     <hr>
                     <table class="vertical">
                         <?php foreach ($file_types as $type => $exts): ?>
-                                <tr>
-                                    <th><?= $type ?>:</th>
-                                    <td style="text-align: justify"><?= implode(' ', $exts) ?></td>
-                                </tr>
+                            <tr>
+                                <th><?= $type ?>:</th>
+                                <td style="text-align: justify"><?= implode(' ', $exts) ?></td>
+                            </tr>
                         <?php endforeach; ?>
                     </table>
                 </div>
