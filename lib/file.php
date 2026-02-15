@@ -1056,15 +1056,28 @@ class FileMetadataStorage
 
     public function ban_file(File $file, string $sha256, string|null $reason = null)
     {
-        if (!$this->delete_file($file)) {
+        if (!$this->delete_physical_file($file)) {
             return false;
         }
 
         if ($this->type === FileStorageType::Database) {
-            $this->db->prepare('INSERT IGNORE INTO hash_bans(sha256, reason) VALUES (?,?)')
-                ->execute([$sha256, $reason]);
-            $this->db->prepare('INSERT INTO file_bans(id, hash_ban) VALUES (?,?)')
-                ->execute([$file->id, $sha256]);
+            $this->db->beginTransaction();
+            try {
+                $check = $this->db->prepare('SELECT 1 FROM files WHERE id = ?');
+                $check->execute([$file->id]);
+                if (!$check->fetchColumn()) {
+                    throw new RuntimeException("File does not exist");
+                }
+
+                $this->db->prepare('INSERT IGNORE INTO hash_bans(sha256, reason) VALUES (?,?)')
+                    ->execute([$sha256, $reason]);
+                $this->db->prepare('INSERT IGNORE INTO file_bans(id, hash_ban) VALUES (?,?)')
+                    ->execute([$file->id, $sha256]);
+                $this->db->commit();
+            } catch (PDOException $e) {
+                $this->db->rollBack();
+                throw $e;
+            }
         } else if (!file_put_contents(CONFIG['moderation']['hashpath'], "$sha256 $reason" . PHP_EOL, FILE_APPEND)) {
             return false;
         }
