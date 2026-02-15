@@ -57,7 +57,12 @@ if (!empty($files)) {
     $name = parse_file_name($_GET['id'] ?? null);
 
     if ($name !== null) {
-        $file = array_find($files, fn($x) => $x->id === $name['name'] && $x->extension === $name['extension']);
+        foreach ($files as $x) {
+            if ($x->id === $name['name'] && $x->extension === $name['extension']) {
+                $file = $x;
+                break;
+            }
+        }
         if ($file === null) {
             generate_alert('/moderation/approve.php', "File {$name['name']}.{$name['extension']} not found!", 404);
         }
