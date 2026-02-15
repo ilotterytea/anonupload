@@ -490,7 +490,7 @@ class File
             ];
         }
 
-        return File::from($data);
+        return $data === null ? null : File::from($data);
     }
 }
 
@@ -538,11 +538,13 @@ class FileMetadataStorage
                 }
 
                 $file = new File();
+                $file->id = $name;
                 $file->extension = $extension;
                 $file->mime = CONFIG['upload']['acceptedmimetypes'][$extension];
                 $file->size = filesize($path);
                 $file->password = null;
                 $file->expires_at = null;
+                $file->title = null;
 
                 return $file;
             }
