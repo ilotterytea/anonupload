@@ -1013,15 +1013,25 @@ class FileMetadataStorage
 
     public function delete_file(File $file): bool
     {
+        if (!$this->delete_physical_file($file)) {
+            throw new RuntimeException("Failed to delete the file physically");
+        }
+
         if ($this->type === FileStorageType::Database) {
             $this->db->prepare('DELETE FROM files WHERE id = ? AND extension = ?')
                 ->execute([$file->id, $file->extension]);
+        } else if ($this->type === FileStorageType::Json && is_file(CONFIG["metadata"]["directory"] . "/{$file->id}.json")) {
+            unlink(CONFIG["metadata"]["directory"] . "/{$file->id}.json");
         }
 
+        return true;
+    }
+
+    public function delete_physical_file(File $file): bool
+    {
         $paths = [
             CONFIG["files"]["directory"] . "/{$file->id}.{$file->extension}",
-            CONFIG["thumbnails"]["directory"] . "/{$file->id}.webp",
-            CONFIG["metadata"]["directory"] . "/{$file->id}.json"
+            CONFIG["thumbnails"]["directory"] . "/{$file->id}.webp"
         ];
 
         foreach ($paths as $path) {
