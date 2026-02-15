@@ -19,3 +19,9 @@ chart.js
 TOS.txt
 PRIVACY.txt
 MOTD.txt
+
+# themes
+static/themes/*
+!static/themes/TinyEmotes/
+!static/themes/Yotsuba/
+!static/themes/Yotsuba B/

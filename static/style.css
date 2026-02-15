@@ -172,6 +172,18 @@ ul {
     list-style: none;
 }
 
+fieldset {
+    background: var(--box-content-background);
+    border-color: var(--box-border);
+    padding: 8px;
+}
+
+legend {
+    background: var(--box-tab-background);
+    border: 2px solid var(--box-border);
+    padding: 1px 8px;
+}
+
 /** FORM */
 button[type=submit].fancy {
     background: linear-gradient(0deg, var(--box-tab-background), var(--background));

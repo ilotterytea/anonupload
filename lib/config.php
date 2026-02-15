@@ -8,6 +8,7 @@ $cfg = [
         "mirrors" => [],
         "url" => (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]",
         "footerlinks" => [],
+        "defaultstyle" => "Yotsuba"
     ],
     "storage" => [
         "type" => "file"

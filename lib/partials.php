@@ -37,6 +37,17 @@ function html_head(string|null $title = null, string|null $description = null, F
     } else {
         echo '<meta name="robots" content="noindex, nofollow" />';
     }
+
+    // themes
+    if (isset($_COOKIE['theme'])) {
+        $themes = array_map(fn($x) => basename($x), glob("{$_SERVER['DOCUMENT_ROOT']}/static/themes/*", GLOB_ONLYDIR));
+
+        if (in_array($_COOKIE['theme'], $themes, true)) {
+            echo "<link rel='stylesheet' href='/static/themes/{$_COOKIE['theme']}/style.css' />";
+        } else {
+            setcookie("theme", "", 0, "/");
+        }
+    }
 }
 
 function html_big_navbar()
@@ -259,6 +270,8 @@ function html_debug_info()
         <?php endif; ?>
         <a href="/tos.php">Terms of Service</a>
         <a href="/privacy.php">Privacy Policy</a>
+        <p><a href="/preferences.php"><img src="/static/img/icons/preferences.png" alt="Preferences"
+                    title="Customize your experience" height="12"></a></p>
     </div>
     <?php ;
 }

@@ -1,0 +1,79 @@
+:root {
+    --background: #f2f8ee;
+    --background-2: #f2f8ee;
+    --foreground: #425514;
+    --box-tab-background-dark: #bed39c;
+    --box-tab-background: #daebc7;
+    --box-tab-background-light: #cfe4a8;
+    --box-tab-foreground: #425514;
+    --box-border: #95a186;
+    --box-content-background: #e4ebdc;
+    --box-content-background-2: #d4dfc9;
+    --anchor-color: #425514;
+    --anchor-color-hovered: #1c220c;
+
+    --navbar-background: linear-gradient(0deg, #b9caaf, #eaffdd);
+    --navbar-border-color: #94a58a;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #262626;
+        --background-2: #202020;
+        --foreground: #ffffff;
+        --box-tab-background-dark: #363d28;
+        --box-tab-background: #4d583f;
+        --box-tab-background-light: #526136;
+        --box-tab-foreground: #fff;
+        --box-border: #575757;
+        --box-content-background: #3a3a3a;
+        --box-content-background-2: #282828;
+        --anchor-color: #c2ff61;
+        --anchor-color-hovered: #e6ffb7;
+
+        --navbar-background: linear-gradient(0deg, #3c4238, #5b6455);
+        --navbar-border-color: #373f32;
+    }
+}
+
+main.full-size>navbar {
+    background: var(--navbar-background);
+    border-bottom: 1px solid var(--navbar-border-color);
+}
+
+navbar.large {
+    background: none;
+    border-bottom: none;
+}
+
+fieldset,
+legend {
+    border-radius: 4px;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.box {
+    border-radius: 4px;
+}
+
+.box>.tab,
+.tabs>.tab {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+.box>.content {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.box:has(.tabs)>.content {
+    border-top-right-radius: 4px;
+}
