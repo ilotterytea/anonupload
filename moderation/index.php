@@ -38,6 +38,10 @@ if ($user->role->as_value() < UserRole::Moderator->as_value()) {
                     <th><a href="/files/index.php">[File catalogue]</a></th>
                     <td>View all files</td>
                 </tr>
+                <tr>
+                    <th><a href="/moderation/reports.php">[Report reviewal]</a></th>
+                    <td>Review file reports</td>
+                </tr>
             </table>
         </div>
     </main>

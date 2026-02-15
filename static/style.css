@@ -184,6 +184,12 @@ legend {
     padding: 1px 8px;
 }
 
+fieldset>textarea {
+    resize: none;
+    width: 256px;
+    height: 128px;
+}
+
 /** FORM */
 button[type=submit].fancy {
     background: linear-gradient(0deg, var(--box-tab-background), var(--background));
@@ -389,6 +395,14 @@ button[type=submit].fancy:hover {
 }
 
 /** SHORTCUTS */
+.block>* {
+    display: block;
+}
+
+.inline-block>* {
+    display: inline-block;
+}
+
 .column {
     display: flex;
     flex-direction: column;

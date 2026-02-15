@@ -204,7 +204,7 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
                                         <?php endif; ?>
                                     <?php endif; ?>
                                     <?php if (CONFIG["report"]["enable"]): ?>
-                                        <a href="/report.php?f=<?= "{$file->id}.{$file->extension}" ?>">
+                                        <a href="/files/report.php?id=<?= "{$file->id}.{$file->extension}" ?>">
                                             <button>Report</button>
                                         </a>
                                     <?php endif; ?>
