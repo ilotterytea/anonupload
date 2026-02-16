@@ -76,3 +76,84 @@ function str_safe(string $s, int|null $max_length, bool $remove_new_lines = true
 
     return $output;
 }
+
+function bbcode_parse(string $text): string
+{
+    $text = htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
+    $simple = [
+        '/\[b\](.*?)\[\/b\]/is' => '<strong>$1</strong>',
+        '/\[i\](.*?)\[\/i\]/is' => '<em>$1</em>',
+        '/\[u\](.*?)\[\/u\]/is' => '<u>$1</u>',
+        '/\[s\](.*?)\[\/s\]/is' => '<del>$1</del>',
+        '/\[quote\](.*?)\[\/quote\]/is' => '<blockquote>$1</blockquote>',
+        '/\[code\](.*?)\[\/code\]/is' => '<pre><code>$1</code></pre>',
+        '/\[size=(\d+)\](.*?)\[\/size\]/is' => '<span style="font-size:$1px">$2</span>',
+        '/\[color=(#[a-f0-9]{3,6}|[a-z]+)\](.*?)\[\/color\]/is' => '<span style="color:$1">$2</span>',
+        '/\[h([1-6])\](.*?)\[\/h\1\]/is' => '<h$1>$2</h$1>'
+    ];
+
+    foreach ($simple as $pattern => $replace) {
+        $text = preg_replace($pattern, $replace, $text);
+    }
+
+    // link with text
+    $text = preg_replace_callback(
+        '/\[url=(.*?)\](.*?)\[\/url\]/is',
+        function ($m) {
+            $url = filter_var($m[1], FILTER_SANITIZE_URL);
+            return "<a href='$url' target='_blank' rel='noopener noreferrer'>{$m[2]}</a>";
+        },
+        $text
+    );
+
+    // link without text
+    $text = preg_replace_callback(
+        '/\[url\](.*?)\[\/url\]/is',
+        function ($m) {
+            $url = filter_var($m[1], FILTER_SANITIZE_URL);
+            return "<a href='$url' target='_blank' rel='noopener noreferrer'>$url</a>";
+        },
+        $text
+    );
+
+    // lists
+    $text = preg_replace_callback(
+        '/\[list\](.*?)\[\/list\]/is',
+        function ($m) {
+            $items = preg_split('/\[\*\]/', $m[1], -1, PREG_SPLIT_NO_EMPTY);
+            $out = '<ul>';
+            foreach ($items as $item) {
+                if (empty(trim($item)))
+                    continue;
+                $out .= '<li>' . trim($item) . '</li>';
+            }
+            $out .= '</ul>';
+            return $out;
+        },
+        $text
+    );
+
+    $text = preg_replace_callback(
+        '/\[olist\](.*?)\[\/olist\]/is',
+        function ($m) {
+            $items = preg_split('/\[\*\]/', $m[1], -1, PREG_SPLIT_NO_EMPTY);
+            $out = '<ol>';
+            foreach ($items as $item) {
+                if (empty(trim($item)))
+                    continue;
+                $out .= '<li>' . trim($item) . '</li>';
+            }
+            $out .= '</ol>';
+            return $out;
+        },
+        $text
+    );
+
+    $paragraphs = preg_split("/\R\R+/", $text);
+    foreach ($paragraphs as &$p) {
+        $p = '<p>' . trim($p) . '</p>';
+    }
+
+    return implode("\n", $paragraphs);
+}

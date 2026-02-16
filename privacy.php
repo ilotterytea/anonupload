@@ -5,7 +5,7 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 
 $file_path = "{$_SERVER['DOCUMENT_ROOT']}/PRIVACY.txt";
 $data = [
-    'content' => file_get_contents($file_path) ?: "We don't store anything personal about you.",
+    'content' => bbcode_parse(file_get_contents($file_path) ?: "We don't store anything personal about you."),
     'lastupdated' => (new DateTime())->setTimestamp(filemtime($file_path) ?: 0)
 ];
 
@@ -26,7 +26,7 @@ if ($data['lastupdated']->getTimestamp() === 0)
                     (<?= format_timestamp($data['lastupdated']) ?> ago)</i></p>
         <?php endif; ?>
         <hr>
-        <pre><?= $data['content'] ?></pre>
+        <?= $data['content'] ?>
     </main>
 </body>
 
