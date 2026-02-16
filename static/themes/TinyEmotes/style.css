@@ -1,4 +1,6 @@
 :root {
+    --page-pad: 8px;
+
     --background: #f2f8ee;
     --background-2: #f2f8ee;
     --foreground: #425514;
@@ -36,9 +38,19 @@
     }
 }
 
-main.full-size>navbar {
+body {
+    margin-top: unset;
+}
+
+navbar {
+    padding-top: var(--page-pad);
     background: var(--navbar-background);
     border-bottom: 1px solid var(--navbar-border-color);
+}
+
+navbar.large {
+    background: unset;
+    border-bottom: unset;
 }
 
 navbar.large {
