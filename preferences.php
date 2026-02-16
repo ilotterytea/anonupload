@@ -7,11 +7,10 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/user.php";
 
 USER->authorize_with_cookie();
 
-$themes = array_map(fn($x) => basename($x), glob("{$_SERVER['DOCUMENT_ROOT']}/static/themes/*", GLOB_ONLYDIR));
 $theme = $_COOKIE['theme'] ?? CONFIG['instance']['defaultstyle'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['theme']) && in_array($_POST['theme'], $themes, true)) {
+    if (isset($_POST['theme']) && in_array($_POST['theme'], THEME_LIST, true)) {
         $theme = $_POST['theme'];
     }
     setcookie("theme", $theme, time() + 86400 * 30 * 180, "/");
@@ -35,10 +34,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form autocomplete="off" method="post" class="column gap-8">
             <fieldset>
                 <legend>General</legend>
-                <?php if (!empty($themes)): ?>
+                <?php if (!empty(THEME_LIST)): ?>
                     <label for="theme">Theme:</label>
                     <select name="theme" id="theme">
-                        <?php foreach ($themes as $name): ?>
+                        <?php foreach (THEME_LIST as $name): ?>
                             <option value="<?= $name ?>" <?= $name === $theme ? 'selected' : '' ?>>
                                 <?= $name ?>
                             </option>

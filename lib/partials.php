@@ -40,9 +40,7 @@ function html_head(string|null $title = null, string|null $description = null, F
 
     // themes
     if (isset($_COOKIE['theme'])) {
-        $themes = array_map(fn($x) => basename($x), glob("{$_SERVER['DOCUMENT_ROOT']}/static/themes/*", GLOB_ONLYDIR));
-
-        if (in_array($_COOKIE['theme'], $themes, true)) {
+        if (in_array($_COOKIE['theme'], THEME_LIST, true)) {
             echo "<link rel='stylesheet' href='/static/themes/{$_COOKIE['theme']}/style.css' />";
         } else {
             setcookie("theme", "", 0, "/");

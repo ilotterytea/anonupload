@@ -59,7 +59,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html>
 
-<head><?php html_head("System configuration"); ?></head>
+<head>
+    <?php html_head("System configuration"); ?>
+</head>
 
 <body>
     <main>
@@ -73,421 +75,348 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
         <hr>
-        <form action="/system/config.php" method="post">
-            <h2>Instance</h2>
-            <hr>
-            <table class="vertical">
-                <tr>
-                    <th>Name</th>
-                    <td><input type="text" name="instance_name" value="<?= CONFIG['instance']['name'] ?>"></td>
-                </tr>
-                <tr>
-                    <th>Mirrors</th>
-                    <td>
-                        <textarea name="instance_mirrors"
-                            placeholder="One line per mirror. The line should follow this formatting: url=name."><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['instance']['mirrors']), CONFIG['instance']['mirrors'])) ?></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Footer links</th>
-                    <td>
-                        <textarea name="instance_footerlinks"
-                            placeholder="One line per link. The line should follow this formatting: name=url."><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['instance']['footerlinks']), CONFIG['instance']['footerlinks'])) ?></textarea>
-                    </td>
-                </tr>
-            </table>
+        <form autocomplete="off" method="post" class="column gap-8">
+            <div class="wall">
+                <fieldset class="block">
+                    <legend>Instance</legend>
 
-            <h2>Storage</h2>
-            <hr>
-            <table class="vertical">
-                <tr>
-                    <th>Type</th>
-                    <td>
-                        <select name="storage_type">
-                            <option value="json" <?= CONFIG["storage"]["type"] === "file" ? 'selected' : '' ?>>Files only
-                            </option>
-                            <option value="json" <?= CONFIG["storage"]["type"] === "json" ? 'selected' : '' ?>>JSON-based
-                            </option>
-                            <option value="database" <?= CONFIG["storage"]["type"] === "database" ? 'selected' : '' ?>>
-                                Database</option>
+                    <label for="instance_name">Name:</label>
+                    <input type="text" name="instance_name" id="instance_name"
+                        value="<?= CONFIG['instance']['name'] ?>">
+
+                    <label for="instance_mirrors">Mirrors:</label>
+                    <textarea name="instance_mirrors" id="instance_mirrors"
+                        placeholder="One line per mirror. The line should follow this formatting: url=name."><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['instance']['mirrors']), CONFIG['instance']['mirrors'])) ?></textarea>
+
+                    <label for="instance_footerlinks">Footer links:</label>
+                    <textarea name="instance_footerlinks" id="instance_footerlinks"
+                        placeholder="One line per link. The line should follow this formatting: name=url."><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['instance']['footerlinks']), CONFIG['instance']['footerlinks'])) ?></textarea>
+
+                    <?php if (!empty(THEME_LIST)): ?>
+                        <label for="instance_defaultstyle">Default theme:</label>
+                        <select name="instance_defaultstyle" id="instance_defaultstyle">
+                            <?php foreach (THEME_LIST as $name): ?>
+                                <option value="<?= $name ?>">
+                                    <?= $name ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
-                    </td>
-                </tr>
-            </table>
+                    <?php endif; ?>
+                </fieldset>
 
-            <h2>Database</h2>
-            <hr>
-            <table class="vertical">
-                <tr>
-                    <th>Driver</th>
-                    <td><input type="text" name="database_driver" value="<?= CONFIG['database']['driver'] ?>"></td>
-                </tr>
-                <tr>
-                    <th>Hostname</th>
-                    <td><input type="text" name="database_host" value="<?= CONFIG['database']['host'] ?>"></td>
-                </tr>
-                <tr>
-                    <th>Port</th>
-                    <td><input type="number" name="database_port" value="<?= CONFIG['database']['port'] ?>"></td>
-                </tr>
-                <tr>
-                    <th>Name</th>
-                    <td><input type="text" name="database_name" value="<?= CONFIG['database']['name'] ?>"></td>
-                </tr>
-                <tr>
-                    <th>User</th>
-                    <td><input type="text" name="database_user" value="<?= CONFIG['database']['user'] ?>"></td>
-                </tr>
-                <tr>
-                    <th>Password</th>
-                    <td><input type="text" name="database_pass"
-                            value="<?= !empty(CONFIG['database']['pass']) ? '****' : '' ?>"></td>
-                </tr>
-            </table>
+                <fieldset class="block">
+                    <legend>Storage</legend>
 
-            <h2>Driver</h2>
-            <hr>
-            <table class="vertical">
-                <tr>
-                    <th>Ruffle</th>
-                    <td>
-                        <input type="text" name="driver_ruffle" value="<?= CONFIG['driver']['ruffle'] ?>">
-                    </td>
-                </tr>
-                <tr>
-                    <th>Chart.js</th>
-                    <td>
-                        <input type="text" name="driver_chart" value="<?= CONFIG['driver']['chart'] ?>">
-                    </td>
-                </tr>
-            </table>
+                    <label for="storage_type">Storage type:</label>
+                    <select name="storage_type" id="storage_type">
+                        <option value="json" <?= CONFIG["storage"]["type"] === "file" ? 'selected' : '' ?>>Files
+                            only
+                        </option>
+                        <option value="json" <?= CONFIG["storage"]["type"] === "json" ? 'selected' : '' ?>>
+                            JSON-based
+                        </option>
+                        <option value="database" <?= CONFIG["storage"]["type"] === "database" ? 'selected' : '' ?>>
+                            Database</option>
+                    </select>
 
-            <h2>File catalog</h2>
-            <hr>
-            <table class="vertical">
-                <tr>
-                    <th>Public access:</th>
-                    <td>
-                        <input type="checkbox" name="filecatalog_public" value="on" <?= CONFIG['filecatalog']['public'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Files per page:</th>
-                    <td>
-                        <input type="number" name="filecatalog_limit" value="<?= CONFIG['filecatalog']['limit'] ?>">
-                    </td>
-                </tr>
-                <tr>
-                    <th>Include only MIME-types:</th>
-                    <td>
-                        <input type="text" name="filecatalog_includemimetypes"
-                            value="<?= implode(' ', CONFIG['filecatalog']['includemimetypes']) ?>">
-                    </td>
-                </tr>
-            </table>
+                    <label for="database_driver">Driver:</label>
+                    <input type="text" name="database_driver" id="database_driver"
+                        value="<?= CONFIG['database']['driver'] ?>">
 
-            <h2>Random files <i>(Suprise Me!)</i></h2>
-            <hr>
-            <table class="vertical">
-                <tr>
-                    <th>Enable:</th>
-                    <td>
-                        <input type="checkbox" name="supriseme_enable" value="on" <?= CONFIG['supriseme']['enable'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Order condition:</th>
-                    <td>
-                        <input type="text" name="filecatalog_order" value="<?= CONFIG['supriseme']['order'] ?>">
-                    </td>
-                </tr>
-            </table>
+                    <label for="database_host">Host:</label>
+                    <input type="text" name="database_host" id="database_host"
+                        value="<?= CONFIG['database']['host'] ?>">
 
-            <h2>Files</h2>
-            <hr>
-            <table class="vertical">
-                <tr>
-                    <th>Fancy view:</th>
-                    <td>
-                        <input type="checkbox" name="files_fancyview" value="on" <?= CONFIG['files']['fancyview'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Count views:</th>
-                    <td>
-                        <input type="checkbox" name="files_countviews" value="on" <?= CONFIG['files']['countviews'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Show upload time:</th>
-                    <td>
-                        <input type="checkbox" name="files_showuploadtime" value="on"
-                            <?= CONFIG['files']['showuploadtime'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Show views:</th>
-                    <td>
-                        <input type="checkbox" name="files_showviews" value="on" <?= CONFIG['files']['showviews'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Display uploaded HTML-pages:</th>
-                    <td>
-                        <input type="checkbox" name="files_displayhtml" value="on" <?= CONFIG['files']['displayhtml'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Directory:</th>
-                    <td>
-                        <input type="text" name="files_directory" value="<?= CONFIG['files']['directory'] ?>">
-                    </td>
-                </tr>
-                <tr>
-                    <th>URL:</th>
-                    <td>
-                        <input type="text" name="files_url" value="<?= CONFIG['files']['url'] ?>">
-                    </td>
-                </tr>
-                <tr>
-                    <th>Deletion:</th>
-                    <td>
-                        <input type="checkbox" name="files_deletion" value="on" <?= CONFIG['files']['deletion'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Deletion key length:</th>
-                    <td>
-                        <input type="number" name="files_deletionkeylength"
-                            value="<?= CONFIG['files']['deletionkeylength'] ?>">
-                        characters
-                    </td>
-                </tr>
-            </table>
+                    <label for="database_port">Port:</label>
+                    <input type="number" name="database_port" id="database_port"
+                        value="<?= CONFIG['database']['port'] ?>">
 
-            <h2>File upload</h2>
-            <hr>
-            <table class="vertical">
-                <tr>
-                    <th>Verify MIME-type:</th>
-                    <td>
-                        <input type="checkbox" name="upload_verifymimetype" value="on"
-                            <?= CONFIG['upload']['verifymimetype'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Strip EXIF information:</th>
-                    <td>
-                        <input type="checkbox" name="upload_stripexif" value="on" <?= CONFIG['upload']['stripexif'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>ID characters:</th>
-                    <td>
-                        <input type="text" name="upload_idcharacters" value="<?= CONFIG['upload']['idcharacters'] ?>">
-                    </td>
-                </tr>
-                <tr>
-                    <th>ID length:</th>
-                    <td>
-                        <input type="number" name="upload_idlength" value="<?= CONFIG['upload']['idlength'] ?>">
-                        characters
-                    </td>
-                </tr>
-                <tr>
-                    <th>ID prefix:</th>
-                    <td>
-                        <input type="text" name="upload_idprefix" value="<?= CONFIG['upload']['idprefix'] ?>">
-                    </td>
-                </tr>
-                <tr>
-                    <th>Custom ID:</th>
-                    <td>
-                        <input type="checkbox" name="upload_customid" value="on" <?= CONFIG['upload']['customid'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Custom ID regex:</th>
-                    <td>
-                        <input type="text" name="upload_customidregex" value="<?= CONFIG['upload']['customidregex'] ?>">
-                    </td>
-                </tr>
-                <tr>
-                    <th>Max custom ID length:</th>
-                    <td>
-                        <input type="number" name="upload_customidlength"
-                            value="<?= CONFIG['upload']['customidlength'] ?>">
-                        characters
-                    </td>
-                </tr>
-                <tr>
-                    <th>Max title length:</th>
-                    <td>
-                        <input type="number" name="upload_titlelength" value="<?= CONFIG['upload']['titlelength'] ?>">
-                        characters
-                    </td>
-                </tr>
-                <tr>
-                    <th>Unpack ZIP web applications:</th>
-                    <td>
-                        <input type="checkbox" name="upload_zipwebapps" value="on" <?= CONFIG['upload']['zipwebapps'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Remove letterboxes:</th>
-                    <td>
-                        <input type="checkbox" name="upload_removeletterboxes" value="on"
-                            <?= CONFIG['upload']['removeletterboxes'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>File expiration:</th>
-                    <td>
-                        <textarea name="upload_expiration"
-                            placeholder="One expiration per line. Format: timeout=name. For example: ne=never, 14d=2 weeks, 12h=12 hours, 5m=5 minutes"><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['upload']['expiration']), CONFIG['upload']['expiration'])) ?></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Accepted MIME-types:</th>
-                    <td>
-                        <textarea name="upload_acceptedmimetypes"
-                            placeholder="One MIME-type per line. Format: extension=mime. For example: jpg=image/jpeg"><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['upload']['acceptedmimetypes']), CONFIG['upload']['acceptedmimetypes'])) ?></textarea>
-                    </td>
-                </tr>
-            </table>
+                    <label for="database_name">Name:</label>
+                    <input type="text" name="database_name" id="database_name"
+                        value="<?= CONFIG['database']['name'] ?>">
 
-            <h2>External File Upload</h2>
-            <hr>
-            <table class="vertical">
-                <tr>
-                    <th>Enable:</th>
-                    <td>
-                        <input type="checkbox" name="externalupload_enable" value="on"
-                            <?= CONFIG['externalupload']['enable'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Max duration:</th>
-                    <td>
-                        <input type="number" name="externalupload_maxduration"
-                            value="<?= CONFIG['externalupload']['maxduration'] ?>">
-                        seconds
-                    </td>
-                </tr>
-                <tr>
-                    <th>Quality:</th>
-                    <td>
-                        <input type="text" name="externalupload_quality"
-                            value="<?= CONFIG['externalupload']['quality'] ?>">
-                    </td>
-                </tr>
-            </table>
+                    <label for="database_user">User:</label>
+                    <input type="text" name="database_user" id="database_user"
+                        value="<?= CONFIG['database']['user'] ?>">
 
-            <h2>Thumbnails</h2>
-            <hr>
-            <table class="vertical">
-                <tr>
-                    <th>Enable:</th>
-                    <td>
-                        <input type="checkbox" name="thumbnails_enable" value="on" <?= CONFIG['thumbnails']['enable'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Directory:</th>
-                    <td>
-                        <input type="text" name="thumbnails_directory" value="<?= CONFIG['thumbnails']['directory'] ?>">
-                    </td>
-                </tr>
-                <tr>
-                    <th>URL:</th>
-                    <td>
-                        <input type="text" name="thumbnails_url" value="<?= CONFIG['thumbnails']['url'] ?>">
-                    </td>
-                </tr>
-                <tr>
-                    <th>Size:</th>
-                    <td>
+                    <label for="database_pass">Password:</label>
+                    <input type="text" name="database_pass" id="database_pass"
+                        value="<?= !empty(CONFIG['database']['pass']) ? '****' : '' ?>">
+                </fieldset>
+
+                <fieldset class="block">
+                    <legend>Driver</legend>
+
+                    <label for="driver_ruffle">Ruffle:</label>
+                    <input type="text" name="driver_ruffle" id="driver_ruffle"
+                        value="<?= CONFIG['driver']['ruffle'] ?>">
+
+                    <label for="driver_chart">Chart.js:</label>
+                    <input type="text" name="driver_chart" id="driver_chart" value="<?= CONFIG['driver']['chart'] ?>">
+                </fieldset>
+
+                <fieldset class="block">
+                    <legend>File catalog</legend>
+
+                    <label for="filecatalog_public">Public access:</label>
+                    <input type="checkbox" name="filecatalog_public" id="filecatalog_public" value="on"
+                        <?= CONFIG['filecatalog']['public'] ? 'checked' : '' ?>>
+
+                    <label for="filecatalog_limit">Files per page:</label>
+                    <input type="number" name="filecatalog_limit" id="filecatalog_limit"
+                        value="<?= CONFIG['filecatalog']['limit'] ?>">
+
+                    <label for="filecatalog_includemimetypes">Include only MIME-types:</label>
+                    <input type="text" name="filecatalog_includemimetypes" id="filecatalog_includemimetypes"
+                        value="<?= implode(' ', CONFIG['filecatalog']['includemimetypes']) ?>">
+                </fieldset>
+
+                <fieldset class="block">
+                    <legend>Random files</legend>
+
+                    <label for="supriseme_enable">Enable:</label>
+                    <input type="checkbox" name="supriseme_enable" id="supriseme_enable" value="on"
+                        <?= CONFIG['supriseme']['enable'] ? 'checked' : '' ?>>
+
+                    <label for="supriseme_order">File selection condition:</label>
+                    <input type="text" name="supriseme_order" id="supriseme_order"
+                        value="<?= CONFIG['supriseme']['order'] ?>">
+                </fieldset>
+
+                <fieldset class="block">
+                    <legend>Files</legend>
+
+                    <label for="files_fancyview">Fancy view:</label>
+                    <input type="checkbox" name="files_fancyview" id="files_fancyview" value="on"
+                        <?= CONFIG['files']['fancyview'] ? 'checked' : '' ?>>
+
+                    <label for="files_countviews">Count views:</label>
+                    <input type="checkbox" name="files_countviews" id="files_countviews" value="on"
+                        <?= CONFIG['files']['countviews'] ? 'checked' : '' ?>>
+
+                    <label for="files_showuploadtime">Show upload time:</label>
+                    <input type="checkbox" name="files_showuploadtime" id="files_showuploadtime" value="on"
+                        <?= CONFIG['files']['showuploadtime'] ? 'checked' : '' ?>>
+
+                    <label for="files_showviews">Show views:</label>
+                    <input type="checkbox" name="files_showviews" id="files_showviews" value="on"
+                        <?= CONFIG['files']['showviews'] ? 'checked' : '' ?>>
+
+                    <label for="files_displayhtml">Display uploaded HTML-pages:</label>
+                    <input type="checkbox" name="files_displayhtml" id="files_displayhtml" value="on"
+                        <?= CONFIG['files']['displayhtml'] ? 'checked' : '' ?>>
+
+                    <label for="files_title">Show file title:</label>
+                    <input type="checkbox" name="files_title" id="files_title" value="on" <?= CONFIG['files']['title'] ? 'checked' : '' ?>>
+
+                    <label for="files_directory">Save directory:</label>
+                    <input type="text" name="files_directory" id="files_directory"
+                        value="<?= CONFIG['files']['directory'] ?>">
+
+                    <label for="files_url">File URL prefix:</label>
+                    <input type="text" name="files_url" id="files_url" value="<?= CONFIG['files']['url'] ?>">
+
+                    <label for="files_deletion">Allow file deletion:</label>
+                    <input type="checkbox" name="files_deletion" id="files_deletion" value="on"
+                        <?= CONFIG['files']['deletion'] ? 'checked' : '' ?>>
+
+                    <label for="files_deletionkeylength">Deletion key length:</label>
+                    <input type="number" name="files_deletionkeylength" id="files_deletionkeylength"
+                        value="<?= CONFIG['files']['deletionkeylength'] ?>">
+
+                    <label for="instance_defaultvisibility">Default file visibility:</label>
+                    <select name="instance_defaultvisibility" id="instance_defaultvisibility">
+                        <option value="0">Private</option>
+                        <option value="1">Public</option>
+                        <option value="2">Must pass approval</option>
+                    </select>
+                </fieldset>
+
+                <fieldset class="block">
+                    <legend>File upload</legend>
+
+                    <label for="upload_verifymimetype">Verify MIME-type for files:</label>
+                    <input type="checkbox" name="upload_verifymimetype" id="upload_verifymimetype" value="on"
+                        <?= CONFIG['upload']['verifymimetype'] ? 'checked' : '' ?>>
+
+                    <label for="upload_stripexif">Strip EXIF information from files:</label>
+                    <input type="checkbox" name="upload_stripexif" id="upload_stripexif" value="on"
+                        <?= CONFIG['upload']['stripexif'] ? 'checked' : '' ?>>
+
+                    <label for="upload_idcharacters">File ID characters:</label>
+                    <input type="text" name="upload_idcharacters" id="upload_idcharacters"
+                        value="<?= CONFIG['upload']['idcharacters'] ?>">
+
+                    <label for="upload_idlength">File ID length:</label>
+                    <input type="number" name="upload_idlength" id="upload_idlength"
+                        value="<?= CONFIG['upload']['idlength'] ?>">
+
+                    <label for="upload_idprefix">File ID prefix:</label>
+                    <input type="text" name="upload_idprefix" id="upload_idprefix"
+                        value="<?= CONFIG['upload']['idprefix'] ?>">
+
+                    <label for="upload_customid">Allow custom file IDs:</label>
+                    <input type="checkbox" name="upload_customid" id="upload_customid" value="on"
+                        <?= CONFIG['upload']['customid'] ? 'checked' : '' ?>>
+
+                    <label for="upload_customidregex">Custom file ID regex:</label>
+                    <input type="text" name="upload_customidregex" id="upload_customidregex"
+                        value="<?= CONFIG['upload']['customidregex'] ?>">
+
+                    <label for="upload_customidlength">Max. custom file ID length:</label>
+                    <input type="number" name="upload_customidlength" id="upload_customidlength"
+                        value="<?= CONFIG['upload']['customidlength'] ?>">
+
+                    <label for="upload_titlelength">Max. title length:</label>
+                    <input type="number" name="upload_titlelength" id="upload_titlelength"
+                        value="<?= CONFIG['upload']['titlelength'] ?>">
+
+                    <label for="upload_zipwebapps">Allow web application uploads:</label>
+                    <input type="checkbox" name="upload_zipwebapps" id="upload_zipwebapps" value="on"
+                        <?= CONFIG['upload']['zipwebapps'] ? 'checked' : '' ?>>
+
+                    <label for="upload_removeletterboxes">Allow letterbox removal:</label>
+                    <input type="checkbox" name="upload_removeletterboxes" id="upload_removeletterboxes" value="on"
+                        <?= CONFIG['upload']['removeletterboxes'] ? 'checked' : '' ?>>
+
+                    <label for="upload_expiration">File expiration:</label>
+                    <textarea name="upload_expiration" id="upload_expiration"
+                        placeholder="One expiration per line. Format: timeout=name. For example: ne=never, 14d=2 weeks, 12h=12 hours, 5m=5 minutes"><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['upload']['expiration']), CONFIG['upload']['expiration'])) ?></textarea>
+
+                    <label for="upload_acceptedmimetypes">Accepted file MIME-types:</label>
+                    <textarea name="upload_acceptedmimetypes" id="upload_acceptedmimetypes"
+                        placeholder="One MIME-type per line. Format: extension=mime. For example: jpg=image/jpeg"><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['upload']['acceptedmimetypes']), CONFIG['upload']['acceptedmimetypes'])) ?></textarea>
+                </fieldset>
+
+                <fieldset class="block">
+                    <legend>External file upload</legend>
+
+                    <label for="externalupload_enable">Enable:</label>
+                    <input type="checkbox" name="externalupload_enable" id="externalupload_enable" value="on"
+                        <?= CONFIG['externalupload']['enable'] ? 'checked' : '' ?>>
+
+                    <label for="externalupload_maxduration">Max duration:</label>
+                    <input type="number" name="externalupload_maxduration" id="externalupload_maxduration"
+                        value="<?= CONFIG['externalupload']['maxduration'] ?>">
+
+                    <label for="externalupload_quality">Quality:</label>
+                    <input type="text" name="externalupload_quality" id="externalupload_quality"
+                        value="<?= CONFIG['externalupload']['quality'] ?>">
+                </fieldset>
+
+                <fieldset class="block">
+                    <legend>Thumbnails</legend>
+
+                    <label for="thumbnails_enable">Enable:</label>
+                    <input type="checkbox" name="thumbnails_enable" id="thumbnails_enable" value="on"
+                        <?= CONFIG['thumbnails']['enable'] ? 'checked' : '' ?>>
+
+                    <label for="thumbnails_directory">Save directory:</label>
+                    <input type="text" name="thumbnails_directory" id="thumbnails_directory"
+                        value="<?= CONFIG['thumbnails']['directory'] ?>">
+
+                    <label for="thumbnails_url">Thumbnail URL prefix:</label>
+                    <input type="text" name="thumbnails_url" id="thumbnails_url"
+                        value="<?= CONFIG['thumbnails']['url'] ?>">
+
+                    <label for="thumbnails_size">Size:</label>
+
+                    <div id="thumbnails_size">
                         <input type="number" name="thumbnails_width" value="<?= CONFIG['thumbnails']['width'] ?>">
                         x
                         <input type="number" name="thumbnails_height" value="<?= CONFIG['thumbnails']['height'] ?>">
-                    </td>
-                </tr>
-            </table>
+                    </div>
+                </fieldset>
 
-            <h2>Metadata</h2>
-            <hr>
-            <table class="vertical">
-                <tr>
-                    <th>Directory:</th>
-                    <td>
-                        <input type="text" name="metadata_directory" value="<?= CONFIG['metadata']['directory'] ?>">
-                    </td>
-                </tr>
-            </table>
+                <fieldset class="block">
+                    <legend>Metadata</legend>
 
-            <h2>Reports</h2>
-            <hr>
-            <table class="vertical">
-                <tr>
-                    <th>Enable:</th>
-                    <td>
-                        <input type="checkbox" name="report_enable" value="on" <?= CONFIG['report']['enable'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Directory:</th>
-                    <td>
-                        <input type="text" name="report_directory" value="<?= CONFIG['report']['directory'] ?>">
-                    </td>
-                </tr>
-            </table>
+                    <label for="metadata_directory">Save directory:</label>
+                    <input type="text" name="metadata_directory" id="metadata_directory"
+                        value="<?= CONFIG['metadata']['directory'] ?>">
+                </fieldset>
 
-            <h2>Moderation</h2>
-            <hr>
-            <table class="vertical">
-                <tr>
-                    <th>File ban permission:</th>
-                    <td>
-                        <input type="checkbox" name="moderation_banfiles" value="on" <?= CONFIG['moderation']['banfiles'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Password file:</th>
-                    <td>
-                        <input type="text" name="moderation_path" value="<?= CONFIG['moderation']['path'] ?>">
-                    </td>
-                </tr>
-            </table>
+                <fieldset class="block">
+                    <legend>Reports</legend>
 
-            <h2>Statistics</h2>
-            <hr>
-            <table class="vertical">
-                <tr>
-                    <th>Enable:</th>
-                    <td>
-                        <input type="checkbox" name="stats_enable" value="on" <?= CONFIG['stats']['enable'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Display last files:</th>
-                    <td>
-                        <input type="checkbox" name="stats_lastfiles" value="on" <?= CONFIG['stats']['lastfiles'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Display the most viewed files:</th>
-                    <td>
-                        <input type="checkbox" name="stats_mostviewed" value="on" <?= CONFIG['stats']['mostviewed'] ? 'checked' : '' ?>>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Disk size:</th>
-                    <td>
-                        <input type="text" name="stats_disksize" value="<?= CONFIG['stats']['disksize'] ?>">
-                        bytes
-                    </td>
-                </tr>
-            </table>
+                    <label for="report_enable">Enable:</label>
+                    <input type="checkbox" name="report_enable" id="report_enable" value="on"
+                        <?= CONFIG['report']['enable'] ? 'checked' : '' ?>>
+
+                    <label for="report_directory">Save directory:</label>
+                    <input type="text" name="report_directory" id="report_directory"
+                        value="<?= CONFIG['report']['directory'] ?>">
+
+                    <label for="report_reasons">Reasons:</label>
+                    <textarea name="report_reasons" id="report_reasons"
+                        placeholder="One reason per line"><?= implode("\n", CONFIG['report']['reasons']) ?></textarea>
+                </fieldset>
+
+                <fieldset class="block">
+                    <legend>Moderation</legend>
+
+                    <label for="moderation_banfiles">File ban permission:</label>
+                    <input type="checkbox" name="moderation_banfiles" id="moderation_banfiles" value="on"
+                        <?= CONFIG['moderation']['banfiles'] ? 'checked' : '' ?>>
+
+                    <label for="moderation_path">Password file:</label>
+                    <input type="text" name="moderation_path" id="moderation_path"
+                        value="<?= CONFIG['moderation']['path'] ?>">
+
+                    <label for="moderation_hashpath">Banned hashes file:</label>
+                    <input type="text" name="moderation_hashpath" id="moderation_hashpath"
+                        value="<?= CONFIG['moderation']['hashpath'] ?>">
+                </fieldset>
+
+                <fieldset class="block">
+                    <legend>Users</legend>
+                    <label for="users_path">User filepath:</label>
+                    <input type="text" name="users_path" id="users_path" value="<?= CONFIG['users']['path'] ?>">
+
+                    <label for="users_cookietime">Cookie lifetime:</label>
+                    <input type="number" name="users_cookietime" id="users_cookietime"
+                        value="<?= CONFIG['users']['cookietime'] ?>">
+
+                    <label for="users_allowregistration">Allow registration:</label>
+                    <input type="checkbox" name="users_allowregistration" value="on"
+                        <?= CONFIG['users']['allowregistration'] ? 'checked' : '' ?>>
+
+                    <label for="users_usernameregex">Username regex:</label>
+                    <input type="text" name="users_usernameregex" id="users_usernameregex"
+                        value="<?= CONFIG['users']['usernameregex'] ?>">
+
+                    <label for="users_usernameminlength">Min. username length:</label>
+                    <input type="number" name="users_usernameminlength" id="users_usernameminlength"
+                        value="<?= CONFIG['users']['usernameminlength'] ?>">
+
+                    <label for="users_usernamemaxlength">Max. username length:</label>
+                    <input type="number" name="users_usernamemaxlength" id="users_usernamemaxlength"
+                        value="<?= CONFIG['users']['usernamemaxlength'] ?>">
+
+                    <label for="users_passwordminlength">Min. password length:</label>
+                    <input type="number" name="users_passwordminlength" id="users_passwordminlength"
+                        value="<?= CONFIG['users']['passwordminlength'] ?>">
+                </fieldset>
+
+                <fieldset class="block">
+                    <legend>Statistics</legend>
+
+                    <label for="stats_enable">Enable:</label>
+                    <input type="checkbox" name="stats_enable" id="stats_enable" value="on" <?= CONFIG['stats']['enable'] ? 'checked' : '' ?>>
+
+                    <label for="stats_lastfiles">Display last files:</label>
+                    <input type="checkbox" name="stats_lastfiles" id="stats_lastfiles" value="on"
+                        <?= CONFIG['stats']['lastfiles'] ? 'checked' : '' ?>>
+
+                    <label for="stats_mostviewed">Display the most viewed files:</label>
+                    <input type="checkbox" name="stats_mostviewed" id="stats_mostviewed" value="on"
+                        <?= CONFIG['stats']['mostviewed'] ? 'checked' : '' ?>>
+
+                    <label for="stats_disksize">Disk size <i>(in bytes)</i>:</label>
+                    <input type="text" name="stats_disksize" id="stats_disksize"
+                        value="<?= CONFIG['stats']['disksize'] ?>">
+                </fieldset>
+            </div>
 
             <button type="submit" class="fancy">Save</button>
         </form>

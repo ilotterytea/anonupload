@@ -234,6 +234,8 @@ if (file_exists(CONFIG_FILE_PATH)) {
                 if (is_array($cfg[$sk][$k])) {
                     if ($sk === "filecatalog" && $k === "includemimetypes") {
                         $v = $v === "" ? [] : explode(' ', $v);
+                    } else if ($sk === "report" && $k === "reasons") {
+                        $v = $v === "" ? [] : explode(PHP_EOL, $v);
                     } else {
                         $lines = explode(PHP_EOL, $v);
                         $v = [];
@@ -277,3 +279,5 @@ if (shell_exec("which magick")) {
 }
 
 define("IMAGEMAGICK_COMMAND", $imagemagick);
+
+define("THEME_LIST", array_map(fn($x) => basename($x), glob("{$_SERVER['DOCUMENT_ROOT']}/static/themes/*", GLOB_ONLYDIR)));
