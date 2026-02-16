@@ -63,8 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head><?php html_head("System assets"); ?></head>
 
 <body>
+    <?php html_mini_navbar() ?>
     <main>
-        <?php html_mini_navbar() ?>
         <?php display_alert() ?>
         <h1>System assets</h1>
         <hr>
@@ -96,6 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         <?php endforeach; ?>
     </main>
+    <?php html_mini_footer(); ?>
 </body>
 
 </html>

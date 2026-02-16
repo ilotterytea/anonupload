@@ -37,9 +37,8 @@ unset($f);
 </head>
 
 <body>
-    <main class="full-size">
-        <?php html_mini_navbar('Page ' . ($page + 1) . '/' . $max_pages, "Library of " . CONFIG["instance"]["name"]) ?>
-
+    <?php html_mini_navbar('Page ' . ($page + 1) . '/' . $max_pages, "Library of " . CONFIG["instance"]["name"]) ?>
+    <main>
         <div class="grow row gap-8">
             <!-- SIDE BAR -->
             <div class="column gap-8">
@@ -95,8 +94,8 @@ unset($f);
                 </div>
             </div>
         </div>
-        <?php html_mini_footer() ?>
     </main>
+    <?php html_mini_footer() ?>
 </body>
 
 </html>

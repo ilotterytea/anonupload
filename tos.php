@@ -18,8 +18,8 @@ if ($data['lastupdated']->getTimestamp() === 0)
 <head><?php html_head("Terms of Service"); ?></head>
 
 <body>
+    <?php html_mini_navbar() ?>
     <main>
-        <?php html_mini_navbar() ?>
         <h1>Terms of Service</h1>
         <?php if ($data['lastupdated']): ?>
             <p><i>Last updated: <?= $data['lastupdated']->format('M d, Y') ?>

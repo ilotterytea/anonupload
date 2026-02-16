@@ -60,8 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head><?php html_head("Register a new account"); ?></head>
 
 <body>
+    <?php html_mini_navbar() ?>
     <main>
-        <?php html_mini_navbar() ?>
         <?php display_alert() ?>
         <?php if (!file_exists(CONFIG['users']['path'])): ?>
             <div class="box">

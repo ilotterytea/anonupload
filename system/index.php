@@ -22,8 +22,8 @@ $uploaded_files = STORAGE->count_uploaded_files();
 <head><?php html_head("System"); ?></head>
 
 <body>
+    <?php html_mini_navbar() ?>
     <main>
-        <?php html_mini_navbar() ?>
         <?php display_alert() ?>
         <h1>System panel</h1>
         <hr>

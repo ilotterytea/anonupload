@@ -45,8 +45,8 @@ if (is_dir($dir_path)) {
 <head><?php html_head("$error_code $error_reason"); ?></head>
 
 <body>
-    <main class="full-size">
-        <?php html_mini_navbar() ?>
+    <?php html_mini_navbar() ?>
+    <main>
         <?php display_alert() ?>
 
         <div class="row grow justify-center">
@@ -65,9 +65,8 @@ if (is_dir($dir_path)) {
                 </section>
             </section>
         </div>
-
-        <?php html_mini_footer(); ?>
     </main>
+    <?php html_mini_footer(); ?>
 </body>
 
 </html>

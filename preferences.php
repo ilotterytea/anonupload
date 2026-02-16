@@ -26,8 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
+    <?php html_mini_navbar() ?>
     <main>
-        <?php html_mini_navbar() ?>
         <?php display_alert() ?>
         <h1>Preferences</h1>
         <hr>

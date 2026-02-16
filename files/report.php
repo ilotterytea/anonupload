@@ -94,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </form>
     </main>
+    <?php html_mini_footer(); ?>
 </body>
 
 </html>

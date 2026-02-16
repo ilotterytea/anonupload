@@ -19,8 +19,8 @@ $user = $_SESSION['user'];
 <head><?php html_head("Account"); ?></head>
 
 <body>
+    <?php html_mini_navbar() ?>
     <main>
-        <?php html_mini_navbar() ?>
         <?php display_alert() ?>
         <h1>Hello, <?= $user->name ?></h1>
         <hr>

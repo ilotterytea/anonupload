@@ -77,8 +77,8 @@ if (!empty($files)) {
 <head><?php html_head("Media Pending Approval"); ?></head>
 
 <body>
+    <?php html_mini_navbar() ?>
     <main>
-        <?php html_mini_navbar() ?>
         <?php display_alert() ?>
         <h1>Media Pending Approval</h1>
         <hr>
@@ -123,6 +123,7 @@ if (!empty($files)) {
             <?php endforeach; ?>
         </div>
     </main>
+    <?php html_mini_footer(); ?>
 </body>
 
 </html>

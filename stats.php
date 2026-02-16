@@ -61,8 +61,8 @@ $file_stats['approx_filesize'] = format_filesize($file_stats['approx_filesize'])
 <head><?php html_head("Statistics"); ?></head>
 
 <body>
+    <?php html_mini_navbar() ?>
     <main>
-        <?php html_mini_navbar() ?>
         <?php display_alert() ?>
         <h1>Statistics</h1>
         <h2>Files uploaded &lpar;per quarter&rpar;</h2>
@@ -124,8 +124,8 @@ $file_stats['approx_filesize'] = format_filesize($file_stats['approx_filesize'])
                 <?php endif; ?>
             </table>
         </div>
-        <?php html_mini_footer(); ?>
     </main>
+    <?php html_mini_footer(); ?>
 </body>
 
 <?php if (isset(CONFIG['driver']['chart'])): ?>

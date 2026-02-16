@@ -75,45 +75,47 @@ function html_big_navbar()
 
     echo '' ?>
     <navbar class="large">
-        <div class="column align-center justify-center grow">
-            <a href="/">
-                <h1><img src="<?= $brand_url ?>" alt="<?= CONFIG["instance"]["name"] ?>"></h1>
-            </a>
-            <?php if (isset($line)): ?>
-                <p><i>&quot;<?= $line ?>&quot;</i></p>
-            <?php endif; ?>
-        </div>
-
-        <div class="links row gap-8 justify-center">
-            <a href="/">
-                <button>Home</button>
-            </a>
-            <?php if (CONFIG["filecatalog"]["public"] || (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value())): ?>
-                <a href="/files/index.php">
-                    <button>Catalogue</button>
+        <main>
+            <div class="brand">
+                <a href="/" id="brand-button">
+                    <h1><img src="<?= $brand_url ?>" alt="<?= CONFIG["instance"]["name"] ?>"></h1>
                 </a>
-            <?php endif; ?>
-            <?php if (CONFIG["supriseme"]["enable"]): ?>
-                <a href="/?random">
-                    <button>I'm Feeling Lucky</button>
-                </a>
-            <?php endif; ?>
-            <a href="/uploaders.php">
-                <button>Uploaders</button>
-            </a>
-            <a href="/account/index.php">
-                <button>Account</button>
-            </a>
-        </div>
-
-        <?php if (isset($_SESSION['user'])): ?>
-            <div class="row gap-8 justify-center">
-                <p>Signed in as <span class="username <?= $_SESSION['user']->role->name ?>">
-                        <?= $_SESSION['user']->name ?>
-                    </span></p>
-                <a href="/account/logout.php"><img src="/static/img/icons/logout.png" alt="[Log out]" title="Log out"></a>
+                <?php if (isset($line)): ?>
+                    <p><i>&quot;<?= $line ?>&quot;</i></p>
+                <?php endif; ?>
             </div>
-        <?php endif; ?>
+
+            <div class="links">
+                <a href="/">
+                    <button>Home</button>
+                </a>
+                <?php if (CONFIG["filecatalog"]["public"] || (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value())): ?>
+                    <a href="/files/index.php" id="file-catalogue-button">
+                        <button>Catalogue</button>
+                    </a>
+                <?php endif; ?>
+                <?php if (CONFIG["supriseme"]["enable"]): ?>
+                    <a href="/?random" id="surprise-me-button">
+                        <button>Surprise Me</button>
+                    </a>
+                <?php endif; ?>
+                <a href="/uploaders.php" id="uploaders-button">
+                    <button>Uploaders</button>
+                </a>
+                <a href="/account/index.php" id="account-button">
+                    <button>Account</button>
+                </a>
+            </div>
+
+            <?php if (isset($_SESSION['user'])): ?>
+                <div class="account-info">
+                    <p>Signed in as <span class="username <?= $_SESSION['user']->role->name ?>">
+                            <?= $_SESSION['user']->name ?>
+                        </span></p>
+                    <a href="/account/logout.php"><img src="/static/img/icons/logout.png" alt="[Log out]" title="Log out"></a>
+                </div>
+            <?php endif; ?>
+        </main>
     </navbar>
     <?php ;
 }
@@ -135,45 +137,49 @@ function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['
 
     echo '' ?>
     <navbar>
-        <a href="/" class="row gap-8 align-bottom" style="text-decoration:none;color:inherit;">
-            <img src="<?= $brand_url ?>" alt="">
-            <div class="column">
-                <?php if ($subtitle): ?>
-                    <p class="font-small"><?= $subtitle ?></p>
+        <main>
+            <div class="brand">
+                <a href="/" class="row gap-8 align-bottom" style="text-decoration:none;color:inherit;">
+                    <img src="<?= $brand_url ?>" alt="">
+                    <div class="column">
+                        <?php if ($subtitle): ?>
+                            <p class="font-small"><?= $subtitle ?></p>
+                        <?php endif; ?>
+                        <h2><?= $title ?></h2>
+                    </div>
+                </a>
+            </div>
+
+            <div class="links">
+                <a href="/" id="home-button">
+                    <button>Home</button>
+                </a>
+                <?php if (CONFIG["filecatalog"]["public"] || (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value())): ?>
+                    <a href="/files/index.php" id="file-catalogue-button">
+                        <button>Catalogue</button>
+                    </a>
                 <?php endif; ?>
-                <h2><?= $title ?></h2>
-            </div>
-        </a>
-
-        <div class="links row gap-8 align-bottom">
-            <a href="/">
-                <button>Home</button>
-            </a>
-            <?php if (CONFIG["filecatalog"]["public"] || (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value())): ?>
-                <a href="/files/index.php">
-                    <button>Catalogue</button>
+                <?php if (CONFIG["supriseme"]["enable"]): ?>
+                    <a href="/?random" id="surprise-me-button">
+                        <button>Surprise Me</button>
+                    </a>
+                <?php endif; ?>
+                <a href="/uploaders.php" id="uploaders-button">
+                    <button>Uploaders</button>
                 </a>
-            <?php endif; ?>
-            <?php if (CONFIG["supriseme"]["enable"]): ?>
-                <a href="/?random">
-                    <button>I'm Feeling Lucky</button>
+                <a href="/account/" id="account-button">
+                    <button>Account</button>
                 </a>
-            <?php endif; ?>
-            <a href="/uploaders.php">
-                <button>Uploaders</button>
-            </a>
-            <a href="/account/">
-                <button>Account</button>
-            </a>
-        </div>
-
-        <?php if (isset($_SESSION['user'])): ?>
-            <div>
-                <p>Signed in as <span
-                        class="username <?= $_SESSION['user']->role->name ?>"><?= $_SESSION['user']->name ?></span></p>
-                <a href="/account/logout.php"><img src="/static/img/icons/logout.png" alt="[Log out]" title="Log out"></a>
             </div>
-        <?php endif; ?>
+
+            <?php if (isset($_SESSION['user'])): ?>
+                <div class="account-info">
+                    <p>Signed in as <span
+                            class="username <?= $_SESSION['user']->role->name ?>"><?= $_SESSION['user']->name ?></span></p>
+                    <a href="/account/logout.php"><img src="/static/img/icons/logout.png" alt="[Log out]" title="Log out"></a>
+                </div>
+            <?php endif; ?>
+        </main>
     </navbar>
     <?php ;
 }
@@ -196,35 +202,45 @@ function html_footer()
     $file_size = sprintf('%.2f%s', $file_size, $suffix);
 
     echo '' ?>
-    <footer class="column justify-center align-center gap-8">
-        <?php if (array_key_exists(CONFIG["instance"]["url"], CONFIG["instance"]["mirrors"])): ?>
-            <p>You are using a mirror for <?= CONFIG["instance"]["mirrors"][CONFIG["instance"]["url"]] ?>. <a
-                    href="<?= CONFIG["instance"]["url"] ?>">[ Check
-                    out the origin website ]</a></p>
-        <?php elseif (!empty(CONFIG["instance"]["mirrors"])): ?>
-            <div class="row gap-8">
-                <p>Mirrors:</p>
-                <ul class="row gap-4" style="list-style: none;">
-                    <?php foreach (CONFIG["instance"]["mirrors"] as $url => $name): ?>
-                        <li><a href="<?= $url ?>"><?= $name ?></a></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-        <?php endif; ?>
-        <div class="row gap-8">
-            <?php foreach (CONFIG["instance"]["footerlinks"] as $title => $link): ?>
-                <p><a href="<?= $link ?>"><?= $title ?></a></p>
-            <?php endforeach; ?>
-        </div>
-        <p>
-            Serving <?= $file_count ?> files and <?= $file_size ?> of active content
-            <?php if (CONFIG["stats"]["enable"]): ?>
-                <a href="/stats.php">
-                    <img src="/static/img/icons/stats.png" alt="[Stats]">
-                </a>
+    <footer>
+        <main>
+            <?php if (array_key_exists(CONFIG["instance"]["url"], CONFIG["instance"]["mirrors"])): ?>
+                <p>You are using a mirror for
+                    <?= CONFIG["instance"]["mirrors"][CONFIG["instance"]["url"]] ?>. <a
+                        href="<?= CONFIG["instance"]["url"] ?>">[ Check
+                        out the origin website ]</a>
+                </p>
+            <?php elseif (!empty(CONFIG["instance"]["mirrors"])): ?>
+                <div class="row gap-8">
+                    <p>Mirrors:</p>
+                    <ul class="row gap-4" style="list-style: none;">
+                        <?php foreach (CONFIG["instance"]["mirrors"] as $url => $name): ?>
+                            <li><a href="<?= $url ?>">
+                                    <?= $name ?>
+                                </a></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
             <?php endif; ?>
-        </p>
-        <?php html_debug_info(); ?>
+            <div class="row gap-8">
+                <?php foreach (CONFIG["instance"]["footerlinks"] as $title => $link): ?>
+                    <p><a href="<?= $link ?>">
+                            <?= $title ?>
+                        </a></p>
+                <?php endforeach; ?>
+            </div>
+            <p>
+                Serving
+                <?= $file_count ?> files and
+                <?= $file_size ?> of active content
+                <?php if (CONFIG["stats"]["enable"]): ?>
+                    <a href="/stats.php">
+                        <img src="/static/img/icons/stats.png" alt="[Stats]">
+                    </a>
+                <?php endif; ?>
+            </p>
+            <?php html_debug_info(); ?>
+        </main>
     </footer>
     <?php ;
 }
@@ -233,13 +249,13 @@ function html_mini_footer()
 {
     echo '' ?>
     <footer class="mini">
-        <?php html_debug_info(); ?>
-        <div class="right">
+        <main>
+            <?php html_debug_info(); ?>
             <p>
                 All trademarks and copyrights belong to their respective owners.
                 The uploader is responsible for any content shared here.
             </p>
-        </div>
+        </main>
     </footer>
     <?php ;
 }

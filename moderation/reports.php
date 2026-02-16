@@ -103,8 +103,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head><?php html_head("Report reviewal"); ?></head>
 
 <body>
+    <?php html_mini_navbar() ?>
     <main>
-        <?php html_mini_navbar() ?>
         <?php display_alert() ?>
         <h1>Report reviewal</h1>
         <hr>
@@ -175,6 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </table>
         <?php endif; ?>
     </main>
+    <?php html_mini_footer(); ?>
 </body>
 
 </html>

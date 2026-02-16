@@ -23,9 +23,8 @@ foreach (CONFIG["upload"]["acceptedmimetypes"] as $k => $v) {
 <head><?php html_head("Uploaders"); ?></head>
 
 <body>
+    <?php html_big_navbar() ?>
     <main>
-        <?php html_big_navbar() ?>
-
         <section class="column gap-16">
             <div>
                 <h1>File Uploaders</h1>

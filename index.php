@@ -151,17 +151,16 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
 <head><?php html_head($file_name, $file_html_description, $file); ?></head>
 
 <body>
-    <main<?= $file ? ' class="full-size"' : '' ?>>
+    <?php isset($file) ? html_mini_navbar() : html_big_navbar() ?>
+    <main>
         <noscript>
             <p><b>No-JavaScript chad <img src="/static/img/icons/chad.png" alt="" width="16"></b></p>
             <p style="color:gray">no fancy features like local file saving</p>
         </noscript>
 
+        <?php display_alert() ?>
+
         <?php if ($file): ?>
-            <?php html_mini_navbar() ?>
-
-            <?php display_alert() ?>
-
             <?php if ($file->is_banned): ?>
                 <section class="box red">
                     <p>Sorry&comma; you cannot access this file as it violated the TOS and was banned from the
@@ -240,12 +239,7 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
                     </section>
                 </div>
             <?php endif; ?>
-            <?php html_mini_footer(); ?>
         <?php else: ?>
-            <?php html_big_navbar() ?>
-
-            <?php display_alert() ?>
-
             <section class="box">
                 <div class="tab">
                     <p>What is <?= CONFIG["instance"]["name"] ?>?</p>
@@ -422,10 +416,9 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
                 <div class="content grid grid-3 gap-8" id="favorite-files" style="display: none;">
                 </div>
             </section>
-
-            <?php html_footer() ?>
         <?php endif; ?>
-        </main>
+    </main>
+    <?php isset($file) ? html_mini_footer() : html_footer(); ?>
 </body>
 
 <?php if ($file && $file->mime == 'application/x-shockwave-flash' && !empty(CONFIG["driver"]["ruffle"])): ?>
