@@ -2,8 +2,13 @@
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 
 $file_path = "{$_SERVER['DOCUMENT_ROOT']}/TOS.txt";
+if (!file_exists($file_path)) {
+    generate_alert('/', 'TOS is not set!', 500);
+}
+
 $data = [
     'content' => bbcode_parse(file_get_contents($file_path) ?: "Don't upload anything bad."),
     'lastupdated' => (new DateTime())->setTimestamp(filemtime($file_path) ?: 0)

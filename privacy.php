@@ -2,8 +2,13 @@
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 
 $file_path = "{$_SERVER['DOCUMENT_ROOT']}/PRIVACY.txt";
+if (!file_exists($file_path)) {
+    generate_alert('/', 'Privacy policy is not set!', 500);
+}
+
 $data = [
     'content' => bbcode_parse(file_get_contents($file_path) ?: "We don't store anything personal about you."),
     'lastupdated' => (new DateTime())->setTimestamp(filemtime($file_path) ?: 0)

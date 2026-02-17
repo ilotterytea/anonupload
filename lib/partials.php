@@ -269,6 +269,20 @@ function html_debug_info()
         'sha' => trim(shell_exec('git rev-parse HEAD'))
     ];
 
+    $new_tos = false;
+    $tos_exists = false;
+    if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/TOS.txt")) {
+        $new_tos = time() - filemtime("{$_SERVER['DOCUMENT_ROOT']}/TOS.txt") < 86400 * 3;
+        $tos_exists = true;
+    }
+
+    $new_privacy = false;
+    $privacy_exists = false;
+    if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/PRIVACY.txt")) {
+        $new_privacy = time() - filemtime("{$_SERVER['DOCUMENT_ROOT']}/PRIVACY.txt") < 86400 * 3;
+        $privacy_exists = true;
+    }
+
     echo '' ?>
     <div class="debug-info">
         <p>Page generated in <?= $compile_time ?>s</p>
@@ -282,8 +296,12 @@ function html_debug_info()
                 </a>
             </p>
         <?php endif; ?>
-        <a href="/tos.php">Terms of Service</a>
-        <a href="/privacy.php">Privacy Policy</a>
+        <?php if ($tos_exists): ?>
+            <a href="/tos.php">Terms of Service<?= $new_tos ? " (NEW)" : "" ?></a>
+        <?php endif; ?>
+        <?php if ($privacy_exists): ?>
+            <a href="/privacy.php">Privacy Policy<?= $new_privacy ? " (NEW)" : "" ?></a>
+        <?php endif; ?>
         <p><a href="/preferences.php"><img src="/static/img/icons/preferences.png" alt="Preferences"
                     title="Customize your experience" height="12"></a></p>
     </div>
