@@ -233,6 +233,17 @@ class UserManager
         return $this->type;
     }
 
+    public function get_user_count(): int
+    {
+        if ($this->type === FileStorageType::Database) {
+            $stmt = $this->db->query('SELECT COUNT(*) FROM users');
+            $stmt->execute();
+            return $stmt->fetch()[0];
+        } else {
+            return count($this->load_local_users() ?? []);
+        }
+    }
+
     private function load_local_users(): array|null
     {
         if (!file_exists(CONFIG['users']['path'])) {

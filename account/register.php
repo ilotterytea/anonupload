@@ -13,7 +13,9 @@ if (isset($_SESSION['user'])) {
     exit("You've already authorized!");
 }
 
-if (!CONFIG['users']['allowregistration'] && file_exists(CONFIG['users']['path'])) {
+$first_user_must_be_administrator = USER->get_user_count() === 0;
+
+if (!CONFIG['users']['allowregistration'] && !$first_user_must_be_administrator) {
     generate_alert('/', 'Account registration is disabled on this instance!', 403);
 }
 
@@ -45,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         !USER->create(
             $_POST['username'],
             $_POST['password'],
-            file_exists(CONFIG['users']['path']) ? UserRole::User : UserRole::Administrator
+            $first_user_must_be_administrator ? UserRole::Administrator : UserRole::User
         )
     ) {
         generate_alert('/account/register.php', 'Failed to create a new user! Try again later.', 500);
@@ -63,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php html_mini_navbar() ?>
     <main>
         <?php display_alert() ?>
-        <?php if (!file_exists(CONFIG['users']['path'])): ?>
+        <?php if ($first_user_must_be_administrator): ?>
             <div class="box">
                 <p>The first registered user will be the administrator.</p>
             </div>

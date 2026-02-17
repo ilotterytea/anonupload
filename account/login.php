@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </table>
             <div class="row gap-8 align-center">
                 <button type="submit" class="fancy">Log in</button>
-                <?php if (CONFIG['users']['allowregistration'] || !file_exists(CONFIG['users']['path'])): ?>
+                <?php if (CONFIG['users']['allowregistration'] || USER->get_user_count() === 0): ?>
                     <a href="/account/register.php">Register</a>
                 <?php endif; ?>
             </div>
