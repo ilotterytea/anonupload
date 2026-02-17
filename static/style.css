@@ -247,6 +247,26 @@ button[type=submit].fancy:hover {
     height: 256px;
 }
 
+#form-upload-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#form-upload-options fieldset>* {
+    display: block;
+}
+
+#form-upload-options>fieldset:has(.description) {
+    display: flex;
+}
+
+#form-upload-options>fieldset>textarea {
+    width: unset;
+    height: 128px;
+    flex-grow: 1;
+}
+
 /** BOX */
 .box {
     background: var(--box-content-background);

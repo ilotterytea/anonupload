@@ -324,80 +324,86 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
 
                         <div class="column" id="form-record-upload" style="display: none;"></div>
 
-                        <div class="column">
+                        <div class="column gap-8">
                             <p class="remove-script">Details:</p>
                             <hr class="remove-script">
-                            <table class="vertical left" id="form-upload-options">
-                                <?php if (CONFIG["upload"]["customid"]): ?>
-                                    <tr>
-                                        <th>File ID:</th>
-                                        <td><input type="text" name="id" placeholder="Leave empty for a random ID"
+
+                            <div id="form-upload-options">
+                                <div class="grid grid-3 gap-8">
+                                    <fieldset>
+                                        <legend>General</legend>
+
+                                        <?php if (CONFIG["upload"]["customid"]): ?>
+                                            <label for="id">File ID:</label>
+                                            <input type="text" name="id" id="id" placeholder="Leave empty for random ID"
                                                 maxlength="<?= CONFIG["upload"]["customidlength"] ?>">
-                                        </td>
-                                    </tr>
-                                <?php endif; ?>
-                                <tr>
-                                    <th>Title:</th>
-                                    <td>
-                                        <input type="text" name="title" placeholder="Leave empty if you want a random title"
-                                            maxlength="<?= CONFIG["upload"]["titlelength"] ?>">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Password<span class="help" title="For file deletion">[?]</span>:</th>
-                                    <td><input type="text" name="password"
+                                        <?php endif; ?>
+
+                                        <label for="password">Password<span class="help"
+                                                title="For file deletion">[?]</span>:</label>
+                                        <input type="text" name="password" id="password"
                                             placeholder="Leave empty if you want the file to be non-deletable"
                                             value="<?= generate_random_char_sequence(CONFIG["upload"]["idcharacters"], CONFIG["files"]["deletionkeylength"]) ?>">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Visibility:</th>
-                                    <td>
-                                        <select name="visibility" id="file-visibility">
-                                            <option value="1" <?= CONFIG['files']['defaultvisibility'] >= 1 ? 'selected' : '' ?>>Public</option>
-                                            <option value="0" <?= CONFIG['files']['defaultvisibility'] === 0 ? 'selected' : '' ?>>Unlisted</option>
+                                    </fieldset>
+
+                                    <fieldset>
+                                        <legend>File accessability</legend>
+
+                                        <label for="visibility">Visibility:</label>
+                                        <select name="visibility" id="visibility">
+                                            <option value="1" <?= CONFIG['files']['defaultvisibility'] >= 1 ? 'selected' : '' ?>>
+                                                Public</option>
+                                            <option value="0" <?= CONFIG['files']['defaultvisibility'] === 0 ? 'selected' : '' ?>>
+                                                Unlisted</option>
                                         </select>
-                                        <p class="hint" id="file-visibility-hint"></p>
-                                    </td>
-                                </tr>
-                                <?php if (!empty(CONFIG["upload"]["expiration"])): ?>
-                                    <tr>
-                                        <th>File expiration:</th>
-                                        <td>
-                                            <select name="expires_in">
+                                        <ul class="hint">
+                                            <li><b>Public</b> makes the file via the "Suprise Me" feature or file catalog.</li>
+                                            <li><b>Unlisted</b> makes the file accessible only via a link.</li>
+                                        </ul>
+
+                                        <?php if (!empty(CONFIG["upload"]["expiration"])): ?>
+                                            <label for="expires_in">File expiration:</label>
+                                            <select name="expires_in" id="expires_in">
                                                 <?php foreach (CONFIG["upload"]["expiration"] as $v => $n): ?>
-                                                    <option value="<?= $v ?>"><?= $n ?></option>
+                                                    <option value="<?= $v ?>">
+                                                        <?= $n ?>
+                                                    </option>
                                                 <?php endforeach; ?>
                                             </select>
-                                        </td>
-                                    </tr>
-                                <?php endif; ?>
-                                <tr>
-                                    <th>Preserve original filename:</th>
-                                    <td><input type="checkbox" name="preserve_original_name" value="1"></td>
-                                </tr>
-                                <?php if (CONFIG["upload"]["stripexif"]): ?>
-                                    <tr>
-                                        <th>Strip EXIF data:</th>
-                                        <td><input type="checkbox" name="strip_exif_data" value="1" checked></td>
-                                    </tr>
-                                <?php endif; ?>
-                                <?php if (CONFIG["upload"]["removeletterboxes"]): ?>
-                                    <tr>
-                                        <th>Remove letterboxing<span class="help"
-                                                title="Removes black bars from the video, may be inaccurate, and only applies to videos">[?]</span>:
-                                        </th>
-                                        <td><input type="checkbox" name="remove_letterbox" value="1"></td>
-                                    </tr>
-                                <?php endif; ?>
-                            </table>
+                                        <?php endif; ?>
+                                    </fieldset>
 
-                            <?php if (CONFIG['files']['description']): ?>
-                                <fieldset class="column">
-                                    <legend>Description</legend>
-                                    <textarea class="grow" name="description" placeholder="Describe the file..."></textarea>
-                                </fieldset>
-                            <?php endif; ?>
+                                    <fieldset>
+                                        <legend>Miscellaneous</legend>
+
+                                        <label for="preserve_original_name">Preserve original filename:</label>
+                                        <input type="checkbox" name="preserve_original_name" id="preserve_original_name"
+                                            value="1">
+
+                                        <?php if (CONFIG["upload"]["stripexif"]): ?>
+                                            <label for="strip_exif_data">Strip EXIF data:</label>
+                                            <input type="checkbox" name="strip_exif_data" id="strip_exif_data" value="1"
+                                                checked>
+                                        <?php endif; ?>
+
+                                        <?php if (CONFIG["upload"]["removeletterboxes"]): ?>
+                                            <label for="remove_letterbox">
+                                                Remove letterboxing<span class="help"
+                                                    title="Removes black bars from the video, may be inaccurate, and only applies to videos">[?]</span>:
+                                            </label>
+                                            <input type="checkbox" name="remove_letterbox" id="remove_letterbox" value="1">
+                                        <?php endif; ?>
+                                    </fieldset>
+                                </div>
+
+                                <?php if (CONFIG['files']['description']): ?>
+                                    <fieldset class="column">
+                                        <legend>Description</legend>
+                                        <textarea class="grow" name="description" placeholder="Describe the file..."></textarea>
+                                    </fieldset>
+                                <?php endif; ?>
+                            </div>
+
                             <button type="submit" class="fancy">Upload</button>
                     </form>
                 </div>
@@ -464,14 +470,6 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
     <script src="/static/scripts/form.js"></script>
     <script>
         window.onload = () => {
-            const fileVisibility = document.getElementById("file-visibility");
-            fileVisibility.addEventListener("change", () => {
-                const hint = document.getElementById("file-visibility-hint");
-                hint.innerHTML = fileVisibility.value === "1"
-                    ? 'File can be <b>accessed anytime by anyone</b> via "Surprise Me" or the file catalog.'
-                    : 'File is accessible only through a shared link.';
-            });
-
             initOptions();
         };
 
