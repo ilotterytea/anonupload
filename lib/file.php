@@ -470,6 +470,17 @@ class File
             ');
             $stmt->execute([$id, $ext]);
             $data = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+
+            if ($data != null) {
+                $data['metadata'] = [
+                    'width' => $data['width'],
+                    'height' => $data['height'],
+                    'duration' => $data['duration'],
+                    'line_count' => $data['line_count']
+                ];
+
+                unset($data['width'], $data['height'], $data['duration'], $data['line_count']);
+            }
         }
 
         if ($data == null && file_exists(CONFIG['metadata']['directory'] . "/$id.json")) {
