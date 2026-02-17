@@ -511,13 +511,15 @@ button[type=submit].fancy:hover {
     float: right;
 }
 
-@media screen and (max-width: 1000px) {
-    main {
-        width: 100%;
+@media screen and (max-width: 1500px) {
+    :root {
+        --page-width: 75%;
     }
+}
 
-    footer.mini {
-        flex-direction: column;
+@media screen and (max-width: 1000px) {
+    :root {
+        --page-width: 99%;
     }
 
     .file-preview-wrapper,
@@ -525,8 +527,13 @@ button[type=submit].fancy:hover {
         margin: 8px;
     }
 
-    .navbar {
-        align-items: start;
+    .grid-3 {
+        grid-template-columns: auto auto;
+    }
+}
+
+@media screen and (max-width: 700px) {
+    navbar>main {
         flex-direction: column;
     }
 
