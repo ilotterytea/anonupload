@@ -30,10 +30,6 @@ if (!is_dir(CONFIG["files"]["directory"]) && !mkdir(CONFIG["files"]["directory"]
 
 try {
     $preserve_original_name = boolval($_POST['preserve_original_name'] ?? '0');
-    $title = str_safe($_POST['title'] ?? '', CONFIG["upload"]["titlelength"]);
-    if (empty(trim($title))) {
-        $title = null;
-    }
 
     if (!isset($_FILES['file']) && isset($_POST['base64'])) {
         $_FILES['file'] = [
@@ -328,12 +324,9 @@ try {
     $file_data['password'] = isset($file_data['password']) ? password_hash($file_data['password'], PASSWORD_DEFAULT) : null;
     $file_data['views'] = 0;
     $file_data['uploaded_at'] = time();
+    $file_data['description'] = $_POST['description'] ?? null;
 
-    if ($title) {
-        $file_data['original_name'] = $title;
-    }
-
-    if ($preserve_original_name && !$title) {
+    if ($preserve_original_name) {
         if ($file && !empty($file['name'])) {
             $file_data['original_name'] = $file['name'];
         } else if ($url) {

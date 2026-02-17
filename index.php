@@ -110,11 +110,8 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
     $factor = floor((strlen($size) - 1) / 3);
     $file_size_formatted = sprintf("%.2f", $size / pow(1024, $factor)) . ' ' . $units[$factor];
 
-    $file_name = $file->title ?? sprintf('%s.%s', $file->id, $file->extension);
+    $file_name = "{$file->id}.{$file->extension}";
     $file_download_name = $file_name;
-    if (!str_ends_with($file_download_name, ".{$file->extension}")) {
-        $file_download_name .= ".{$file->extension}";
-    }
 
     $file_resolution = [];
 
@@ -182,11 +179,7 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
                                         <p id="file-extension"><?= $file->extension ?></p>
                                         <p id="file-size"><?= $file->size ?></p>
                                     </div>
-                                    <?php if (isset($file->title)): ?>
-                                        <p><i><?= $file->title ?></i></p>
-                                    <?php else: ?>
-                                        <p>File <?= sprintf('%s.%s', $file->id, $file->extension) ?></p>
-                                    <?php endif; ?>
+                                    <p>File <?= $file_name ?></p>
                                 </div>
                                 <div class="grow row gap-8 justify-end align-center wrap" id="file-tab-buttons">
                                     <?php if (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value()): ?>
@@ -236,6 +229,14 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
                                 <p><?= $file->views ?> views</p>
                             <?php endif; ?>
                         </div>
+
+                        <?php if (isset($file->description) && !empty(trim($file->description))): ?>
+                            <details open>
+                                <summary>Note</summary>
+
+                                <?= bbcode_parse($file->description) ?>
+                            </details>
+                        <?php endif; ?>
                     </section>
                 </div>
             <?php endif; ?>
@@ -390,6 +391,13 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
                                     </tr>
                                 <?php endif; ?>
                             </table>
+
+                            <?php if (CONFIG['files']['description']): ?>
+                                <fieldset class="column">
+                                    <legend>Description</legend>
+                                    <textarea class="grow" name="description" placeholder="Describe the file..."></textarea>
+                                </fieldset>
+                            <?php endif; ?>
                             <button type="submit" class="fancy">Upload</button>
                     </form>
                 </div>

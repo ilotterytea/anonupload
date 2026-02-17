@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS files (
     mime TEXT NOT NULL,
     extension TEXT NOT NULL,
     `size` BIGINT NOT NULL,
-    title TEXT,
+    `description` TEXT,
     `password` TEXT,
     visibility SMALLINT NOT NULL,
     uploaded_at TIMESTAMP NOT NULL DEFAULT UTC_TIMESTAMP,

@@ -316,7 +316,7 @@ function html_file_brick(File $file, string|null $custom_url = null)
     echo '' ?>
     <div class="brick<?= isset($file->color) ? " {$file->color}" : '' ?>">
         <a href="<?= $custom_url ?>">
-            <i title="<?= $file->title ?>">
+            <i title="<?= "{$file->id}.{$file->extension} // {$file->mime} ({$file->extension})" ?>">
                 <?php if (str_starts_with($file->mime, 'image/') || str_starts_with($file->mime, 'video/')): ?>
                     <img src="<?= sprintf('%s/%s.webp', CONFIG["thumbnails"]["url"], $file->id) ?>" alt="No thumbnail."
                         loading="lazy">

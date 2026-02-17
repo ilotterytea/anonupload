@@ -340,7 +340,7 @@ class File
     public string $id, $mime, $extension, $path, $color;
     public int $size;
     public int|null $views, $visibility, $width, $height, $duration, $line_count;
-    public string|null $password, $ban_reason, $title;
+    public string|null $password, $ban_reason, $description;
     public bool $is_banned;
     public DateTime|null $expires_at, $uploaded_at;
 
@@ -361,7 +361,8 @@ class File
             'expires_at' => $this->expires_at,
             'uploaded_at' => $this->uploaded_at,
             'is_banned' => $this->is_banned,
-            'ban_reason' => $this->ban_reason
+            'ban_reason' => $this->ban_reason,
+            'description' => $this->description
         ];
 
         if (isset($this->width) || isset($this->height) || isset($this->duration) || isset($this->line_count)) {
@@ -389,7 +390,7 @@ class File
         $f->path = CONFIG['files']['directory'] . "/{$f->id}.{$f->extension}";
         $f->is_banned = $data['is_banned'] ?? false;
         $f->ban_reason = $data['ban_reason'] ?? null;
-        $f->title = $data['title'] ?? null;
+        $f->description = $data['description'] ?? null;
         $f->visibility = $data['visibility'] ?? null;
 
         if (isset($data['metadata'])) {
@@ -611,7 +612,7 @@ class FileMetadataStorage
                     mime = ?,
                     extension = ?,
                     `size` = ?,
-                    title = ?,
+                    `description` = ?,
                     `password` = ?,
                     visibility = ?,
                     uploaded_at = ?,
@@ -624,7 +625,7 @@ class FileMetadataStorage
                         $file->mime,
                         $file->extension,
                         $file->size,
-                        $file->title,
+                        $file->description,
                         $file->password,
                         $file->visibility ?? CONFIG['files']['defaultvisibility'],
                         ($file->uploaded_at ?? new DateTime())->format('Y-m-d H:i:s'),

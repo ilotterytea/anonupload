@@ -22,12 +22,6 @@ $page = min($page, $max_pages - 1);
 
 // getting files
 $files = STORAGE->get_files($page, $sort);
-
-foreach ($files as &$f) {
-    $name = $f->title ?: "{$f->id}.{$f->extension}";
-    $f->title = "{$f->id} // {$f->mime} ({$f->extension})";
-}
-unset($f);
 ?>
 <!DOCTYPE html>
 <html>

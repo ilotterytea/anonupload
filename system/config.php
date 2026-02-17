@@ -206,8 +206,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="checkbox" name="files_displayhtml" id="files_displayhtml" value="on"
                         <?= CONFIG['files']['displayhtml'] ? 'checked' : '' ?>>
 
-                    <label for="files_title">Show file title:</label>
-                    <input type="checkbox" name="files_title" id="files_title" value="on" <?= CONFIG['files']['title'] ? 'checked' : '' ?>>
+                    <label for="files_description">Show file descriptions:</label>
+                    <input type="checkbox" name="files_description" id="files_description" value="on"
+                        <?= CONFIG['files']['description'] ? 'checked' : '' ?>>
 
                     <label for="files_directory">Save directory:</label>
                     <input type="text" name="files_directory" id="files_directory"
