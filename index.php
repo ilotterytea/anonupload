@@ -25,6 +25,8 @@ if (CONFIG["supriseme"]["enable"] && isset($_GET['random'])) {
 
 $file = null;
 $file_id = null;
+$file_name = null;
+$file_html_description = null;
 $url = parse_url($_SERVER['REQUEST_URI']);
 
 if (strlen($url['path']) > 1) {
