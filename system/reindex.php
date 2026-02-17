@@ -11,12 +11,19 @@ if ($_SESSION['user']->role->as_value() < UserRole::Administrator->as_value()) {
     generate_alert('/account/', 'You are not allowed to make changes on this page!', 401);
 }
 
+generate_alert('/system/', 'Re-indexing...', 200, null, false, false);
+
+if (!fastcgi_finish_request() || !set_time_limit(0)) {
+    throw new RuntimeException("Failed to finish the request");
+}
+
 $iterator = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator(CONFIG['files']['directory'], FilesystemIterator::SKIP_DOTS)
 );
 
 $missing_filenames = [];
 $count = 0;
+$deleted_count = 0;
 
 foreach ($iterator as $file) {
     if ($file->isFile()) {
@@ -83,10 +90,7 @@ foreach ($nonexistent_files as $file) {
         throw new RuntimeException("Failed to delete the file");
     }
 
-    $count--;
+    $deleted_count++;
 }
 
-generate_alert(
-    "/system/",
-    "Re-indexed $count files"
-);
+error_log("Re-indexed $count files, deleted $deleted_count files");

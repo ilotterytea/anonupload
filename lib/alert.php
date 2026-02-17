@@ -1,7 +1,7 @@
 <?php
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 
-function generate_alert(string $redirect, string|null $message, int $code = 200, mixed $data = null, bool $json_only = false)
+function generate_alert(string $redirect, string|null $message, int $code = 200, mixed $data = null, bool $json_only = false, bool $end_request = true)
 {
     $response = $message;
 
@@ -24,7 +24,11 @@ function generate_alert(string $redirect, string|null $message, int $code = 200,
         header("Location: $redirect");
     }
 
-    die($response);
+    if ($end_request) {
+        die($response);
+    } else {
+        echo $response;
+    }
 }
 
 function display_alert()
