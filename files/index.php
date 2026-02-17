@@ -50,6 +50,9 @@ $files = STORAGE->get_files($page, $sort);
                                     viewed</option>
                                 <option value="least_viewed" <?= $sort == 'least_viewed' ? 'selected' : '' ?>>Least
                                     viewed</option>
+                                <option value="heavy" <?= $sort == 'heavy' ? 'selected' : '' ?>>Heaviness</option>
+                                <option value="lightweight" <?= $sort == 'lightweight' ? 'selected' : '' ?>>Lightness
+                                </option>
                             </select>
                             <button type="submit">Search</button>
                         </div>

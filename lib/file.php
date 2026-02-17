@@ -920,7 +920,7 @@ class FileMetadataStorage
 
     public function get_files(int $page, string $sort = "recent"): array
     {
-        if (!in_array($sort, ["recent", "oldest", "most_viewed", "least_viewed"], true)) {
+        if (!in_array($sort, ["recent", "oldest", "most_viewed", "least_viewed", "heavy", "lightweight"], true)) {
             $sort = "recent";
         }
 
@@ -935,6 +935,8 @@ class FileMetadataStorage
                 "recent" => "ORDER BY f.uploaded_at DESC",
                 "most_viewed" => "ORDER BY f.views DESC",
                 "least_viewed" => "ORDER BY f.views ASC",
+                "heavy" => "ORDER BY f.size DESC",
+                "lightweight" => "ORDER BY f.size ASC"
             };
 
             $stmt = $this->db->query("SELECT f.id, f.mime, f.extension, f.size
@@ -976,6 +978,12 @@ class FileMetadataStorage
                     break;
                 case "most_viewed":
                     usort($files, fn($a, $b) => ($b->views ?? PHP_INT_MIN) <=> ($a->views ?? PHP_INT_MIN));
+                    break;
+                case "heavy":
+                    usort($files, fn($a, $b) => ($b->size ?? PHP_INT_MIN) <=> ($a->size ?? PHP_INT_MIN));
+                    break;
+                case "lightweight":
+                    usort($files, fn($a, $b) => ($a->size ?? PHP_INT_MIN) <=> ($b->size ?? PHP_INT_MIN));
                     break;
                 case "recent":
                 default:
