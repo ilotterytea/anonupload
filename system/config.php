@@ -225,11 +225,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="number" name="files_deletionkeylength" id="files_deletionkeylength"
                         value="<?= CONFIG['files']['deletionkeylength'] ?>">
 
-                    <label for="instance_defaultvisibility">Default file visibility:</label>
-                    <select name="instance_defaultvisibility" id="instance_defaultvisibility">
-                        <option value="0">Private</option>
-                        <option value="1">Public</option>
-                        <option value="2">Must pass approval</option>
+                    <label for="files_defaultvisibility">Default file visibility:</label>
+                    <select name="files_defaultvisibility" id="files_defaultvisibility">
+                        <option value="0" <?= CONFIG['files']['defaultvisibility'] === 0 ? 'selected' : '' ?>>Private
+                        </option>
+                        <option value="1" <?= CONFIG['files']['defaultvisibility'] === 1 ? 'selected' : '' ?>>Public
+                        </option>
+                        <option value="2" <?= CONFIG['files']['defaultvisibility'] === 2 ? 'selected' : '' ?>>Must pass
+                            approval</option>
                     </select>
                 </fieldset>
 
