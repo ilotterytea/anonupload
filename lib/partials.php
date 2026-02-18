@@ -22,7 +22,7 @@ function html_head(string|null $title = null, string|null $description = null, F
     if (isset($file)) {
         echo '<meta property="og:url" content="' . sprintf("%s/%s.%s", CONFIG["instance"]["url"], $file->id, $file->extension) . '" />';
         if (CONFIG['thumbnails']['enable']) {
-            echo '<meta property="og:image" content="' . sprintf("%s/%s.webp", CONFIG["instance"]["url"], $file->id) . '" />';
+            echo '<meta property="og:image" content="' . sprintf("%s%s/%s.webp", CONFIG["instance"]["url"], CONFIG["thumbnails"]["url"], $file->id) . '" />';
         }
     }
 
