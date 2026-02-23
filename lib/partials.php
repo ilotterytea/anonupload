@@ -6,6 +6,8 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/user.php";
 
 function html_head(string|null $title = null, string|null $description = null, File|null $file = null)
 {
+    USER->authorize_with_cookie();
+
     $ititle = CONFIG['instance']['name'];
     if (!$description) {
         $description = "$ititle is a simple, free and anonymous file sharing site. We do not store anything other than the files you upload.";
