@@ -50,7 +50,7 @@ if (is_dir($dir_path)) {
         <?php display_alert() ?>
 
         <div class="row grow justify-center">
-            <section class="file-preview-wrapper" style="max-width: 256px;">
+            <section class="file-preview-wrapper">
                 <section class="box">
                     <div class="tab">
                         <p style="text-align:center"><?= "$error_code $error_reason" ?></p>
