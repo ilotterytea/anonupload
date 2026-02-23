@@ -16,8 +16,7 @@ if ($_SESSION['user']->role->as_value() < UserRole::Administrator->as_value()) {
 $assets = [
     "banner" => "/static/img/brand/big",
     "logo" => "/static/img/brand/mini",
-    "404" => "/static/img/404",
-    "403" => "/static/img/403"
+    "404" => "/static/img/404"
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

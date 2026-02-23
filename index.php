@@ -50,14 +50,8 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
 
     $file = File::load("$file_id.$file_ext");
 
-    if (!$file) {
+    if (!$file || $file->is_banned) {
         $error = "404 Not Found";
-        include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/pages/error.php";
-        exit();
-    }
-
-    if ($file->is_banned) {
-        $error = "451 Unavailable For Legal Reasons";
         include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/pages/error.php";
         exit();
     }
