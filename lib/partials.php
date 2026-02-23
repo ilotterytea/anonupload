@@ -215,7 +215,7 @@ function html_footer()
             <?php elseif (!empty(CONFIG["instance"]["mirrors"])): ?>
                 <div class="row gap-8">
                     <p>Mirrors:</p>
-                    <ul class="row gap-4" style="list-style: none;">
+                    <ul class="no-style row gap-4" style="list-style: none;">
                         <?php foreach (CONFIG["instance"]["mirrors"] as $url => $name): ?>
                             <li><a href="<?= $url ?>">
                                     <?= $name ?>

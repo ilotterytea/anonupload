@@ -194,8 +194,14 @@ table.left td {
     text-align: left;
 }
 
-ul {
+ul,
+ol {
+    padding-left: 32px;
+}
+
+ul.no-style {
     list-style: none;
+    padding: 0;
 }
 
 fieldset {

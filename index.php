@@ -270,7 +270,7 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
                                     <div class="column grow">
                                         <input type="url" name="url" id="form-url"
                                             placeholder="Instagram, YouTube and other links">
-                                        <ul class="row gap-8 font-small" style="list-style:none">
+                                        <ul class="no-style row gap-8 font-small" style="list-style:none">
                                             <li>
                                                 <p>Max duration: <b><?= CONFIG["externalupload"]["maxduration"] / 60 ?>
                                                         minutes</b></p>
@@ -282,7 +282,7 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
                                     </div>
                                 </div>
                             <?php endif; ?>
-                            <ul class="row gap-8 font-small" style="list-style:none">
+                            <ul class="no-style row gap-8 font-small" style="list-style:none">
                                 <li>
                                     <p class="font-small">Max file size:
                                         <b><?= get_cfg_var(option: 'upload_max_filesize') ?></b>
@@ -331,7 +331,7 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
                                             <option value="1" <?= CONFIG['files']['defaultvisibility'] >= 1 ? 'selected' : '' ?>>Public</option>
                                             <option value="0" <?= CONFIG['files']['defaultvisibility'] === 0 ? 'selected' : '' ?>>Unlisted</option>
                                         </select>
-                                        <ul class="hint">
+                                        <ul class="no-style hint">
                                             <li><b>Public</b> makes the file via the "Suprise Me" feature or file catalog.
                                             </li>
                                             <li><b>Unlisted</b> makes the file accessible only via a link.</li>
