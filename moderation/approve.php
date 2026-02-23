@@ -83,10 +83,24 @@ if (!empty($files)) {
         <h1>Media Pending Approval</h1>
         <hr>
         <?php if (isset($file)): ?>
-            <div class="column file-preview">
-                <a href="/<?= "{$file->id}.{$file->extension}" ?>" target="_blank">
-                    <?php html_file_full($file); ?>
-                </a>
+            <div class="row justify-center">
+                <section class="box">
+                    <div class="tab row wrap gap-8">
+                        <div class="grow">
+                            <p>File <?= "{$file->id}.{$file->extension}" ?></p>
+                        </div>
+                        <div class="grow row gap-8 justify-end align-center wrap">
+                            <a href="<?= "/{$file->id}.{$file->extension}" ?>" target="_blank">
+                                <button>
+                                    Open in new tab
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="content column file-preview">
+                        <?php html_file_full($file); ?>
+                    </div>
+                </section>
             </div>
             <div class="row gap-8">
                 <form action="/moderation/approve.php" method="post" class="row grow">
