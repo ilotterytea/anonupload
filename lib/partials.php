@@ -266,10 +266,14 @@ function html_debug_info()
 {
     $compile_time = (floor(microtime(true) * 1000) - GEN_TIMESTAMP) / 1000;
 
-    $commit = [
-        'timestamp' => (int) trim(shell_exec('git show -s --format=%ct HEAD')),
-        'sha' => trim(shell_exec('git rev-parse HEAD'))
-    ];
+    $commit = null;
+
+    if ($_SERVER['REQUEST_URI'] === '/') {
+        $commit = [
+            'timestamp' => (int) trim(shell_exec('git show -s --format=%ct HEAD')),
+            'sha' => trim(shell_exec('git rev-parse HEAD'))
+        ];
+    }
 
     $new_tos = false;
     $tos_exists = false;
@@ -288,7 +292,7 @@ function html_debug_info()
     echo '' ?>
     <div class="debug-info">
         <p>Page generated in <?= $compile_time ?>s</p>
-        <?php if (!empty($commit['sha'])): ?>
+        <?php if (isset($commit) && !empty($commit['sha'])): ?>
             <p>
                 Last updated
                 <?= format_timestamp((new DateTime())->setTimestamp($commit['timestamp'])) ?> ago
