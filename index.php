@@ -154,88 +154,69 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
         <?php display_alert() ?>
 
         <?php if ($file): ?>
-            <?php if ($file->is_banned): ?>
-                <section class="box red">
-                    <p>Sorry&comma; you cannot access this file as it violated the TOS and was banned from the
-                        <?= CONFIG["instance"]["name"] ?> servers.
-                    </p>
-                    <?php if (isset($file->ban_reason)): ?>
-                        <p>Reason: <b><?= $file->ban_reason ?></b></p>
-                    <?php endif; ?>
-                </section>
-            <?php else: ?>
-                <div class="row grow justify-center">
-                    <section class="file-preview-wrapper" <?= isset($file->width) ? ('style="max-width:' . max($file->width, 256) . 'px;"') : '' ?>>
-                        <section class="box">
-                            <div class="tab row wrap gap-8">
-                                <div class="grow">
-                                    <div style="display: none;">
-                                        <p id="file-id"><?= $file->id ?></p>
-                                        <p id="file-mime"><?= $file->mime ?></p>
-                                        <p id="file-extension"><?= $file->extension ?></p>
-                                        <p id="file-size"><?= $file->size ?></p>
-                                    </div>
-                                    <p>File <?= $file_name ?></p>
+            <div class="row grow justify-center">
+                <section class="file-preview-wrapper" <?= isset($file->width) ? ('style="max-width:' . max($file->width, 256) . 'px;"') : '' ?>>
+                    <section class="box">
+                        <div class="tab row wrap gap-8">
+                            <div class="grow">
+                                <div style="display: none;">
+                                    <p id="file-id"><?= $file->id ?></p>
+                                    <p id="file-mime"><?= $file->mime ?></p>
+                                    <p id="file-extension"><?= $file->extension ?></p>
+                                    <p id="file-size"><?= $file->size ?></p>
                                 </div>
-                                <div class="grow row gap-8 justify-end align-center wrap" id="file-tab-buttons">
-                                    <?php if (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value()): ?>
-                                        <a href="/files/delete.php?id=<?= "{$file->id}.{$file->extension}" ?>">
-                                            <button>Delete</button>
-                                        </a>
-                                        <?php if (CONFIG["moderation"]["banfiles"]): ?>
-                                            <form action="/files/ban.php" method="post" class="row gap-4">
-                                                <input type="text" name="id" value="<?= "{$file->id}.{$file->extension}" ?>"
-                                                    style="display:none">
-                                                <input type="text" name="reason" placeholder="Ban reason">
-                                                <button type="submit">Ban</button>
-                                            </form>
-                                        <?php endif; ?>
-                                    <?php endif; ?>
-                                    <?php if (CONFIG["report"]["enable"]): ?>
-                                        <a href="/files/report.php?id=<?= "{$file->id}.{$file->extension}" ?>">
-                                            <button>Report</button>
-                                        </a>
-                                    <?php endif; ?>
-                                    <a href="<?= $file_full_url ?>">
-                                        <button>Full size</button>
-                                    </a>
-                                    <a href="<?= $file_full_url ?>" download="<?= $file_download_name ?>">
-                                        <button>Download</button>
-                                    </a>
-                                </div>
+                                <p>File <?= $file_name ?></p>
                             </div>
-                            <div class="content column file-preview">
-                                <?php html_file_full($file); ?>
+                            <div class="grow row gap-8 justify-end align-center wrap" id="file-tab-buttons">
+                                <?php if (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value()): ?>
+                                    <a href="/files/delete.php?id=<?= "{$file->id}.{$file->extension}" ?>">
+                                        <button id="file-deletion-button">Delete</button>
+                                    </a>
+                                <?php endif; ?>
+                                <?php if (CONFIG["report"]["enable"]): ?>
+                                    <a href="/files/report.php?id=<?= "{$file->id}.{$file->extension}" ?>">
+                                        <button>Report</button>
+                                    </a>
+                                <?php endif; ?>
+                                <a href="<?= $file_full_url ?>">
+                                    <button>Full size</button>
+                                </a>
+                                <a href="<?= $file_full_url ?>" download="<?= $file_download_name ?>">
+                                    <button>Download</button>
+                                </a>
                             </div>
-
-                        </section>
-
-                        <div class="font-small row right wrap justify-end gap-8 align-bottom">
-                            <p title="<?= $file->size ?>B"><?= $file_size_formatted ?></p>
-                            <p><?= $file->mime ?> &#40;<?= $file->extension ?>&#41;</p>
-                            <?php if (isset($file_resolution)): ?>
-                                <p><?= $file_resolution ?></p>
-                            <?php endif; ?>
-                            <?php if (isset($file->uploaded_at)): ?>
-                                <p title="<?= $file->uploaded_at->format('M d, Y @ H:i:s') ?>">Uploaded
-                                    <?= format_timestamp($file->uploaded_at) ?> ago
-                                </p>
-                            <?php endif; ?>
-                            <?php if ((CONFIG["files"]["showviews"] || (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() > UserRole::Moderator->as_value())) && isset($file->views)): ?>
-                                <p><?= $file->views ?> views</p>
-                            <?php endif; ?>
+                        </div>
+                        <div class="content column file-preview">
+                            <?php html_file_full($file); ?>
                         </div>
 
-                        <?php if (isset($file->description) && !empty(trim($file->description))): ?>
-                            <details open>
-                                <summary>Note</summary>
-
-                                <?= bbcode_parse($file->description) ?>
-                            </details>
-                        <?php endif; ?>
                     </section>
-                </div>
-            <?php endif; ?>
+
+                    <div class="font-small row right wrap justify-end gap-8 align-bottom">
+                        <p title="<?= $file->size ?>B"><?= $file_size_formatted ?></p>
+                        <p><?= $file->mime ?> &#40;<?= $file->extension ?>&#41;</p>
+                        <?php if (isset($file_resolution)): ?>
+                            <p><?= $file_resolution ?></p>
+                        <?php endif; ?>
+                        <?php if (isset($file->uploaded_at)): ?>
+                            <p title="<?= $file->uploaded_at->format('M d, Y @ H:i:s') ?>">Uploaded
+                                <?= format_timestamp($file->uploaded_at) ?> ago
+                            </p>
+                        <?php endif; ?>
+                        <?php if ((CONFIG["files"]["showviews"] || (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() > UserRole::Moderator->as_value())) && isset($file->views)): ?>
+                            <p><?= $file->views ?> views</p>
+                        <?php endif; ?>
+                    </div>
+
+                    <?php if (isset($file->description) && !empty(trim($file->description))): ?>
+                        <details open>
+                            <summary>Note</summary>
+
+                            <?= bbcode_parse($file->description) ?>
+                        </details>
+                    <?php endif; ?>
+                </section>
+            </div>
         <?php else: ?>
             <section class="box">
                 <div class="tab">
@@ -347,13 +328,12 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
 
                                         <label for="visibility">Visibility:</label>
                                         <select name="visibility" id="visibility">
-                                            <option value="1" <?= CONFIG['files']['defaultvisibility'] >= 1 ? 'selected' : '' ?>>
-                                                Public</option>
-                                            <option value="0" <?= CONFIG['files']['defaultvisibility'] === 0 ? 'selected' : '' ?>>
-                                                Unlisted</option>
+                                            <option value="1" <?= CONFIG['files']['defaultvisibility'] >= 1 ? 'selected' : '' ?>>Public</option>
+                                            <option value="0" <?= CONFIG['files']['defaultvisibility'] === 0 ? 'selected' : '' ?>>Unlisted</option>
                                         </select>
                                         <ul class="hint">
-                                            <li><b>Public</b> makes the file via the "Suprise Me" feature or file catalog.</li>
+                                            <li><b>Public</b> makes the file via the "Suprise Me" feature or file catalog.
+                                            </li>
                                             <li><b>Unlisted</b> makes the file accessible only via a link.</li>
                                         </ul>
 
@@ -442,15 +422,14 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
     </script>
     <script src="/static/scripts/favorites.js"></script>
     <script src="/static/scripts/player.js"></script>
-<?php endif; ?>
-
-<?php if ($file && isset($_SESSION['user']) && $_SESSION['user']->role->as_value() > UserRole::Moderator->as_value()): ?>
     <script>
         // adding deletion button
-        const files = JSON.parse(localStorage.getItem('uploaded_files') ?? '[]');
-        const file = files.find((x) => x.id === '<?= $file->id ?>');
-        if (file && file.urls && file.urls.deletion_url) {
-            fileTabButtons.innerHTML = `<a href='${file.urls.deletion_url}'><button>Delete</button></a>` + fileTabButtons.innerHTML;
+        if (document.getElementById("file-deletion-button") === null) {
+            const files = JSON.parse(localStorage.getItem('uploaded_files') ?? '[]');
+            const file = files.find((x) => x.id === '<?= $file->id ?>');
+            if (file && file.urls && file.urls.deletion_url) {
+                fileTabButtons.innerHTML = `<a href='${file.urls.deletion_url}'><button>Delete</button></a>` + fileTabButtons.innerHTML;
+            }
         }
     </script>
 <?php elseif (!$file): ?>
