@@ -39,7 +39,6 @@ if (!isset($_COOKIE['doomscrolling'])) {
 <?php endif; ?>
 
 <script src="/static/scripts/favorites.js"></script>
-<script src="/static/scripts/player.js"></script>
 
 <script>
     const uploadedFiles = JSON.parse(localStorage.getItem('uploaded_files') ?? '[]');
@@ -251,6 +250,8 @@ if (!isset($_COOKIE['doomscrolling'])) {
                     b.textContent = 'Download';
                     buttons.appendChild(b);
                 }
+
+                createFavoriteButton(buttons, file);
             }
 
             // content

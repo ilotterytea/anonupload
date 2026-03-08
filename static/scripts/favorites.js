@@ -32,19 +32,43 @@ function isFavoriteFile(f) {
     return files.find((x) => x.id == f.id) != undefined;
 }
 
+function createFavoriteButton(root, data) {
+    const id = `${data.id}.${data.extension}`;
+
+    const addIcon = '<img src="/static/img/icons/star-gray.png" alt="Favorite"/>';
+    const delIcon = '<img src="/static/img/icons/star.png" alt="Unfavorite"/>';
+
+    const btn = document.createElement('button');
+    btn.classList.add("favorite-button");
+    btn.setAttribute("file-id", id);
+
+    btn.addEventListener('click', (e) => {
+        if (isFavoriteFile(data)) {
+            removeFavoriteFile(data);
+        } else {
+            addFavoriteFile(data);
+        }
+
+        const isf = isFavoriteFile(data);
+
+        const btns = document.querySelectorAll(`button.favorite-button[file-id='${id}']`);
+        btns.forEach((x) => {
+            x.innerHTML = isf ? delIcon : addIcon;
+            x.title = isf ? 'Unfavorite this file' : 'Favorite file';
+        });
+    });
+
+    const isf = isFavoriteFile(data);
+
+    btn.innerHTML = isf ? delIcon : addIcon;
+    btn.title = isf ? 'Unfavorite this file' : 'Favorite file';
+
+    root.appendChild(btn);
+}
+
 window.addEventListener('load', () => {
     const tabs = document.getElementById('file-tab-buttons');
     if (tabs != null) {
-        const addIcon = document.createElement('img');
-        addIcon.src = '/static/img/icons/star-gray.png';
-        addIcon.alt = 'Favorite';
-
-        const delIcon = document.createElement('img');
-        delIcon.src = '/static/img/icons/star.png';
-        delIcon.alt = 'Unfavorite';
-
-        const btn = document.createElement('button');
-
         const file = {
             id: document.getElementById('file-id').innerText,
             mime: document.getElementById('file-mime').innerText,
@@ -52,27 +76,7 @@ window.addEventListener('load', () => {
             size: document.getElementById('file-size').innerText
         };
 
-        btn.addEventListener('click', (e) => {
-            if (isFavoriteFile(file)) {
-                removeFavoriteFile(file);
-            } else {
-                addFavoriteFile(file);
-            }
-
-            btn.innerHTML = '';
-
-            const isf = isFavoriteFile(file);
-
-            btn.appendChild(isf ? delIcon : addIcon);
-            btn.title = isf ? 'Unfavorite this file' : 'Favorite file';
-        });
-
-        const isf = isFavoriteFile(file);
-
-        btn.appendChild(isf ? delIcon : addIcon);
-        btn.title = isf ? 'Unfavorite this file' : 'Favorite file';
-
-        tabs.appendChild(btn);
+        createFavoriteButton(tabs, file);
     }
 
     const files = document.getElementById('favorite-files');
