@@ -97,9 +97,15 @@ function html_big_navbar()
                     </a>
                 <?php endif; ?>
                 <?php if (CONFIG["supriseme"]["enable"]): ?>
-                    <a href="/?random" id="surprise-me-button">
-                        <button>Surprise Me</button>
-                    </a>
+                    <?php if (isset($_COOKIE['doomscrolling'])): ?>
+                        <a href="/doomscrolling.php" class="button" id="doomscrolling-button">
+                            Burn My Receptors
+                        </a>
+                    <?php else: ?>
+                        <a href="/?random" id="surprise-me-button">
+                            <button>Surprise Me</button>
+                        </a>
+                    <?php endif; ?>
                 <?php endif; ?>
                 <a href="/uploaders.php" id="uploaders-button">
                     <button>Uploaders</button>
@@ -162,9 +168,15 @@ function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['
                     </a>
                 <?php endif; ?>
                 <?php if (CONFIG["supriseme"]["enable"]): ?>
-                    <a href="/?random" id="surprise-me-button">
-                        <button>Surprise Me</button>
-                    </a>
+                    <?php if (isset($_COOKIE['doomscrolling'])): ?>
+                        <a href="/doomscrolling.php" class="button" id="doomscrolling-button">
+                            Burn My Receptors
+                        </a>
+                    <?php else: ?>
+                        <a href="/?random" id="surprise-me-button">
+                            <button>Surprise Me</button>
+                        </a>
+                    <?php endif; ?>
                 <?php endif; ?>
                 <a href="/uploaders.php" id="uploaders-button">
                     <button>Uploaders</button>
