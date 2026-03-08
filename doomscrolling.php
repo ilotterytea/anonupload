@@ -46,6 +46,25 @@ if (!isset($_COOKIE['doomscrolling'])) {
     const loadedFiles = new Set();
     let loading = false;
     let failedAttempts = 0;
+    let currentPlaying = null;
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            const el = entry.target;
+
+            if (entry.intersectionRatio > 0.6) {
+                if (currentPlaying && currentPlaying !== el) {
+                    currentPlaying.pause?.();
+                }
+                el.play?.();
+                currentPlaying = el;
+            } else {
+                el.pause?.();
+            }
+        });
+    }, {
+        threshold: [0.6]
+    });
 
     function formatTimestamp(input) {
         const dt = input instanceof Date ? input : new Date(input);
@@ -243,6 +262,7 @@ if (!isset($_COOKIE['doomscrolling'])) {
                     return;
                 }
 
+                observer.observe(f);
                 el.appendChild(f);
             }
 
