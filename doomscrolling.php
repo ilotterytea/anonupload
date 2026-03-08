@@ -66,6 +66,17 @@ if (!isset($_COOKIE['doomscrolling'])) {
         threshold: [0.6]
     });
 
+    let volume = Number(localStorage.getItem("player-volume") || "0.45");
+    function updateVolume(v) {
+        localStorage.setItem("player-volume", v);
+        volume = v;
+
+        const elements = document.querySelectorAll("video, audio");
+        elements.forEach(x => {
+            x.volume = v;
+        });
+    }
+
     function formatTimestamp(input) {
         const dt = input instanceof Date ? input : new Date(input);
         const now = new Date();
@@ -238,6 +249,7 @@ if (!isset($_COOKIE['doomscrolling'])) {
                     f.alt = 'Image file.';
                 } else if (file.mime.startsWith("video/")) {
                     f = document.createElement('video');
+                    f.volume = volume;
                     f.setAttribute("controls", "on");
                     <?php if (!isset($_COOKIE['noloop'])): ?>
                     f.setAttribute("loop", "on");
@@ -247,14 +259,17 @@ if (!isset($_COOKIE['doomscrolling'])) {
                     s.src = fullUrl;
                     s.type = file.mime;
                     f.appendChild(s);
+                    f.addEventListener("volumechange", () => updateVolume(f.volume));
                 }
                 else if (file.mime.startsWith("audio/")) {
                     f = document.createElement('audio');
+                    f.volume = volume;
                     f.setAttribute("controls", "on");
                     const s = document.createElement('source');
                     s.src = fullUrl;
                     s.type = file.mime;
                     f.appendChild(s);
+                    f.addEventListener("volumechange", () => updateVolume(f.volume));
                 }
 
                 if (f === null) {
