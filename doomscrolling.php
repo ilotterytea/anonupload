@@ -49,6 +49,7 @@ if (!isset($_COOKIE['doomscrolling'])) {
     const timeAwardDisplay = 60 * 5;
     let timeActive = 0;
 
+    <?php if (!isset($_COOKIE['noautoplay'])): ?>
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             const el = entry.target;
@@ -66,6 +67,7 @@ if (!isset($_COOKIE['doomscrolling'])) {
     }, {
         threshold: [0.6]
     });
+    <?php endif; ?>
 
     let volume = Number(localStorage.getItem("player-volume") || "0.45");
     function updateVolume(v) {
@@ -296,7 +298,9 @@ if (!isset($_COOKIE['doomscrolling'])) {
                     return;
                 }
 
+                <?php if (!isset($_COOKIE['noautoplay'])): ?>
                 observer.observe(f);
+                <?php endif; ?>
                 el.appendChild(f);
             }
 
