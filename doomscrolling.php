@@ -47,6 +47,8 @@ if (!isset($_COOKIE['doomscrolling'])) {
     let loading = false;
     let failedAttempts = 0;
     let currentPlaying = null;
+    const timeAwardDisplay = 60 * 5;
+    let timeActive = 0;
 
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
@@ -75,6 +77,22 @@ if (!isset($_COOKIE['doomscrolling'])) {
         elements.forEach(x => {
             x.volume = v;
         });
+    }
+
+    function startTimer() {
+        timeActive++;
+
+        if (timeActive >= timeAwardDisplay) {
+            let timer = document.getElementById('doomscrolling-timer');
+            if (!timer) {
+                const subtitle = document.getElementById("brand-subtitle");
+                timer = document.createElement('span');
+                timer.id = 'doomscrolling-timer';
+                subtitle.appendChild(timer);
+            }
+
+            timer.textContent = ` (wasted ${formatTimestamp(Date.now() + timeActive * 1000)} award)`;
+        }
     }
 
     function formatTimestamp(input) {
@@ -338,6 +356,17 @@ if (!isset($_COOKIE['doomscrolling'])) {
             loadRandomFiles(10);
         }
 
+        // editing the navbar
+        const navbar = document.querySelector("navbar");
+        if (navbar) {
+            if (window.scrollY > 0) {
+                navbar.style.backdropFilter = 'blur(8px)';
+            } else {
+                navbar.style.backdropFilter = 'blur(0px)';
+            }
+        }
+
+
         if (failedAttempts >= 3) {
             document.getElementById("feed-end-text").style.display = 'flex';
         }
@@ -345,6 +374,14 @@ if (!isset($_COOKIE['doomscrolling'])) {
 
     window.addEventListener("load", () => {
         loadRandomFiles(10);
+        setInterval(startTimer, 1000);
+
+        // editing the navbar
+        const navbar = document.querySelector("navbar");
+        if (navbar) {
+            navbar.style.position = 'sticky';
+            navbar.style.top = '0px';
+        }
     });
 </script>
 

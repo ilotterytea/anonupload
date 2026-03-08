@@ -147,7 +147,7 @@ function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['
                     <img src="<?= $brand_url ?>" alt="">
                     <div class="column">
                         <?php if ($subtitle): ?>
-                            <p class="font-small"><?= $subtitle ?></p>
+                            <p class="font-small" id="brand-subtitle"><?= $subtitle ?></p>
                         <?php endif; ?>
                         <h2><?= $title ?></h2>
                     </div>
