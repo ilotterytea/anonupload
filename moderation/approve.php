@@ -90,10 +90,8 @@ if (!empty($files)) {
                             <p>File <?= "{$file->id}.{$file->extension}" ?></p>
                         </div>
                         <div class="grow row gap-8 justify-end align-center wrap">
-                            <a href="<?= "/{$file->id}.{$file->extension}" ?>" target="_blank">
-                                <button>
-                                    Open in new tab
-                                </button>
+                            <a href="<?= "/{$file->id}.{$file->extension}" ?>" target="_blank" class="button">
+                                Open in New Tab
                             </a>
                         </div>
                     </div>

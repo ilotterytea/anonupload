@@ -88,13 +88,9 @@ function html_big_navbar()
             </div>
 
             <div class="links">
-                <a href="/">
-                    <button>Home</button>
-                </a>
+                <a href="/" class="button">Home</a>
                 <?php if (CONFIG["filecatalog"]["public"] || (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value())): ?>
-                    <a href="/files/index.php" id="file-catalogue-button">
-                        <button>Catalogue</button>
-                    </a>
+                    <a href="/files/index.php" class="button" id="file-catalogue-button">Catalogue</a>
                 <?php endif; ?>
                 <?php if (CONFIG["supriseme"]["enable"]): ?>
                     <?php if (isset($_COOKIE['doomscrolling'])): ?>
@@ -102,16 +98,16 @@ function html_big_navbar()
                             Burn My Receptors
                         </a>
                     <?php else: ?>
-                        <a href="/?random" id="surprise-me-button">
-                            <button>Surprise Me</button>
+                        <a href="/?random" id="surprise-me-button" class="button">
+                            Surprise Me
                         </a>
                     <?php endif; ?>
                 <?php endif; ?>
-                <a href="/uploaders.php" id="uploaders-button">
-                    <button>Uploaders</button>
+                <a href="/uploaders.php" class="button" id="uploaders-button">
+                    Uploaders
                 </a>
-                <a href="/account/index.php" id="account-button">
-                    <button>Account</button>
+                <a href="/account/index.php" class="button" id="account-button">
+                    Account
                 </a>
             </div>
 
@@ -159,12 +155,12 @@ function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['
             </div>
 
             <div class="links">
-                <a href="/" id="home-button">
-                    <button>Home</button>
+                <a href="/" class="button" id="home-button">
+                    Home
                 </a>
                 <?php if (CONFIG["filecatalog"]["public"] || (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value())): ?>
-                    <a href="/files/index.php" id="file-catalogue-button">
-                        <button>Catalogue</button>
+                    <a href="/files/index.php" class="button" id="file-catalogue-button">
+                        Catalogue
                     </a>
                 <?php endif; ?>
                 <?php if (CONFIG["supriseme"]["enable"]): ?>
@@ -173,16 +169,16 @@ function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['
                             Burn My Receptors
                         </a>
                     <?php else: ?>
-                        <a href="/?random" id="surprise-me-button">
-                            <button>Surprise Me</button>
+                        <a href="/?random" class="button" id="surprise-me-button">
+                            Surprise Me
                         </a>
                     <?php endif; ?>
                 <?php endif; ?>
-                <a href="/uploaders.php" id="uploaders-button">
-                    <button>Uploaders</button>
+                <a href="/uploaders.php" class="button" id="uploaders-button">
+                    Uploaders
                 </a>
-                <a href="/account/" id="account-button">
-                    <button>Account</button>
+                <a href="/account/" class="button" id="account-button">
+                    Account
                 </a>
             </div>
 

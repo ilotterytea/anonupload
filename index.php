@@ -169,20 +169,21 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
                             </div>
                             <div class="grow row gap-8 justify-end align-center wrap" id="file-tab-buttons">
                                 <?php if (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value()): ?>
-                                    <a href="/files/delete.php?id=<?= "{$file->id}.{$file->extension}" ?>">
-                                        <button id="file-deletion-button">Delete</button>
+                                    <a href="/files/delete.php?id=<?= "{$file->id}.{$file->extension}" ?>" class="button"
+                                        id="file-deletion-button">
+                                        Delete
                                     </a>
                                 <?php endif; ?>
                                 <?php if (CONFIG["report"]["enable"]): ?>
-                                    <a href="/files/report.php?id=<?= "{$file->id}.{$file->extension}" ?>">
-                                        <button>Report</button>
+                                    <a href="/files/report.php?id=<?= "{$file->id}.{$file->extension}" ?>" class="button">
+                                        Report
                                     </a>
                                 <?php endif; ?>
-                                <a href="<?= $file_full_url ?>">
-                                    <button>Full size</button>
+                                <a href="<?= $file_full_url ?>" class="button">
+                                    Full size
                                 </a>
-                                <a href="<?= $file_full_url ?>" download="<?= $file_download_name ?>">
-                                    <button>Download</button>
+                                <a href="<?= $file_full_url ?>" download="<?= $file_download_name ?>" class="button">
+                                    Download
                                 </a>
                             </div>
                         </div>
@@ -428,7 +429,7 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
             const files = JSON.parse(localStorage.getItem('uploaded_files') ?? '[]');
             const file = files.find((x) => x.id === '<?= $file->id ?>');
             if (file && file.urls && file.urls.deletion_url) {
-                fileTabButtons.innerHTML = `<a href='${file.urls.deletion_url}'><button>Delete</button></a>` + fileTabButtons.innerHTML;
+                fileTabButtons.innerHTML = `<a href='${file.urls.deletion_url}' class="button">Delete</a>` + fileTabButtons.innerHTML;
             }
         }
     </script>

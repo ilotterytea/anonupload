@@ -78,13 +78,14 @@ $files = STORAGE->get_files($page, $sort);
                 <div class="row">
                     <div class="box row gap-8">
                         <?php if ($page - 1 >= 0): ?>
-                            <a href="/files/index.php?p=<?= $page ?>&sort=<?= $sort ?>">
-                                <button>Previous</button>
+                            <a href="/files/index.php?p=<?= $page ?>&sort=<?= $sort ?>" class="button">
+                                Previous
                             </a>
                         <?php endif; ?>
                         <?php if ($page + 2 <= $max_pages): ?>
-                            <a href="/files/index.php?p=<?= $page + 2 ?>&sort=<?= $sort ?>" style="margin-left:auto">
-                                <button>Next</button>
+                            <a href="/files/index.php?p=<?= $page + 2 ?>&sort=<?= $sort ?>" style="margin-left:auto"
+                                class="button">
+                                Next
                             </a>
                         <?php endif; ?>
                     </div>
