@@ -220,7 +220,9 @@ if (!isset($_COOKIE['doomscrolling'])) {
                 } else if (file.mime.startsWith("video/")) {
                     f = document.createElement('video');
                     f.setAttribute("controls", "on");
+                    <?php if (!isset($_COOKIE['noloop'])): ?>
                     f.setAttribute("loop", "on");
+                    <?php endif; ?>
                     f.classList.add("video-playback");
                     const s = document.createElement('source');
                     s.src = fullUrl;

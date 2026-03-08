@@ -351,15 +351,18 @@ function html_file_brick(File $file, string|null $custom_url = null)
 
 function html_file_full(File $file)
 {
+    $loop = isset($_COOKIE['noloop']) ? '' : 'loop';
+    $autoplay = isset($_COOKIE['noautoplay']) ? '' : 'autoplay';
+
     $file_full_url = CONFIG["files"]["url"] . "/{$file->id}.{$file->extension}";
     if (str_starts_with($file->mime, 'image/')) {
         echo "<img src='$file_full_url' alt='Image file.'>";
     } elseif (str_starts_with($file->mime, 'video/')) {
-        echo "<video controls autoplay loop id='video-playback'>";
+        echo "<video controls $autoplay $loop id='video-playback'>";
         echo "<source src='$file_full_url' type='{$file->mime}'>";
         echo "</video>";
     } elseif (str_starts_with($file->mime, 'audio/')) {
-        echo "<audio controls autoplay>";
+        echo "<audio controls $autoplay>";
         echo "<source src='$file_full_url' type='{$file->mime}'>";
         echo "</audio>";
     } elseif (CONFIG["files"]["displayhtml"] && $file->extension === "html" && file_exists(sprintf("%s/%s/index.html", CONFIG["files"]["directory"], $file->id))) {
