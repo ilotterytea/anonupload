@@ -1005,6 +1005,7 @@ class FileMetadataStorage
             $stmt = $this->db->prepare("SELECT f.id, f.mime, f.extension, f.size
                 FROM files f
                 WHERE f.id NOT IN (SELECT id FROM file_bans) AND f.visibility = ?
+                ORDER BY f.uploaded_at DESC
             ");
             $stmt->execute([$visibility]);
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1026,6 +1027,8 @@ class FileMetadataStorage
                 }
                 array_push($files, $f);
             }
+
+            usort($files, fn($a, $b) => ($b->uploaded_at?->getTimestamp() ?? PHP_INT_MIN) <=> ($a->uploaded_at?->getTimestamp() ?? PHP_INT_MIN));
         }
 
         return $files;
