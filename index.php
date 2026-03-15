@@ -159,12 +159,6 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
                     <section class="box">
                         <div class="tab row wrap gap-8">
                             <div class="grow">
-                                <div style="display: none;">
-                                    <p id="file-id"><?= $file->id ?></p>
-                                    <p id="file-mime"><?= $file->mime ?></p>
-                                    <p id="file-extension"><?= $file->extension ?></p>
-                                    <p id="file-size"><?= $file->size ?></p>
-                                </div>
                                 <p>File <?= $file_name ?></p>
                             </div>
                             <div class="grow row gap-8 justify-end align-center wrap" id="file-tab-buttons">

@@ -410,6 +410,15 @@ button[type=submit].fancy:hover {
     image-rendering: pixelated;
 }
 
+#unsupported-playback {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    padding: 4px;
+}
+
 /** FILE CATALOG (WALL) */
 .wall {
     display: flex;
@@ -557,6 +566,36 @@ button[type=submit].fancy:hover {
 
 .right {
     float: right;
+}
+
+/** BACKGROUNDS */
+.scan-bg {
+    position: relative;
+    overflow: hidden;
+    background: var(--box-content-background);
+}
+
+.scan-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg,
+            transparent 40%,
+            rgb(136, 0, 0, 0.05) 50%,
+            transparent 60%);
+    background-size: 200% 200%;
+    animation: scan 3s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes scan {
+    from {
+        background-position: -200% 0;
+    }
+
+    to {
+        background-position: 200% 0;
+    }
 }
 
 @media screen and (max-width: 1500px) {
