@@ -354,23 +354,23 @@ function html_file_full(File $file)
     $loop = isset($_COOKIE['noloop']) ? '' : 'loop';
     $autoplay = isset($_COOKIE['noautoplay']) ? '' : 'autoplay';
 
-    echo '<div style="display:none;">';
-    echo "<p id='file-id'>{$file->id}</p>";
-    echo "<p id='file-mime'>{$file->mime}</p>";
-    echo "<p id='file-extension'>{$file->extension}</p>";
-    echo "<p id='file-size'>{$file->size}</p>";
+    echo "<div style='display:none;' class='file-metadata' file-id='{$file->id}'>";
+    echo "<p class='file-id'>{$file->id}</p>";
+    echo "<p class='file-mime'>{$file->mime}</p>";
+    echo "<p class='file-extension'>{$file->extension}</p>";
+    echo "<p class='file-size'>{$file->size}</p>";
     echo '</div>';
 
     $file_full_url = CONFIG["files"]["url"] . "/{$file->id}.{$file->extension}";
     if (str_starts_with($file->mime, 'image/')) {
         echo "<img src='$file_full_url' alt='Image file.'>";
     } elseif (str_starts_with($file->mime, 'video/')) {
-        echo "<video controls $autoplay $loop id='video-playback'>";
+        echo "<video controls $autoplay $loop class='video-playback' file-id='{$file->id}'>";
         echo "<source src='$file_full_url' type='{$file->mime}'>";
         echo "</video>";
 
         echo '' ?>
-        <div class="scan-bg" id="unsupported-playback" style="display:none">
+        <div class="scan-bg unsupported-playback" file-id="<?= $file->id ?>" style="display:none">
             <p>This file uses the <?= $file->mime ?> (<?= $file->extension ?>) format which your browser cannot play.</p>
             <p>
                 You can <a href="<?= $file_full_url ?>" download="<?= "{$file->id}.{$file->extension}" ?>">download the file</a>
@@ -380,9 +380,9 @@ function html_file_full(File $file)
         </div>
 
         <script>
-            const video = document.getElementById("video-playback");
-            const msg = document.getElementById("unsupported-playback");
-            const mime = document.getElementById("file-mime");
+            const video = document.querySelector(".video-playback[file-id=\"<?= $file->id ?>\"]");
+            const msg = document.querySelector(".unsupported-playback[file-id=\"<?= $file->id ?>\"]");
+            const mime = document.querySelector("*[file-id=\"<?= $file->id ?>\"]>.file-mime");
 
             if (mime && video && msg && !video.canPlayType(mime.textContent)) {
                 video.style.display = 'none';

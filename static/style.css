@@ -411,7 +411,7 @@ button[type=submit].fancy:hover {
     image-rendering: pixelated;
 }
 
-#unsupported-playback {
+.unsupported-playback {
     display: flex;
     flex-direction: column;
     justify-content: center;

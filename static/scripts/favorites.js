@@ -70,10 +70,10 @@ window.addEventListener('load', () => {
     const tabs = document.getElementById('file-tab-buttons');
     if (tabs != null) {
         const file = {
-            id: document.getElementById('file-id').innerText,
-            mime: document.getElementById('file-mime').innerText,
-            extension: document.getElementById('file-extension').innerText,
-            size: document.getElementById('file-size').innerText
+            id: document.querySelector('.file-id').innerText,
+            mime: document.querySelector('.file-mime').innerText,
+            extension: document.querySelector('.file-extension').innerText,
+            size: document.querySelector('.file-size').innerText
         };
 
         createFavoriteButton(tabs, file);
