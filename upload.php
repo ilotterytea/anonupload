@@ -205,6 +205,19 @@ try {
         throw new RuntimeException("Failed to save the file. Try again later.");
     }
 
+    // converting file
+    if (array_key_exists($file_data['extension'], CONFIG['upload']['convertextensions'])) {
+        $file_data['extension'] = CONFIG['upload']['convertextensions'][$file_data['extension']];
+        if (!array_key_exists($file_data['extension'], CONFIG['upload']['acceptedmimetypes'])) {
+            throw new RuntimeException("MIME type for {$file_data['extension']} does not exist!");
+        }
+
+        $file_data['mime'] = CONFIG['upload']['acceptedmimetypes'][$file_data['extension']];
+        $fp = sprintf('%s/%s.%s', CONFIG["files"]["directory"], $file_id, $file_data['extension']);
+        convert_file($file_path, $fp);
+        $file_path = $fp;
+    }
+
     // checking if this is a banned file
     if ($reason = STORAGE->is_sha256_banned(hash_file('sha256', $file_path))) {
         STORAGE->delete_file_by_id($file_id, $file_data['extension']);

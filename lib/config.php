@@ -156,6 +156,10 @@ $cfg = [
             'zsh' => 'text/x-scriptzsh',
             'lua' => 'text/x-lua'
         ],
+        "convertextensions" => [
+            'mov' => 'mp4',
+            'mkv' => 'mp4'
+        ],
         "verifymimetype" => true,
         "stripexif" => true,
         "idcharacters" => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_",

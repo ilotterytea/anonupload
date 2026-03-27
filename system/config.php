@@ -294,6 +294,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="upload_acceptedmimetypes">Accepted file MIME-types:</label>
                     <textarea name="upload_acceptedmimetypes" id="upload_acceptedmimetypes"
                         placeholder="One MIME-type per line. Format: extension=mime. For example: jpg=image/jpeg"><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['upload']['acceptedmimetypes']), CONFIG['upload']['acceptedmimetypes'])) ?></textarea>
+
+                    <label for="upload_convertextensions">Extension conversion:</label>
+                    <textarea name="upload_convertextensions" id="upload_convertextensions"
+                        placeholder="One MIME-type per line. Format: extension=extension. For example: mkv=mp4"><?= implode("\n", array_map(fn($k, $v) => "$k=$v", array_keys(CONFIG['upload']['convertextensions']), CONFIG['upload']['convertextensions'])) ?></textarea>
                 </fieldset>
 
                 <fieldset class="block">

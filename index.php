@@ -364,6 +364,10 @@ if (CONFIG["files"]["fancyview"] && $file_id) {
                                             </label>
                                             <input type="checkbox" name="remove_letterbox" id="remove_letterbox" value="1">
                                         <?php endif; ?>
+
+                                        <label for="convert_file">Convert the file to a more common format<a class="help"
+                                                href="/uploaders.php#file-conversion">[more...]</a>:</label>
+                                        <input type="checkbox" name="convert_file" id="convert_file" value="1" checked>
                                     </fieldset>
                                 </div>
 

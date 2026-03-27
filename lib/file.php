@@ -335,6 +335,34 @@ function parse_zip_web_archive(string $input_path, string $output_path)
     return $is_webapp;
 }
 
+function convert_file(string $input_path, string $output_path)
+{
+    $input_ext = pathinfo($input_path, PATHINFO_EXTENSION);
+    $output_ext = pathinfo($output_path, PATHINFO_EXTENSION);
+
+    $input_mime = CONFIG['upload']['acceptedmimetypes'][$input_ext] ?? null;
+    $output_mime = CONFIG['upload']['acceptedmimetypes'][$output_ext] ?? null;
+
+    if (str_starts_with($input_mime, 'video/') && str_starts_with($output_mime, 'video/')) {
+        $copy_supported = match (strtolower($output_ext)) {
+            'mp4', 'mov', 'mkv', 'webm', 'avi' => true,
+            default => false,
+        };
+
+        $cmd = $copy_supported
+            ? sprintf('ffmpeg -i %s -c copy -y %s 2>&1', escapeshellarg($input_path), escapeshellarg($output_path))
+            : sprintf('ffmpeg -i %s -c:v libx264 -c:a aac -y %s 2>&1', escapeshellarg($input_path), escapeshellarg($output_path));
+
+        exec($cmd, $output, $return_var);
+
+        if ($return_var !== 0) {
+            throw new RuntimeException("Conversion failed: " . implode("\n", $output));
+        }
+    } else {
+        throw new RuntimeException("MIME types must be matched: $input_mime -> $output_mime");
+    }
+}
+
 class File
 {
     public string $id, $mime, $extension, $path, $color;

@@ -16,6 +16,18 @@ foreach (CONFIG["upload"]["acceptedmimetypes"] as $k => $v) {
         array_push($file_types[$type], $k);
     }
 }
+
+$file_extensions = [];
+foreach (CONFIG["upload"]["convertextensions"] as $k => $v) {
+    if (!array_key_exists($v, $file_extensions)) {
+        $file_extensions[$v] = [];
+    }
+
+    if (!in_array($k, $file_extensions[$v])) {
+        array_push($file_extensions[$v], $k);
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -155,15 +167,40 @@ foreach (CONFIG["upload"]["acceptedmimetypes"] as $k => $v) {
                 <div class="column" id="supported-file-extensions">
                     <h3>Supported file extensions</h3>
                     <hr>
-                    <table class="vertical">
-                        <?php foreach ($file_types as $type => $exts): ?>
-                            <tr>
-                                <th><?= $type ?>:</th>
-                                <td style="text-align: justify"><?= implode(' ', $exts) ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </table>
+                    <div>
+                        <table class="vertical">
+                            <?php foreach ($file_types as $type => $exts): ?>
+                                <tr>
+                                    <th><?= $type ?>:</th>
+                                    <td style="text-align: justify"><?= implode(' ', $exts) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </table>
+                    </div>
                 </div>
+
+                <?php if (!empty($file_extensions)): ?>
+                    <div class="column" id="file-conversion">
+                        <h3>File conversion</h3>
+                        <hr>
+                        <p><?= CONFIG['instance']['name'] ?> automatically converts file formats to more widely
+                            supported ones.</p>
+                        <div>
+                            <table class="vertical">
+                                <?php foreach ($file_extensions as $type => $exts): ?>
+                                    <tr>
+                                        <th>
+                                            <?= $type ?>:
+                                        </th>
+                                        <td style="text-align: justify">
+                                            <?= implode(' ', $exts) ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </table>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </section>
         </section>
     </main>
