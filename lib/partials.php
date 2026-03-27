@@ -277,9 +277,11 @@ function html_debug_info()
     $commit = null;
 
     if ($_SERVER['REQUEST_URI'] === '/') {
+        $commit = explode(' ', trim(shell_exec('git show -s --format="%h %ct %s" HEAD')), 3);
         $commit = [
-            'timestamp' => (int) trim(shell_exec('git show -s --format=%ct HEAD')),
-            'sha' => trim(shell_exec('git rev-parse HEAD'))
+            'sha' => $commit[0],
+            'timestamp' => (int) $commit[1],
+            'message' => $commit[2]
         ];
     }
 
@@ -304,9 +306,9 @@ function html_debug_info()
             <p>
                 Last updated
                 <?= format_timestamp((new DateTime())->setTimestamp($commit['timestamp'])) ?> ago
-                <a href="https://git.ilt.su/services/anonupload.git/commit/?id=<?= $commit['sha'] ?>">
-                    (commit
-                    <?= substr($commit['sha'], 0, 7) ?>)
+                <a href="https://git.ilt.su/services/anonupload.git/commit/?id=<?= $commit['sha'] ?>"
+                    title="<?= $commit['message'] ?>">
+                    (commit <?= $commit['sha'] ?>)
                 </a>
             </p>
         <?php endif; ?>
