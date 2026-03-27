@@ -679,8 +679,13 @@ class FileMetadataStorage
 
             $in = !empty($viewed_files) ? (str_repeat('?,', count($viewed_files) - 1) . '?') : '';
             $in_condition = !empty($viewed_files) ? ("id NOT IN ($in) " . ($mime_filter ? " AND " : "")) : "";
-            $where_word = $in_condition || $mime_filter ? "WHERE" : "";
+            $where_condition = CONFIG['supriseme']['where'];
+            $where_word = $in_condition || $mime_filter || $where_condition ? "WHERE" : "";
             $order_condition = CONFIG["supriseme"]["order"] ?: "rand()";
+
+            if (($mime_filter || $in_condition) && $where_condition) {
+                $where_condition = "AND $where_condition";
+            }
 
             $file_id = null;
             $file_path = null;
@@ -690,7 +695,7 @@ class FileMetadataStorage
                 $file_id = null;
                 $file_path = null;
 
-                $stmt = $this->db->prepare("SELECT id, extension FROM files $where_word $in_condition $mime_filter ORDER BY $order_condition LIMIT 1");
+                $stmt = $this->db->prepare("SELECT id, extension FROM files $where_word $in_condition $mime_filter $where_condition ORDER BY $order_condition LIMIT 1");
                 if (empty($viewed_files)) {
                     $stmt->execute();
                 } else {

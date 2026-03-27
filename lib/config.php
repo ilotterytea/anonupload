@@ -32,7 +32,8 @@ $cfg = [
     ],
     "supriseme" => [
         "enable" => true,
-        "order" => "rand()"
+        "order" => "rand()",
+        "where" => false
     ],
     "files" => [
         "fancyview" => true,

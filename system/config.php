@@ -178,9 +178,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="checkbox" name="supriseme_enable" id="supriseme_enable" value="on"
                         <?= CONFIG['supriseme']['enable'] ? 'checked' : '' ?>>
 
-                    <label for="supriseme_order">File selection condition:</label>
+                    <label for="supriseme_order">File selection order:</label>
                     <input type="text" name="supriseme_order" id="supriseme_order"
                         value="<?= CONFIG['supriseme']['order'] ?>">
+
+                    <label for="supriseme_where">File selection filter:</label>
+                    <input type="text" name="supriseme_where" id="supriseme_where"
+                        value="<?= CONFIG['supriseme']['where'] ?>">
                 </fieldset>
 
                 <fieldset class="block">
