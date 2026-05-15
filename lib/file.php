@@ -368,6 +368,7 @@ class BaseFile
     public string $id, $ext, $mime;
     public DateTime $uploaded_at;
     public int $size;
+    public string|null $url;
 }
 
 class File

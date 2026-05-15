@@ -3,23 +3,26 @@ require $_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php';
 require $_SERVER['DOCUMENT_ROOT'] . '/lib/file.php';
 
 use Aws\S3\S3Client;
+use Aws\S3\MultipartUploader;
 
 interface FileStorage
 {
     public function get_file(string $name): BaseFile|null;
     public function get_files(): array;
     public function get_random_file(): BaseFile|null;
+    public function save_file(string $name, string $input_path): BaseFile|null;
 }
 
 class S3FileStorage implements FileStorage
 {
     private S3Client $s3;
-    private string $bucket;
+    private string $bucket, $host;
 
     public function __construct($data)
     {
         $this->s3 = new S3Client($data);
         $this->bucket = $data['bucket'];
+        $this->host = $data['web_endpoint'];
     }
 
     public function get_file(string $name): BaseFile|null
@@ -38,6 +41,7 @@ class S3FileStorage implements FileStorage
         $file->mime = $result->get("ContentType");
         $file->size = $result->get("ContentLength");
         $file->uploaded_at = new DateTime($result->get("LastModified"));
+        $file->url = sprintf("https://%s.%s/%s", $this->bucket, $this->host, $name);
 
         return $file;
     }
@@ -66,5 +70,25 @@ class S3FileStorage implements FileStorage
         }
 
         return $this->get_file($files[random_int(0, $c - 1)]);
+    }
+
+    public function save_file(string $name, string $input_path): BaseFile|null
+    {
+        $uploader = new MultipartUploader($this->s3, $input_path, [
+            'Bucket' => $this->bucket,
+            'Key' => $name,
+        ]);
+
+        $result = $uploader->upload();
+        $key = $result->get("Key");
+
+        $file = $this->get_file($key);
+        if (!$file) {
+            return null;
+        }
+
+        $file->url = $result->get("ObjectURL");
+
+        return $file;
     }
 }
