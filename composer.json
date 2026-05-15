@@ -1,0 +1,15 @@
+{
+    "name": "ilotterytea/anonupload",
+    "description": "a simple file sharing website",
+    "type": "project",
+    "require": {
+        "aws/aws-sdk-php": "^3.383"
+    },
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "ilotterytea",
+            "email": "tea@shungites.casa"
+        }
+    ]
+}

@@ -363,6 +363,13 @@ function convert_file(string $input_path, string $output_path)
     }
 }
 
+class BaseFile
+{
+    public string $id, $ext, $mime;
+    public DateTime $uploaded_at;
+    public int $size;
+}
+
 class File
 {
     public string $id, $mime, $extension, $path, $color;
