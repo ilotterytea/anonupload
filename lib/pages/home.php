@@ -16,10 +16,22 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
     </header>
     <main>
         <form action="/upload.php" method="post" enctype="multipart/form-data" autocomplete="off" id="form-upload">
-            <input type="file" name="file" id="upload-file" required multiple>
+            <input type="file" name="file[]" id="upload-file" required multiple>
             <button type="submit">upload</button>
             <button id="huge-upload-button" style="display:none">click, drop, or paste files here</button>
         </form>
+        <section id="file-upload-queue">
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
     </main>
     <footer>
         <?php html_footer(); ?>
@@ -34,7 +46,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
         const fileUploadElement = document.getElementById("upload-file");
         const submitButton = document.querySelector("#form-upload>button[type=\"submit\"]");
         const fakeUploadButton = document.getElementById("huge-upload-button");
-        if (!form || !fileUploadElement || !submitButton || !fakeUploadButton) return;
+        const fileUploadQueue = document.querySelector("#file-upload-queue tbody");
+        if (!form || !fileUploadElement || !submitButton || !fakeUploadButton || !fileUploadQueue) return;
 
         // -- adjusting the upload form
         fileUploadElement.style.display = 'none';
@@ -85,10 +98,43 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
         // -- file upload via fetch
         form.addEventListener("submit", (ev) => {
             ev.preventDefault();
-            console.log("uploading...");
-            console.log(cachedFiles);
 
             for (const file of cachedFiles) {
+                // -- creating file in queue
+                const fileElement = document.createElement("tr");
+                const fileIconElement = document.createElement("img");
+
+                const fileNameElement = document.createElement("p");
+                fileNameElement.textContent = file.name;
+
+                const fileStatusElement = document.createElement("p");
+                fileStatusElement.textContent = 'uploading...';
+
+                const fileOpenButton = document.createElement("button");
+                fileOpenButton.textContent = 'open';
+                fileOpenButton.style.display = 'none';
+
+                const fileCopyButton = document.createElement("button");
+                fileCopyButton.textContent = 'copy';
+                fileCopyButton.style.display = 'none';
+
+                for (const e of [fileIconElement, fileNameElement, [fileStatusElement, fileOpenButton, fileCopyButton]]) {
+                    const td = document.createElement("td");
+
+                    if (Array.isArray(e)) {
+                        const div = document.createElement("div");
+                        for (const d of e) div.appendChild(d);
+                        td.appendChild(div);
+                    } else {
+                        td.appendChild(e);
+                    }
+
+                    fileElement.append(td);
+                }
+
+                fileUploadQueue.append(fileElement);
+
+                // -- uploading file
                 const formData = new FormData();
 
                 formData.set("file", file);
@@ -104,8 +150,25 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
                         return Promise.reject(`${r.status} ${r.statusText}`);
                     }
                     return r.json();
-                }).then((j) => console.log(r))
-                    .catch((e) => console.error(e));
+                }).then((j) => {
+                    const d = j.data;
+                    fileNameElement.textContent = `${d.id}.${d.ext}`;
+                    fileStatusElement.style.display = 'none';
+
+                    fileOpenButton.style.display = 'inline';
+                    fileOpenButton.addEventListener("click", () => window.location.href = d.urls.download_url);
+
+                    if (navigator.clipboard) {
+                        fileCopyButton.style.display = 'inline';
+                        fileCopyButton.addEventListener("click", () => {
+                            navigator.clipboard.writeText(d.urls.download_url);
+                        });
+                    }
+                })
+                    .catch((e) => {
+                        fileStatusElement.classList.add("error");
+                        fileStatusElement.textContent = e;
+                    });
             }
 
             cachedFiles = [];
