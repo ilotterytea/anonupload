@@ -157,3 +157,18 @@ function bbcode_parse(string $text): string
 
     return implode("\n", $paragraphs);
 }
+
+class HTTPException extends Exception
+{
+    private int $statusCode;
+    public function __construct(string $message = "", int $statusCode = 400)
+    {
+        parent::__construct($message, 0, null);
+        $this->statusCode = $statusCode;
+    }
+
+    public function as_response()
+    {
+        http_response_code($this->statusCode);
+    }
+}

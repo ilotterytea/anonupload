@@ -1,6 +1,6 @@
 <?php
 define('GEN_TIMESTAMP', floor(microtime(true) * 1000));
-define("CONFIG_FILE_PATH", "{$_SERVER['DOCUMENT_ROOT']}/anonupload.json");
+define("CONFIG_FILE_PATH", $_SERVER['DOCUMENT_ROOT'] . '/anonupload.ini');
 
 $cfg = [
     "instance" => [
@@ -20,6 +20,16 @@ $cfg = [
         "name" => "anonupload",
         "user" => "default",
         "pass" => "default"
+    ],
+    's3' => [
+        'version' => 'latest',
+        'access_key' => null,
+        'secret_key' => null,
+        'region' => null,
+        'bucket' => null,
+        'endpoint' => null,
+        'web_endpoint' => null,
+        'use_path_style_endpoint' => true
     ],
     "driver" => [
         "ruffle" => false,
@@ -47,6 +57,12 @@ $cfg = [
         "deletion" => true,
         "deletionkeylength" => 16,
         "defaultvisibility" => 1
+    ],
+    'id' => [
+        'type' => 'chars',
+        'pool' => 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+        'length' => 5,
+        'prefix' => null
     ],
     "upload" => [
         "acceptedmimetypes" => [
@@ -226,37 +242,18 @@ $cfg = [
 ];
 
 if (file_exists(CONFIG_FILE_PATH)) {
-    $c = json_decode(file_get_contents(CONFIG_FILE_PATH), true);
-    foreach ($cfg as $sk => $sv) {
-        if (!is_array($sv) || !array_key_exists($sk, $c)) {
+    $c = parse_ini_file(CONFIG_FILE_PATH, true);
+    foreach ($c as $s => $r) {
+        if (!array_key_exists($s, $cfg)) {
             continue;
         }
 
-        foreach ($sv as $k => $v) {
-            if (array_key_exists($k, $c[$sk])) {
-                $v = $c[$sk][$k];
-
-                if (is_array($cfg[$sk][$k])) {
-                    if ($sk === "filecatalog" && $k === "includemimetypes") {
-                        $v = $v === "" ? [] : explode(' ', $v);
-                    } else if ($sk === "report" && $k === "reasons") {
-                        $v = $v === "" ? [] : explode(PHP_EOL, $v);
-                    } else {
-                        $lines = explode(PHP_EOL, $v);
-                        $v = [];
-                        foreach ($lines as $line) {
-                            $line = trim($line);
-                            $parts = explode('=', $line, 2);
-                            if (count($parts) != 2) {
-                                continue;
-                            }
-                            $v[$parts[0]] = $parts[1];
-                        }
-                    }
-                }
-
-                $cfg[$sk][$k] = $v;
+        foreach ($r as $k => $v) {
+            if (!array_key_exists($k, $cfg[$s])) {
+                continue;
             }
+
+            $cfg[$s][$k] = $v;
         }
     }
 }
