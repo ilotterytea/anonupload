@@ -149,7 +149,15 @@ try {
         }
     }
 
-    generate_alert("/", null, 201, $uploaded_files);
+    generate_alert(
+        "/",
+        null,
+        array_all($uploaded_files, fn($x) => is_array($x) && isset($x['error'])) ? 400 : 201,
+        match (true) {
+            count($uploaded_files) == 1 => $uploaded_files[0],
+            default => $uploaded_files
+        }
+    );
 } catch (HTTPException $e) {
     generate_alert('/', $e->getMessage(), $e->getCode());
 } catch (Exception $e) {
