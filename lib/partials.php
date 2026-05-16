@@ -20,7 +20,6 @@ function html_head(string|null $title = null, string|null $description = null, F
     echo "<meta property='og:description' content='$description' />";
     echo "<meta property='description' content='$description' />";
 
-
     if (isset($file)) {
         echo '<meta property="og:url" content="' . sprintf("%s/%s.%s", CONFIG["instance"]["url"], $file->id, $file->extension) . '" />';
         if (CONFIG['thumbnails']['enable']) {
@@ -75,52 +74,10 @@ function html_big_navbar()
         }
     }
 
-    echo '' ?>
-    <navbar class="large">
-        <main>
-            <div class="brand">
-                <a href="/" id="brand-button">
-                    <h1><img src="<?= $brand_url ?>" alt="<?= CONFIG["instance"]["name"] ?>"></h1>
-                </a>
-                <?php if (isset($line)): ?>
-                    <p><i>&quot;<?= $line ?>&quot;</i></p>
-                <?php endif; ?>
-            </div>
-
-            <div class="links">
-                <a href="/" class="button">Home</a>
-                <?php if (CONFIG["filecatalog"]["public"] || (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value())): ?>
-                    <a href="/files/index.php" class="button" id="file-catalogue-button">Catalogue</a>
-                <?php endif; ?>
-                <?php if (CONFIG["supriseme"]["enable"]): ?>
-                    <?php if (isset($_COOKIE['doomscrolling'])): ?>
-                        <a href="/doomscrolling.php" class="button" id="doomscrolling-button">
-                            Burn My Receptors
-                        </a>
-                    <?php else: ?>
-                        <a href="/?random" id="surprise-me-button" class="button">
-                            Surprise Me
-                        </a>
-                    <?php endif; ?>
-                <?php endif; ?>
-                <a href="/uploaders.php" class="button" id="uploaders-button">
-                    Uploaders
-                </a>
-                <a href="/account/index.php" class="button" id="account-button">
-                    Account
-                </a>
-            </div>
-
-            <?php if (isset($_SESSION['user'])): ?>
-                <div class="account-info">
-                    <p>Signed in as <span class="username <?= $_SESSION['user']->role->name ?>">
-                            <?= $_SESSION['user']->name ?>
-                        </span></p>
-                    <a href="/account/logout.php"><img src="/static/img/icons/logout.png" alt="[Log out]" title="Log out"></a>
-                </div>
-            <?php endif; ?>
-        </main>
-    </navbar>
+    ?>
+    <a href="/">
+        <img src="<?= $brand_url ?>" alt="<?= CONFIG['instance']['name'] ?>" />
+    </a>
     <?php ;
 }
 
@@ -196,63 +153,6 @@ function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['
 
 function html_footer()
 {
-    $out = STORAGE->count_file_and_size();
-
-    $file_count = $out['file_count'];
-    $file_size = $out['file_overall_size'];
-
-    $suffix = 'MB';
-    $file_size /= 1024 * 1024; // MB
-
-    if ($file_size >= 1024) {
-        $file_size /= 1024;
-        $suffix = 'GB';
-    }
-
-    $file_size = sprintf('%.2f%s', $file_size, $suffix);
-
-    echo '' ?>
-    <footer>
-        <main>
-            <?php if (array_key_exists(CONFIG["instance"]["url"], CONFIG["instance"]["mirrors"])): ?>
-                <p>You are using a mirror for
-                    <?= CONFIG["instance"]["mirrors"][CONFIG["instance"]["url"]] ?>. <a
-                        href="<?= CONFIG["instance"]["url"] ?>">[ Check
-                        out the origin website ]</a>
-                </p>
-            <?php elseif (!empty(CONFIG["instance"]["mirrors"])): ?>
-                <div class="row gap-8">
-                    <p>Mirrors:</p>
-                    <ul class="no-style row gap-4" style="list-style: none;">
-                        <?php foreach (CONFIG["instance"]["mirrors"] as $url => $name): ?>
-                            <li><a href="<?= $url ?>">
-                                    <?= $name ?>
-                                </a></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-            <div class="row gap-8">
-                <?php foreach (CONFIG["instance"]["footerlinks"] as $title => $link): ?>
-                    <p><a href="<?= $link ?>">
-                            <?= $title ?>
-                        </a></p>
-                <?php endforeach; ?>
-            </div>
-            <p>
-                Serving
-                <?= $file_count ?> files and
-                <?= $file_size ?> of active content
-                <?php if (CONFIG["stats"]["enable"]): ?>
-                    <a href="/stats.php">
-                        <img src="/static/img/icons/stats.png" alt="[Stats]">
-                    </a>
-                <?php endif; ?>
-            </p>
-            <?php html_debug_info(); ?>
-        </main>
-    </footer>
-    <?php ;
 }
 
 function html_mini_footer()
