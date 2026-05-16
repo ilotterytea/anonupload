@@ -11,13 +11,13 @@ interface FileStorage
     public function get_file(string $name): BaseFile|null;
     public function get_files(): array;
     public function get_random_file(): BaseFile|null;
-    public function save_file(string $name, string $input_path): BaseFile|null;
+    public function save_file(string $name, string $input_path, FileMetadata|null $metadata): BaseFile|null;
 }
 
 class S3FileStorage implements FileStorage
 {
     private S3Client $s3;
-    private string $bucket, $host;
+    private string $bucket, $web_host;
 
     public function __construct($data)
     {
@@ -32,7 +32,7 @@ class S3FileStorage implements FileStorage
             'use_path_style_endpoint' => $data['use_path_style_endpoint'] ?? false
         ]);
         $this->bucket = $data['bucket'];
-        $this->host = $data['web_endpoint'];
+        $this->web_host = $data['web_endpoint'];
     }
 
     public function has_file(string $name): bool
@@ -60,7 +60,7 @@ class S3FileStorage implements FileStorage
         $file->mime = $result->get("ContentType");
         $file->size = $result->get("ContentLength");
         $file->uploaded_at = new DateTime($result->get("LastModified"));
-        $file->url = sprintf("https://%s.%s/%s", $this->bucket, $this->host, $name);
+        $file->url = "{$this->web_host}/$name";
 
         return $file;
     }
@@ -91,12 +91,20 @@ class S3FileStorage implements FileStorage
         return $this->get_file($files[random_int(0, $c - 1)]);
     }
 
-    public function save_file(string $name, string $input_path): BaseFile|null
+    public function save_file(string $name, string $input_path, FileMetadata|null $metadata = null): BaseFile|null
     {
-        $uploader = new MultipartUploader($this->s3, $input_path, [
+        $m = [
             'Bucket' => $this->bucket,
             'Key' => $name,
-        ]);
+        ];
+
+        if ($metadata?->content_type) {
+            $m['Params'] = [
+                'ContentType' => $metadata->content_type
+            ];
+        }
+
+        $uploader = new MultipartUploader($this->s3, $input_path, $m);
 
         $result = $uploader->upload();
         $key = $result->get("Key");
@@ -106,7 +114,7 @@ class S3FileStorage implements FileStorage
             return null;
         }
 
-        $file->url = $result->get("ObjectURL");
+        $file->url = "{$this->web_host}/$key";
 
         return $file;
     }

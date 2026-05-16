@@ -363,6 +363,11 @@ function convert_file(string $input_path, string $output_path)
     }
 }
 
+class FileMetadata
+{
+    public string|null $content_type;
+}
+
 class BaseFile implements JsonSerializable
 {
     public string $id, $ext, $mime;

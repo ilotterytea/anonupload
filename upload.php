@@ -132,7 +132,10 @@ try {
                 $attempts++;
             } while (FILESTORAGE->has_file("$file_id.$file_ext"));
 
-            $data = FILESTORAGE->save_file("$file_id.$file_ext", $file['tmp_name']);
+            $meta = new FileMetadata();
+            $meta->content_type = $file_mime;
+
+            $data = FILESTORAGE->save_file("$file_id.$file_ext", $file['tmp_name'], $meta);
             if (!$data) {
                 throw new HTTPException('Failed to save file. Try again later.');
             }
