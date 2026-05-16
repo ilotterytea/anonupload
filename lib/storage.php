@@ -27,10 +27,14 @@ class S3FileStorage implements FileStorage
 
     public function get_file(string $name): BaseFile|null
     {
+        try {
         $result = $this->s3->headObject([
             'Bucket' => $this->bucket,
             'Key' => $name
         ]);
+        } catch (Exception $e) {
+            return null;
+        }
 
         $file = new BaseFile();
 
