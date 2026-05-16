@@ -56,7 +56,7 @@ class S3FileStorage implements FileStorage
         $k = explode(".", $name, 2);
 
         $file->id = $k[0];
-        $file->ext = $k[1];
+        $file->extension = $k[1];
         $file->mime = $result->get("ContentType");
         $file->size = $result->get("ContentLength");
         $file->uploaded_at = new DateTime($result->get("LastModified"));

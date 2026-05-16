@@ -370,7 +370,7 @@ class FileMetadata
 
 class BaseFile implements JsonSerializable
 {
-    public string $id, $ext, $mime;
+    public string $id, $extension, $mime;
     public DateTime $uploaded_at;
     public int $size;
     public string|null $url;
@@ -379,12 +379,12 @@ class BaseFile implements JsonSerializable
     {
         return [
             'id' => $this->id,
-            'ext' => $this->ext,
+            'extension' => $this->extension,
             'mime' => $this->mime,
             'size' => $this->size,
             'uploaded_at' => $this->uploaded_at->getTimestamp(),
             'urls' => [
-                'download_url' => '',
+                'download_url' => '/',
                 'raw_url' => $this->url
             ]
         ];

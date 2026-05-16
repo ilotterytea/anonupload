@@ -152,7 +152,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
                     return r.json();
                 }).then((j) => {
                     const d = j.data;
-                    fileNameElement.textContent = `${d.id}.${d.ext}`;
+                    fileNameElement.textContent = `${d.id}.${d.extension}`;
                     fileStatusElement.style.display = 'none';
 
                     fileOpenButton.style.display = 'inline';
