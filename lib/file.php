@@ -363,12 +363,27 @@ function convert_file(string $input_path, string $output_path)
     }
 }
 
-class BaseFile
+class BaseFile implements JsonSerializable
 {
     public string $id, $ext, $mime;
     public DateTime $uploaded_at;
     public int $size;
     public string|null $url;
+
+    public function jsonSerialize(): mixed
+    {
+        return [
+            'id' => $this->id,
+            'ext' => $this->ext,
+            'mime' => $this->mime,
+            'size' => $this->size,
+            'uploaded_at' => $this->uploaded_at->getTimestamp(),
+            'urls' => [
+                'download_url' => '',
+                'raw_url' => $this->url
+            ]
+        ];
+    }
 }
 
 class File
