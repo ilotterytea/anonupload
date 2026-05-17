@@ -1,4 +1,8 @@
 :root {
+    --button-background: #000;
+    --button-background-hover: #303030;
+    --button-foreground: #fff;
+
     --box-border-width: 4px;
     --box-border: #d5d5d5;
     --box-background: #f1f1f1;
@@ -8,6 +12,13 @@
     --error-background: #ff8181;
     --error-foreground: #6d2828;
     --error-border: #ff6c6c;
+
+    --showcase-background: #191a1b;
+    --showcase-control-background: #26282a;
+    --showcase-control-foreground: #4c5661;
+
+    --showcase-button-background: #606091;
+    --showcase-button-background-hover: #3e3e7a;
 
     --page-width: 50%;
     --pad: 8px;
@@ -55,6 +66,25 @@ noscript {
     color: var(--error-foreground);
     border: var(--box-border-width) solid var(--error-border);
     text-align: center;
+}
+
+.button {
+    background: var(--button-background);
+    color: var(--button-foreground);
+    padding: var(--pad);
+}
+
+.button:hover {
+    background: var(--button-background-hover);
+    text-decoration: line-through;
+}
+
+.button:has(> img:only-child) {
+    line-height: 0;
+}
+
+.button:has(> img:only-child):hover {
+    text-decoration: none;
 }
 
 /** FORM UPLOAD */
@@ -138,6 +168,67 @@ noscript {
     color: var(--box-foreground);
     padding: var(--pad);
     border: var(--box-border-width) solid var(--box-border);
+}
+
+/** FILES */
+body:has(> .file-preview) {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.file-preview {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.file-preview .preview {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    background: var(--showcase-background);
+}
+
+.file-preview .preview>* {
+    max-width: 80vw;
+    max-height: 80vh;
+}
+
+.file-preview>.control-panel {
+    display: flex;
+    flex-direction: row;
+
+    background: var(--showcase-control-background);
+    color: var(--showcase-control-foreground);
+    border-top: var(--box-border-width) solid var(--showcase-control-foreground);
+
+    padding: var(--pad);
+    gap: var(--pad);
+
+    font-size: 0.8em;
+}
+
+.control-panel>.metadata {
+    flex-grow: 1;
+}
+
+.control-panel>.control-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: var(--pad);
+}
+
+.control-buttons .button {
+    background: var(--showcase-button-background);
+}
+
+.control-buttons .button:hover {
+    background: var(--showcase-button-background-hover);
 }
 
 @media screen and (max-width: 800px) {

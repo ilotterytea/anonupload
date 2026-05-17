@@ -49,6 +49,24 @@ function html_head(string|null $title = null, string|null $description = null, F
     }
 }
 
+function html_mini_icon()
+{
+    $brand_url = '/static/img/brand/mini.webp';
+    $static_folder = '/static/img/brand/mini';
+    $brand_folder = $_SERVER['DOCUMENT_ROOT'] . $static_folder;
+
+    if (is_dir($brand_folder)) {
+        $files = glob("$brand_folder/*.*");
+
+        if (!empty($files)) {
+            $file = basename($files[random_int(0, count($files) - 1)]);
+            $brand_url = "$static_folder/$file";
+        }
+    }
+
+    echo "<a href='/'><img src='$brand_url' alt=''></a>";
+}
+
 function html_big_navbar()
 {
     $brand_url = '/static/img/brand/big.webp';
@@ -257,31 +275,23 @@ function html_file_brick(File $file, string|null $custom_url = null)
     <?php ;
 }
 
-function html_file_full(File $file)
+function html_file_full(BaseFile $file)
 {
     $loop = isset($_COOKIE['noloop']) ? '' : 'loop';
     $autoplay = isset($_COOKIE['noautoplay']) ? '' : 'autoplay';
 
-    echo "<div style='display:none;' class='file-metadata' file-id='{$file->id}'>";
-    echo "<p class='file-id'>{$file->id}</p>";
-    echo "<p class='file-mime'>{$file->mime}</p>";
-    echo "<p class='file-extension'>{$file->extension}</p>";
-    echo "<p class='file-size'>{$file->size}</p>";
-    echo '</div>';
-
-    $file_full_url = CONFIG["files"]["url"] . "/{$file->id}.{$file->extension}";
     if (str_starts_with($file->mime, 'image/')) {
-        echo "<img src='$file_full_url' alt='Image file.'>";
+        echo "<img src='{$file->url}' alt='Image file.'>";
     } elseif (str_starts_with($file->mime, 'video/')) {
         echo "<video controls $autoplay $loop class='video-playback' file-id='{$file->id}'>";
-        echo "<source src='$file_full_url' type='{$file->mime}'>";
+        echo "<source src='{$file->url}' type='{$file->mime}'>";
         echo "</video>";
 
         echo '' ?>
         <div class="scan-bg unsupported-playback" file-id="<?= $file->id ?>" style="display:none">
             <p>This file uses the <?= $file->mime ?> (<?= $file->extension ?>) format which your browser cannot play.</p>
             <p>
-                You can <a href="<?= $file_full_url ?>" download="<?= "{$file->id}.{$file->extension}" ?>">download the file</a>
+                You can <a href="<?= $file->url ?>" download="<?= "{$file->id}.{$file->extension}" ?>">download the file</a>
                 and watch it in a media player
                 or <b>use a different browser</b> that supports this codec.
             </p>
@@ -300,24 +310,8 @@ function html_file_full(File $file)
         <?php ;
     } elseif (str_starts_with($file->mime, 'audio/')) {
         echo "<audio controls $autoplay>";
-        echo "<source src='$file_full_url' type='{$file->mime}'>";
+        echo "<source src='{$file->url}' type='{$file->mime}'>";
         echo "</audio>";
-    } elseif (CONFIG["files"]["displayhtml"] && $file->extension === "html" && file_exists(sprintf("%s/%s/index.html", CONFIG["files"]["directory"], $file->id))) {
-        $src = sprintf("%s/%s/index.html", CONFIG["files"]["url"], $file->id);
-        echo "<iframe src='$src' width='800' height='600' frameborder='0'></iframe>";
-    } elseif (CONFIG["files"]["displayhtml"] && $file->extension === "html") {
-        $src = sprintf("%s/%s.%s", CONFIG["files"]["url"], $file->id, $file->extension);
-        echo "<iframe src='$src' width='800' height='600' frameborder='0'></iframe>";
-    } elseif (str_starts_with($file->mime, 'text/')) {
-        echo '<pre>';
-        echo file_get_contents(CONFIG["files"]["directory"] . "/{$file->id}.{$file->extension}");
-        echo '</pre>';
-    } elseif ($file->mime == 'application/x-shockwave-flash' && !empty(CONFIG["driver"]["ruffle"])) {
-        $width = $file->width - 4;
-        echo '<noscript>JavaScript is required to play Flash</noscript>';
-        echo '<object>';
-        echo "<embed src='$file_full_url' width='$width' height='{$file->height}'>";
-        echo '</object>';
     } else {
         echo '<p><i>This file cannot be displayed.</i></p>';
     }
