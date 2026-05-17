@@ -164,6 +164,11 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
                             navigator.clipboard.writeText(d.urls.download_url);
                         });
                     }
+
+                    // -- saving file in history
+                    let fileHistory = JSON.parse(localStorage.getItem("uploaded_files") ?? "[]");
+                    fileHistory.unshift(d);
+                    localStorage.setItem("uploaded_files", JSON.stringify(fileHistory));
                 })
                     .catch((e) => {
                         fileStatusElement.classList.add("error");
