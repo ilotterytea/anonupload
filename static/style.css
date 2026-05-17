@@ -5,6 +5,10 @@
     --box-background-hover: #f6f6f6;
     --box-foreground: #636363;
 
+    --error-background: #ff8181;
+    --error-foreground: #6d2828;
+    --error-border: #ff6c6c;
+
     --page-width: 50%;
     --pad: 8px;
 }
@@ -24,7 +28,8 @@ footer {
     margin: var(--pad) auto;
 }
 
-header {
+header,
+footer {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -32,9 +37,25 @@ header {
     gap: var(--pad);
 }
 
-main {}
+main {
+    display: flex;
+    flex-direction: column;
+}
 
-footer {}
+ul.horizontal li {
+    display: inline;
+}
+
+ul.horizontal li:not(:first-child)::before {
+    content: ' | ';
+}
+
+noscript {
+    background: var(--error-background);
+    color: var(--error-foreground);
+    border: var(--box-border-width) solid var(--error-border);
+    text-align: center;
+}
 
 /** FORM UPLOAD */
 #form-upload {

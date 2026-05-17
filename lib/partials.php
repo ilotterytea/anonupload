@@ -153,6 +153,12 @@ function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['
 
 function html_footer()
 {
+    ?>
+    <ul class="horizontal links">
+        <li><a href="/"><?= CONFIG['instance']['name'] ?></a></li>
+        <li><a href="/history">history</a></li>
+    </ul>
+    <?php ;
 }
 
 function html_mini_footer()
