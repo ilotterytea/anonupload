@@ -1,12 +1,6 @@
 <?php
-include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
-include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
-include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
-include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
-include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
-include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/user.php";
-
-USER->authorize_with_cookie();
+include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/config.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
 
 $error_code = null;
 $error_reason = null;
@@ -42,31 +36,28 @@ if (is_dir($dir_path)) {
 <!DOCTYPE html>
 <html>
 
-<head><?php html_head("$error_code $error_reason"); ?></head>
+<head>
+    <?php html_head("$error_code $error_reason"); ?>
+</head>
 
 <body>
-    <?php html_mini_navbar() ?>
     <main>
-        <?php display_alert() ?>
-
-        <div class="row grow justify-center">
-            <section class="file-preview-wrapper">
-                <section class="box">
-                    <div class="tab">
-                        <p style="text-align:center"><?= "$error_code $error_reason" ?></p>
-                    </div>
-                    <div class="content column file-preview">
-                        <?php if (isset($image_name)): ?>
-                            <img src="/static/img/<?= "$error_code/$image_name" ?>" alt="There is nothing to see here.">
-                        <?php else: ?>
-                            <p>There is nothing to see here.</p>
-                        <?php endif; ?>
-                    </div>
-                </section>
-            </section>
-        </div>
+        <section class="box error">
+            <div class="tab">
+                <p><?= "$error_code $error_reason" ?></p>
+            </div>
+            <div class="content">
+                <?php if (isset($image_name)): ?>
+                    <img src="/static/img/<?= "$error_code/$image_name" ?>" alt="There is nothing to see here.">
+                <?php else: ?>
+                    <p>There is nothing to see here.</p>
+                <?php endif; ?>
+            </div>
+        </section>
     </main>
-    <?php html_mini_footer(); ?>
+    <footer>
+        <?php html_footer(); ?>
+    </footer>
 </body>
 
 </html>

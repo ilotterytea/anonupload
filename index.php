@@ -13,6 +13,9 @@ if ($file_name_specified) {
 
 if ($file) {
     include $_SERVER['DOCUMENT_ROOT'] . '/lib/pages/file.php';
+} elseif ($file_name_specified) {
+    $error = '404 Not Found';
+    include $_SERVER['DOCUMENT_ROOT'] . '/lib/pages/error.php';
 } else {
     include $_SERVER['DOCUMENT_ROOT'] . '/lib/pages/home.php';
 }

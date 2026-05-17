@@ -9,6 +9,9 @@
     --box-background-hover: #f6f6f6;
     --box-foreground: #636363;
 
+    --box-tab-background: #eaeaea;
+    --box-tab-foreground: #3a3a3a;
+
     --error-background: #ff8181;
     --error-foreground: #6d2828;
     --error-border: #ff6c6c;
@@ -160,6 +163,23 @@ noscript {
 .item>.details {
     font-size: 0.8em;
     list-style-type: none;
+}
+
+/** BOX */
+.box {
+    border: var(--box-border-width) solid var(--box-border);
+}
+
+.box>.tab {
+    background: var(--box-tab-background);
+    color: var(--box-tab-foreground);
+    border-bottom: var(--box-border-width) solid var(--box-border);
+    padding: var(--pad);
+}
+
+.box.error {
+    font-size: 1.25em;
+    text-align: center;
 }
 
 /** MESSAGES & HINTS */
