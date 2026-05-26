@@ -125,6 +125,22 @@ noscript {
     flex-direction: column;
 }
 
+#file-upload-queue tbody tr>td {
+    padding: calc(var(--pad) / 2);
+}
+
+#file-upload-queue tbody td:nth-child(1) img {
+    vertical-align: middle;
+}
+
+#file-upload-queue thead th:nth-child(2) {
+    width: 55%;
+}
+
+#file-upload-queue thead th:nth-child(3) {
+    width: 40%;
+}
+
 /** ITEMS */
 .item-list {
     display: grid;

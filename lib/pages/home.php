@@ -104,7 +104,35 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
                 const fileElement = document.createElement("tr");
                 const fileIconElement = document.createElement("img");
 
+                // setting icon according to file type (not thumbnail)
+                if (file.type.startsWith("image/")) {
+                    fileIconElement.src = '/static/img/icons/file_image.png';
+                    fileIconElement.alt = '[I]';
+                    fileIconElement.title = 'image file';
+                } else if (file.type.startsWith("video/")) {
+                    fileIconElement.src = '/static/img/icons/file_video.png';
+                    fileIconElement.alt = '[V]';
+                    fileIconElement.title = 'video file';
+                } else if (file.type.startsWith("audio/")) {
+                    fileIconElement.src = '/static/img/icons/file_audio.png';
+                    fileIconElement.alt = '[A]';
+                    fileIconElement.title = 'audio file';
+                } else if (file.type.startsWith("text/")) {
+                    fileIconElement.src = '/static/img/icons/file_text.png';
+                    fileIconElement.alt = '[T]';
+                    fileIconElement.title = 'text file';
+                } else if (file.type === "application/x-shockwave-flash") {
+                    fileIconElement.src = '/static/img/icons/file_flash.png';
+                    fileIconElement.alt = '[S]';
+                    fileIconElement.title = 'flash file';
+                } else {
+                    fileIconElement.src = '/static/img/icons/file.png';
+                    fileIconElement.alt = '[F]';
+                    fileIconElement.title = 'file';
+                }
+
                 const fileNameElement = document.createElement("p");
+                fileNameElement.classList.add("file-name");
                 fileNameElement.textContent = file.name;
 
                 const fileStatusElement = document.createElement("p");
@@ -123,6 +151,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
 
                     if (Array.isArray(e)) {
                         const div = document.createElement("div");
+                        div.classList.add("details");
                         for (const d of e) div.appendChild(d);
                         td.appendChild(div);
                     } else {
