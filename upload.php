@@ -149,6 +149,10 @@ try {
         }
     }
 
+    if (isset($_POST['save_upload_list']) && boolval($_POST['save_upload_list'])) {
+        $_SESSION['recently_uploaded_files'] = $uploaded_files;
+    }
+
     generate_alert(
         "/",
         null,
