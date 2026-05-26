@@ -26,6 +26,9 @@
     --showcase-button-background: #606091;
     --showcase-button-background-hover: #3e3e7a;
 
+    --options-background: linear-gradient(0deg, #c4c4c4 95%, #9d9d9d);
+    --options-border: #a1a1a1;
+
     --page-width: 50%;
     --pad: 8px;
     --font: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
@@ -116,6 +119,20 @@ code {
     line-height: 1.25em;
 }
 
+fieldset {
+    background: var(--box-background);
+    color: var(--box-foreground);
+    border: var(--box-border-width) solid var(--box-border);
+    padding: var(--pad);
+}
+
+fieldset>legend {
+    background: var(--box-tab-background);
+    color: var(--box-tab-foreground);
+    border: var(--box-border-width) solid var(--box-border);
+    padding: calc(var(--pad) / 2) var(--pad);
+}
+
 .software-uploaders {
     display: flex;
     flex-direction: column;
@@ -162,6 +179,33 @@ code {
     background: var(--button-background-hover);
     text-decoration: line-through;
     cursor: pointer;
+}
+
+#form-upload .options {
+    display: flex;
+    flex-direction: row;
+    gap: var(--pad);
+}
+
+#form-upload:has(> #huge-upload-button[active]) {
+    gap: 0;
+}
+
+#form-upload:has(> #huge-upload-button[active]) .options {
+    background: var(--options-background);
+    border: 2px dotted var(--options-border);
+    border-top: none;
+    padding: var(--pad);
+}
+
+#form-upload:has(> #huge-upload-button[active]) .options fieldset {
+    background: none;
+    border: 2px dotted var(--options-border);
+}
+
+#form-upload:has(> #huge-upload-button[active]) .options fieldset>legend {
+    background: none;
+    border: none;
 }
 
 /** FILE QUEUE */
@@ -274,7 +318,7 @@ code {
     border: var(--box-border-width) solid var(--box-border);
 }
 
-.hint::before {
+.hint:not(.iconless)::before {
     position: relative;
     left: 0;
     top: 0;
@@ -351,5 +395,9 @@ body:has(> .file-preview) {
 @media screen and (max-width: 800px) {
     :root {
         --page-width: 95%;
+    }
+
+    #form-upload .options {
+        flex-direction: column;
     }
 }

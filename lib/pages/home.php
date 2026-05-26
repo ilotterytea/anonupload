@@ -22,13 +22,42 @@ unset($_SESSION['recently_uploaded_files']);
         <h2>max upload size is <?= get_cfg_var(option: 'upload_max_filesize') ?></h2>
     </header>
     <main>
-        <form action="/upload.php" method="post" enctype="multipart/form-data" autocomplete="off" id="form-upload">
+        <form action="/upload" method="post" enctype="multipart/form-data" autocomplete="off" id="form-upload">
+            <button id="huge-upload-button" style="display:none">click, drop, or paste files here</button>
             <input type="file" name="file[]" id="upload-file" required multiple>
+            <div class="options">
+                <fieldset>
+                    <legend>general</legend>
+
+                    <table class="vertical">
+                        <tr>
+                            <th><label for="file-password">password<sup class="hint iconless"
+                                        title="for file deletion">[?]</sup>:</label>
+                            </th>
+                            <td><input type="text" name="password" id="file-password"></td>
+                        </tr>
+                    </table>
+                </fieldset>
+                <fieldset>
+                    <legend>miscellaneous</legend>
+
+                    <table class="vertical">
+                        <tr>
+                            <th><label for="file-originalname">preserve original filename:</label></th>
+                            <td><input type="checkbox" name="preserve_original_filename" id="file-originalname"
+                                    value="1"></td>
+                        </tr>
+                        <tr>
+                            <th><label for="file-exif">strip EXIF data:</label></th>
+                            <td><input type="checkbox" name="strip_exif_data" id="file-exif" value="1"></td>
+                        </tr>
+                    </table>
+                </fieldset>
+            </div>
             <button type="submit">upload</button>
             <input type="hidden" name="save_upload_list" value="1">
-            <button id="huge-upload-button" style="display:none">click, drop, or paste files here</button>
-            <p class="hint" id="upload-hint">the page will be refreshed once all uploads are complete</p>
         </form>
+        <p class="hint" id="upload-hint">the page will be refreshed once all uploads are complete</p>
         <section id="file-upload-queue">
             <table>
                 <thead>
@@ -111,6 +140,8 @@ unset($_SESSION['recently_uploaded_files']);
         submitButton.style.display = 'none';
         fakeUploadButton.style.display = 'flex';
         document.querySelector("input[name=\"save_upload_list\"]").remove();
+
+        fakeUploadButton.setAttribute("active", "true");
 
         fileUploadElement.removeAttribute("required");
 
@@ -249,14 +280,14 @@ unset($_SESSION['recently_uploaded_files']);
 
                     if (d.urls) {
                         if (d.urls.download_url) {
-                    fileOpenButton.style.display = 'inline';
+                            fileOpenButton.style.display = 'inline';
                             fileOpenButton.addEventListener("click", () => window.open(d.urls.download_url, '_blank'));
 
-                    if (navigator.clipboard) {
-                        fileCopyButton.style.display = 'inline';
-                        fileCopyButton.addEventListener("click", () => {
-                            navigator.clipboard.writeText(d.urls.download_url);
-                        });
+                            if (navigator.clipboard) {
+                                fileCopyButton.style.display = 'inline';
+                                fileCopyButton.addEventListener("click", () => {
+                                    navigator.clipboard.writeText(d.urls.download_url);
+                                });
                             }
                         }
 
