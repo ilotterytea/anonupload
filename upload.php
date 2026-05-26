@@ -75,7 +75,7 @@ try {
     }
 
     $strip_exif = boolval($_POST['strip_exif'] ?? '0');
-    $password = $_POST['password'] ?? generate_random_char_sequence(CONFIG["upload"]["idcharacters"], CONFIG["files"]["deletionkeylength"]);
+    $password = $_POST['password'] ?? null;
 
     $uploaded_files = [];
 
@@ -134,6 +134,7 @@ try {
 
             $meta = new FileMetadata();
             $meta->content_type = $file_mime;
+            $meta->password = $password;
 
             $data = FILESTORAGE->save_file("$file_id.$file_ext", $file['tmp_name'], $meta);
             if (!$data) {

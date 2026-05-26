@@ -90,17 +90,6 @@ function createUploadedFileItem(data) {
     };
 }
 
-function getUploadedFiles() {
-    const files = JSON.parse(localStorage.getItem("uploaded_files") ?? "[]");
-    return files;
-}
-
-function saveUploadedFile(data) {
-    const files = getUploadedFiles();
-    files.unshift(data);
-    localStorage.setItem("uploaded_files", JSON.stringify(files));
-}
-
 function displayUploadedFile(data) {
     const items = document.getElementById("uploaded-files");
     if (items) {

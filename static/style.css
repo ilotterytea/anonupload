@@ -186,6 +186,13 @@ code {
     width: 40%;
 }
 
+#file-upload-queue .details {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--pad);
+}
+
 /** ITEMS */
 .item-list {
     display: grid;
@@ -226,6 +233,12 @@ code {
 .item>.details {
     font-size: 0.8em;
     list-style-type: none;
+}
+
+.item>.buttons {
+    display: flex;
+    flex-direction: row;
+    gap: var(--pad);
 }
 
 /** BOX */

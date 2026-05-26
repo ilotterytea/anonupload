@@ -12,6 +12,7 @@ interface FileStorage
     public function get_files(): array;
     public function get_random_file(): BaseFile|null;
     public function save_file(string $name, string $input_path, FileMetadata|null $metadata): BaseFile|null;
+    public function delete_file(string $name): bool;
 }
 
 class S3FileStorage implements FileStorage
@@ -62,6 +63,10 @@ class S3FileStorage implements FileStorage
         $file->uploaded_at = new DateTime($result->get("LastModified"));
         $file->url = "{$this->web_host}/$name";
 
+        if ($metadata = $result->get("Metadata")) {
+            $file->password = $metadata['Password'] ?? null;
+        }
+
         return $file;
     }
 
@@ -96,11 +101,16 @@ class S3FileStorage implements FileStorage
         $m = [
             'Bucket' => $this->bucket,
             'Key' => $name,
+            'Params' => []
         ];
 
         if ($metadata?->content_type) {
-            $m['Params'] = [
-                'ContentType' => $metadata->content_type
+            $m['Params']['ContentType'] = $metadata->content_type;
+        }
+
+        if ($metadata?->password) {
+            $m['Params']['Metadata'] = [
+                'Password' => password_hash($metadata?->password, PASSWORD_DEFAULT)
             ];
         }
 
@@ -114,9 +124,24 @@ class S3FileStorage implements FileStorage
             return null;
         }
 
+        $file->password = $metadata?->password;
         $file->url = "{$this->web_host}/$key";
 
         return $file;
+    }
+
+    public function delete_file(string $name): bool
+    {
+        try {
+            $this->s3->deleteObject([
+                'Bucket' => $this->bucket,
+                'Key' => $name
+            ]);
+        } catch (Exception $e) {
+            return false;
+        }
+
+        return true;
     }
 }
 

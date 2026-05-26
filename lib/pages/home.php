@@ -89,8 +89,14 @@ unset($_SESSION['recently_uploaded_files']);
     </footer>
 </body>
 
+<script src="/static/scripts/file.js"></script>
 <script>
     let cachedFiles = [];
+
+    function setStatus(element, message) {
+        element.style.display = message.length > 0 ? 'flex' : 'none';
+        element.textContent = message;
+    }
 
     window.addEventListener("load", () => {
         const form = document.getElementById("form-upload");
@@ -152,6 +158,8 @@ unset($_SESSION['recently_uploaded_files']);
             for (const file of cachedFiles) {
                 // -- creating file in queue
                 const fileElement = document.createElement("tr");
+                fileElement.setAttribute("status", "progress");
+
                 const fileIconElement = document.createElement("img");
 
                 // setting icon according to file type (not thumbnail)
@@ -186,17 +194,21 @@ unset($_SESSION['recently_uploaded_files']);
                 fileNameElement.textContent = file.name;
 
                 const fileStatusElement = document.createElement("p");
-                fileStatusElement.textContent = 'uploading...';
+                setStatus(fileStatusElement, "uploading...");
 
                 const fileOpenButton = document.createElement("button");
                 fileOpenButton.textContent = 'open';
                 fileOpenButton.style.display = 'none';
 
                 const fileCopyButton = document.createElement("button");
-                fileCopyButton.textContent = 'copy';
+                fileCopyButton.innerHTML = '<img src="/static/img/icons/paste_plain.png" alt="[C]" title="copy URL" />';
                 fileCopyButton.style.display = 'none';
 
-                for (const e of [fileIconElement, fileNameElement, [fileStatusElement, fileOpenButton, fileCopyButton]]) {
+                const fileDeleteButton = document.createElement("button");
+                fileDeleteButton.innerHTML = '<img src="/static/img/icons/cross.png" alt="[X]" title="delete this file" />';
+                fileDeleteButton.style.display = 'none';
+
+                for (const e of [fileIconElement, fileNameElement, [fileStatusElement, fileOpenButton, fileCopyButton, fileDeleteButton]]) {
                     const td = document.createElement("td");
 
                     if (Array.isArray(e)) {
@@ -214,7 +226,7 @@ unset($_SESSION['recently_uploaded_files']);
                 fileUploadQueue.append(fileElement);
 
                 // -- uploading file
-                const formData = new FormData();
+                const formData = new FormData(form);
 
                 formData.set("file", file);
 
@@ -232,26 +244,61 @@ unset($_SESSION['recently_uploaded_files']);
                 }).then((j) => {
                     const d = j.data;
                     fileNameElement.textContent = `${d.id}.${d.extension}`;
-                    fileStatusElement.style.display = 'none';
+                    setStatus(fileStatusElement, '');
+                    fileElement.setAttribute("status", "success");
 
+                    if (d.urls) {
+                        if (d.urls.download_url) {
                     fileOpenButton.style.display = 'inline';
-                    fileOpenButton.addEventListener("click", () => window.location.href = d.urls.download_url);
+                            fileOpenButton.addEventListener("click", () => window.open(d.urls.download_url, '_blank'));
 
                     if (navigator.clipboard) {
                         fileCopyButton.style.display = 'inline';
                         fileCopyButton.addEventListener("click", () => {
                             navigator.clipboard.writeText(d.urls.download_url);
                         });
+                            }
+                        }
+
+                        if (d.urls.deletion_url) {
+                            fileDeleteButton.style.display = 'inline';
+                            fileDeleteButton.addEventListener("click", () => {
+                                fileDeleteButton.style.display = 'none';
+                                setStatus(fileStatusElement, 'deleting...');
+
+                                fetch(d.urls.deletion_url, {
+                                    method: "DELETE",
+                                    headers: {
+                                        "Accept": "application/json"
+                                    }
+                                })
+                                    .then((r) => r.json())
+                                    .then((j) => {
+                                        if (j.status_code === 200 || j.status_code == 404) {
+                                            setStatus(fileStatusElement, "deleted");
+                                            fileOpenButton.style.display = 'none';
+                                            fileCopyButton.style.display = 'none';
+                                            fileDeleteButton.style.display = 'none';
+                                            fileElement.setAttribute("status", "deleted");
+                                            deleteUploadedFile(d.id);
+                                        } else {
+                                            fileElement.setAttribute("status", "error");
+                                            setStatus(fileStatusElement, j.message);
+                                        }
+                                    })
+                                    .catch((err) => {
+                                        alert("Failed to delete this file. Check the console.");
+                                        console.error(err);
+                                    });
+                            });
+                        }
                     }
 
-                    // -- saving file in history
-                    let fileHistory = JSON.parse(localStorage.getItem("uploaded_files") ?? "[]");
-                    fileHistory.unshift(d);
-                    localStorage.setItem("uploaded_files", JSON.stringify(fileHistory));
+                    saveUploadedFile(d);
                 })
                     .catch((e) => {
-                        fileStatusElement.classList.add("error");
-                        fileStatusElement.textContent = e;
+                        setStatus(fileStatusElement, e);
+                        fileElement.setAttribute("status", "error");
                     });
             }
 

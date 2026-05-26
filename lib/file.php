@@ -366,6 +366,7 @@ function convert_file(string $input_path, string $output_path)
 class FileMetadata
 {
     public string|null $content_type;
+    public string|null $password;
 }
 
 class BaseFile implements JsonSerializable
@@ -373,11 +374,12 @@ class BaseFile implements JsonSerializable
     public string $id, $extension, $mime;
     public DateTime $uploaded_at;
     public int $size;
+    public string|null $password;
     public string|null $url;
 
     public function jsonSerialize(): mixed
     {
-        return [
+        $d = [
             'id' => $this->id,
             'extension' => $this->extension,
             'mime' => $this->mime,
@@ -385,9 +387,16 @@ class BaseFile implements JsonSerializable
             'uploaded_at' => $this->uploaded_at->getTimestamp(),
             'urls' => [
                 'download_url' => '/',
-                'raw_url' => $this->url
+                'raw_url' => $this->url,
+                'deletion_url' => null
             ]
         ];
+
+        if ($this->password && password_get_info($this->password)['algo'] === null) {
+            $d['urls']['deletion_url'] = "/delete?id={$this->id}.{$this->extension}&key={$this->password}";
+        }
+
+        return $d;
     }
 }
 
