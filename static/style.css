@@ -25,12 +25,13 @@
 
     --page-width: 50%;
     --pad: 8px;
+    --font: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
 * {
     margin: 0;
     padding: 0;
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-family: var(--font);
 }
 
 body {}
@@ -71,6 +72,7 @@ noscript {
     text-align: center;
 }
 
+button,
 .button {
     background: var(--button-background);
     color: var(--button-foreground);
@@ -78,16 +80,19 @@ noscript {
     border: none;
 }
 
+button:hover,
 .button:hover {
     background: var(--button-background-hover);
     text-decoration: line-through;
     cursor: pointer;
 }
 
+button:has(> img:only-child),
 .button:has(> img:only-child) {
     line-height: 0;
 }
 
+button:has(> img:only-child):hover,
 .button:has(> img:only-child):hover {
     text-decoration: none;
 }
@@ -116,6 +121,21 @@ noscript {
 
 #huge-upload-button:hover {
     background: var(--box-background-hover);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+#form-upload input[type="file"]::file-selector-button {
+    font-family: var(--font);
+    background: var(--button-background);
+    color: var(--button-foreground);
+    padding: var(--pad);
+    border: none;
+}
+
+#form-upload input[type="file"]::file-selector-button:hover {
+    background: var(--button-background-hover);
+    text-decoration: line-through;
     cursor: pointer;
 }
 
@@ -206,6 +226,19 @@ noscript {
     color: var(--box-foreground);
     padding: var(--pad);
     border: var(--box-border-width) solid var(--box-border);
+}
+
+.hint::before {
+    position: relative;
+    left: 0;
+    top: 0;
+    content: "    ";
+    background-image: url('/static/img/icons/hint.png');
+    background-position: 5%;
+    background-size: 16px 16px;
+    background-repeat: no-repeat;
+    width: 16px;
+    height: 16px;
 }
 
 /** FILES */

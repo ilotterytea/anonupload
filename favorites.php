@@ -16,7 +16,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
         <p>all the files you liked</p>
     </header>
     <main>
-        <noscript>JavaScript is required for file upload history.</noscript>
+        <noscript>JavaScript is required for favorite files.</noscript>
         <section class="item-list" id="favorite-files"></section>
     </main>
     <footer>
