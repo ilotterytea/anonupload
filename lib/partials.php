@@ -175,6 +175,7 @@ function html_footer()
     <ul class="horizontal links">
         <li><a href="/"><?= CONFIG['instance']['name'] ?></a></li>
         <li><a href="/history">history</a></li>
+        <li><a href="/favorites">favorites</a></li>
     </ul>
     <?php ;
 }

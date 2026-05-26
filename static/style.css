@@ -75,11 +75,13 @@ noscript {
     background: var(--button-background);
     color: var(--button-foreground);
     padding: var(--pad);
+    border: none;
 }
 
 .button:hover {
     background: var(--button-background-hover);
     text-decoration: line-through;
+    cursor: pointer;
 }
 
 .button:has(> img:only-child) {

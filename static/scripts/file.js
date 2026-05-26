@@ -16,10 +16,10 @@ function createFile(file) {
         base.append(wrapper);
     }
 
-    if (file.urls.thumbnail_url) {
+    if (file.urls && file.urls.thumbnail_url) {
         thumbnail.src = file.urls.thumbnail_url;
     } else {
-        thumbnail.src = `<?= CONFIG['thumbnails']['url'] ?>/${file.id}.webp`;
+        thumbnail.src = `/-/${file.id}.webp`;
     }
 
     // -- creating name
@@ -55,6 +55,17 @@ function createFile(file) {
         copyButton.innerHTML = '<img src="/static/img/icons/paste_plain.png" alt="copy" title="copy" />';
         copyButton.addEventListener("click", () => navigator.clipboard.writeText(file.urls.download_url));
         buttons.append(copyButton);
+    }
+
+    // favorite button
+    if (file.is_favorite) {
+        const favoriteButton = document.createElement("button");
+        favoriteButton.innerHTML = '<img src="/static/img/icons/star.png" alt="unfavorite" title="unfavorite this file" />';
+        favoriteButton.addEventListener("click", () => {
+            removeFavoriteFile(file);
+            base.remove();
+        });
+        buttons.append(favoriteButton);
     }
 
     return base;
