@@ -176,6 +176,7 @@ function html_footer()
         <li><a href="/"><?= CONFIG['instance']['name'] ?></a></li>
         <li><a href="/history">history</a></li>
         <li><a href="/favorites">favorites</a></li>
+        <li><a href="/uploaders">uploaders</a></li>
     </ul>
     <?php ;
 }

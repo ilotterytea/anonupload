@@ -1,56 +1,28 @@
 <?php
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
-
-session_start();
-
-$file_types = [];
-
-foreach (CONFIG["upload"]["acceptedmimetypes"] as $k => $v) {
-    $type = ucfirst(explode('/', $v)[0]);
-    if (!array_key_exists($type, $file_types)) {
-        $file_types[$type] = [];
-    }
-
-    if (!in_array($k, $file_types[$type])) {
-        array_push($file_types[$type], $k);
-    }
-}
-
-$file_extensions = [];
-foreach (CONFIG["upload"]["convertextensions"] as $k => $v) {
-    if (!array_key_exists($v, $file_extensions)) {
-        $file_extensions[$v] = [];
-    }
-
-    if (!in_array($k, $file_extensions[$v])) {
-        array_push($file_extensions[$v], $k);
-    }
-}
-
 ?>
 <!DOCTYPE html>
 <html>
 
-<head><?php html_head("Uploaders"); ?></head>
+<head><?php html_head("uploaders"); ?></head>
 
 <body>
-    <?php html_big_navbar() ?>
+    <header>
+        <?php html_big_navbar() ?>
+        <h1>file uploaders</h1>
+        <p>configure your software to work with
+            <?= CONFIG["instance"]["name"] ?>
+        </p>
+    </header>
     <main>
-        <section class="column gap-16">
-            <div>
-                <h1>File Uploaders</h1>
-                <p>Configure your software to work with <?= CONFIG["instance"]["name"] ?></p>
-            </div>
-
-            <!-- SOFTWARE -->
-            <div class="row gap-8">
-                <!-- SHAREX -->
-                <section class="column">
-                    <div class="column">
-                        <h2>ShareX</h2>
-                        <p class="small-font">(Destinations &rarr; Custom uploader settings &rarr; New)</p>
-                    </div>
+        <section class="software-uploaders">
+            <div class="box">
+                <div class="tab">
+                    <h2>ShareX</h2>
+                    <p class="small-font">(Destinations &rarr; Custom uploader settings &rarr; New)</p>
+                </div>
+                <div class="content">
                     <table class="vertical">
                         <tr>
                             <th>Name:</th>
@@ -58,7 +30,7 @@ foreach (CONFIG["upload"]["convertextensions"] as $k => $v) {
                         </tr>
                         <tr>
                             <th>Request URL:</th>
-                            <td><code class="copy"><?= CONFIG["instance"]["url"] ?>/upload.php</code></td>
+                            <td><code class="copy"><?= CONFIG["instance"]["url"] ?>/upload</code></td>
                         </tr>
                         <tr>
                             <th>Destination type:</th>
@@ -91,22 +63,23 @@ foreach (CONFIG["upload"]["convertextensions"] as $k => $v) {
                     </table>
                     <p>Then, select it via <b>Destinations &rarr; Image uploader &rarr; Custom image
                             uploader</b></p>
-                </section>
+                </div>
+            </div>
 
-                <!-- CHATTERINO -->
-                <section class="column">
-                    <div class="column">
-                        <h2>Chatterino/DankChat</h2>
-                        <p class="small-font"><b>Chatterino</b>: Settings &rarr; External tools &rarr; Image Uploader
-                        </p>
-                        <p class="small-font"><b>DankChat</b>: &#8942; &rarr; Settings &rarr; Tools &rarr; Configure
-                            uploader
-                        </p>
-                    </div>
+            <div class="box">
+                <div class="tab">
+                    <h2>Chatterino/DankChat</h2>
+                    <p class="small-font"><b>Chatterino</b>: Settings &rarr; External tools &rarr; Image Uploader
+                    </p>
+                    <p class="small-font"><b>DankChat</b>: &#8942; &rarr; Settings &rarr; Tools &rarr; Configure
+                        uploader
+                    </p>
+                </div>
+                <div class="content">
                     <table class="vertical">
                         <tr>
                             <th>URL:</th>
-                            <td><code class="copy"><?= CONFIG["instance"]["url"] ?>/upload.php</code></td>
+                            <td><code class="copy"><?= CONFIG["instance"]["url"] ?>/upload</code></td>
                         </tr>
                         <tr>
                             <th>Form field:</th>
@@ -125,100 +98,70 @@ foreach (CONFIG["upload"]["convertextensions"] as $k => $v) {
                             <td><code class="copy">{data.urls.deletion_url}</code></td>
                         </tr>
                     </table>
-                </section>
+                </div>
             </div>
 
-            <!-- API -->
-            <section class="column gap-16">
-                <h2>API</h2>
-                <div class="column">
-                    <h3>Endpoint</h3>
-                    <hr>
-                    <p><code>POST <span class="copy"><?= CONFIG["instance"]["url"] ?>/upload.php</span></code></p>
+            <div class="box">
+                <div class="tab">
+                    <h2>API</h2>
                 </div>
+                <div class="content">
+                    <div class="column">
+                        <h3>Endpoint</h3>
+                        <hr>
+                        <p><code>POST <span class="copy"><?= CONFIG["instance"]["url"] ?>/upload</span></code></p>
+                    </div>
 
-                <div>
-                    <h3>Request Format</h3>
-                    <hr>
-                    <table class="vertical">
-                        <tr>
-                            <th>Method:</th>
-                            <td><code>POST</code></td>
-                        </tr>
-                        <tr>
-                            <th>Content-Type:</th>
-                            <td><code>multipart/form-data</code></td>
-                        </tr>
-                        <tr>
-                            <th>Headers:</th>
-                            <td><code>Accept: application/json</code></td>
-                        </tr>
-                        <tr>
-                            <th>File field:</th>
-                            <td><code>file</code></td>
-                        </tr>
-                        <tr>
-                            <th>Max file size:</th>
-                            <td><code><?= get_cfg_var("upload_max_filesize") ?></code></td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div class="column" id="supported-file-extensions">
-                    <h3>Supported file extensions</h3>
-                    <hr>
                     <div>
+                        <h3>Request Format</h3>
+                        <hr>
                         <table class="vertical">
-                            <?php foreach ($file_types as $type => $exts): ?>
-                                <tr>
-                                    <th><?= $type ?>:</th>
-                                    <td style="text-align: justify"><?= implode(' ', $exts) ?></td>
-                                </tr>
-                            <?php endforeach; ?>
+                            <tr>
+                                <th>Method:</th>
+                                <td><code>POST</code></td>
+                            </tr>
+                            <tr>
+                                <th>Content-Type:</th>
+                                <td><code>multipart/form-data</code></td>
+                            </tr>
+                            <tr>
+                                <th>Headers:</th>
+                                <td><code>Accept: application/json</code></td>
+                            </tr>
+                            <tr>
+                                <th>File field:</th>
+                                <td><code>file</code></td>
+                            </tr>
+                            <tr>
+                                <th>Max file size:</th>
+                                <td><code><?= get_cfg_var("upload_max_filesize") ?></code></td>
+                            </tr>
                         </table>
                     </div>
                 </div>
-
-                <?php if (!empty($file_extensions)): ?>
-                    <div class="column" id="file-conversion">
-                        <h3>File conversion</h3>
-                        <hr>
-                        <p><?= CONFIG['instance']['name'] ?> automatically converts file formats to more widely
-                            supported ones.</p>
-                        <div>
-                            <table class="vertical">
-                                <?php foreach ($file_extensions as $type => $exts): ?>
-                                    <tr>
-                                        <th>
-                                            <?= $type ?>:
-                                        </th>
-                                        <td style="text-align: justify">
-                                            <?= implode(' ', $exts) ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </table>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            </section>
         </section>
     </main>
+    <footer>
+        <?php html_footer(); ?>
+    </footer>
 </body>
 
 <script>
-    const copyButtons = document.querySelectorAll(".copy");
-    for (const copyButton of copyButtons) {
-        const content = copyButton.innerHTML;
-        const button = document.createElement("button");
+    window.addEventListener("load", () => {
+        if (navigator.clipboard) {
+            const copyButtons = document.querySelectorAll(".copy");
+            for (const copyButton of copyButtons) {
+                const content = copyButton.innerHTML;
+                const button = document.createElement("button");
 
-        button.innerHTML = '<img src="/static/img/icons/paste_plain.png" alt="Copy" />';
-        button.addEventListener("click", () => {
-            navigator.clipboard.writeText(content);
-        });
-
-        copyButton.parentElement.appendChild(button);
-    }
+                button.innerHTML = '<img src="/static/img/icons/paste_plain.png" alt="Copy" />';
+                button.addEventListener("click", () => {
+                    navigator.clipboard.writeText(content);
+                });
+                copyButton.parentElement.appendChild(button);
+            }
+        }
+    });
 </script>
 
 </html>

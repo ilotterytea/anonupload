@@ -3,6 +3,9 @@
     --button-background-hover: #303030;
     --button-foreground: #fff;
 
+    --code-background: #b8b8d6;
+    --code-foreground: #201b37;
+
     --box-border-width: 4px;
     --box-border: #d5d5d5;
     --box-background: #f1f1f1;
@@ -95,6 +98,28 @@ button:has(> img:only-child),
 button:has(> img:only-child):hover,
 .button:has(> img:only-child):hover {
     text-decoration: none;
+}
+
+table.vertical th {
+    text-align: right;
+}
+
+table.vertical tr>* {
+    padding: calc(var(--pad) / 4);
+}
+
+code {
+    font-family: 'Courier New', Courier, monospace;
+    background: var(--code-background);
+    color: var(--code-foreground);
+    padding: 2px 4px;
+    line-height: 1.25em;
+}
+
+.software-uploaders {
+    display: flex;
+    flex-direction: column;
+    gap: var(--pad);
 }
 
 /** FORM UPLOAD */
@@ -213,6 +238,14 @@ button:has(> img:only-child):hover,
     color: var(--box-tab-foreground);
     border-bottom: var(--box-border-width) solid var(--box-border);
     padding: var(--pad);
+}
+
+.box>.content {
+    padding: var(--pad);
+}
+
+.box>.content:has(> img:only-child) {
+    padding: 0;
 }
 
 .box.error {
