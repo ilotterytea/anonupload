@@ -268,12 +268,15 @@ unset($_SESSION['recently_uploaded_files']);
                     },
                     body: formData
                 }).then((r) => {
-                    if (r.status !== 201) {
+                    if (r.status !== 201 && r.headers.get('Content-Type') !== 'application/json') {
                         return Promise.reject(`${r.status} ${r.statusText}`);
                     }
                     return r.json();
                 }).then((j) => {
                     const d = j.data;
+                    if (j.status_code !== 201) {
+                        return Promise.reject(j.message ?? d.error ?? `Received ${j.status_code} code`);
+                    }
                     fileNameElement.textContent = `${d.id}.${d.extension}`;
                     setStatus(fileStatusElement, '');
                     fileElement.setAttribute("status", "success");
