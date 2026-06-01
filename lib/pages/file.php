@@ -27,7 +27,9 @@ $file_name = "{$file->id}.{$file->extension}";
                     <span id="file-id"><?= $file->id ?></span>.<span id="file-extension"><?= $file->extension ?></span>
                     (<span id="file-mime"><?= $file->mime ?></span>)
                 </p>
-                <p>uploaded <?= format_timestamp($file->uploaded_at) ?> ago</p>
+                <p id="file-timestamp" timestamp="<?= $file->uploaded_at->getTimestamp() ?>">uploaded
+                    <?= format_timestamp($file->uploaded_at) ?> ago
+                </p>
                 <p style="display:none" id="file-size"><?= $file->size ?></p>
                 <p style="display:none" id="file-raw-url"><?= $file->url ?></p>
                 <p style="display:none" id="file-url"><?= "/{$file->id}.{$file->extension}" ?></p>
@@ -94,6 +96,43 @@ $file_name = "{$file->id}.{$file->extension}";
             setFavoriteIcon(file, favoriteButton, goodIcon, badIcon);
         });
         buttons.append(favoriteButton);
+    });
+
+    // live timestamp counting
+    function formatTimestamp(ts) {
+        const diff = Math.floor(Date.now() - ts * 1000);
+
+        const seconds = Math.floor(diff / 1000);
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+        const months = Math.floor(days / 30);
+        const years = Math.floor(days / 365);
+
+        if (years === 0 && months === 0 && days === 0 && hours === 0 && minutes === 0) {
+            return `${seconds} second${seconds !== 1 ? "s" : ""}`;
+        } else if (years === 0 && months === 0 && days === 0 && hours === 0) {
+            return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
+        } else if (years === 0 && months === 0 && days === 0) {
+            return `${hours} hour${hours !== 1 ? "s" : ""}`;
+        } else if (years === 0 && months === 0) {
+            return `${days} day${days !== 1 ? "s" : ""}`;
+        } else if (years === 0) {
+            return `${months} month${months !== 1 ? "s" : ""}`;
+        }
+
+        return `${years} year${years !== 1 ? "s" : ""}`;
+    }
+
+    window.addEventListener("load", () => {
+        const timestampElement = document.getElementById("file-timestamp");
+        if (!timestampElement) return;
+
+        const timestamp = timestampElement.getAttribute("timestamp");
+
+        setInterval(() => {
+            timestampElement.textContent = `uploaded ${formatTimestamp(timestamp)} ago`;
+        }, 1000);
     });
 </script>
 
