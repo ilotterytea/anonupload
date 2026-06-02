@@ -20,24 +20,15 @@ function deleteUploadedFile(id) {
 function createFile(file) {
     const fileName = `${file.id}.${file.extension}`;
 
+    const root = document.createElement("div");
+    root.classList.add("file", "item");
+
     const base = document.createElement("div");
-    base.classList.add("item");
-
-    // -- creating thumbnail
-    const thumbnail = document.createElement("img");
-    thumbnail.alt = `[thumbnail of ${fileName}]`;
-    thumbnail.title = thumbnail.alt;
-    thumbnail.loading = 'lazy';
-
-    {
-        const wrapper = document.createElement("div");
-        wrapper.classList.add("thumbnail");
-        wrapper.append(thumbnail);
-        base.append(wrapper);
-    }
+    base.classList.add("base");
+    root.append(base);
 
     if (file.urls && file.urls.thumbnail_url) {
-        thumbnail.src = file.urls.thumbnail_url;
+        root.style.backgroundImage = `url('${file.urls.thumbnail_url}')`;
     }
 
     // -- creating name
@@ -114,5 +105,5 @@ function createFile(file) {
         buttons.append(favoriteButton);
     }
 
-    return base;
+    return root;
 }

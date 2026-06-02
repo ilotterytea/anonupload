@@ -15,6 +15,10 @@
     --box-tab-background: #eaeaea;
     --box-tab-foreground: #3a3a3a;
 
+    --file-foreground: #fff;
+    --file-background: linear-gradient(0deg, #000000, transparent);
+    --file-shadow: #202020;
+
     --error-background: #ff8181;
     --error-foreground: #6d2828;
     --error-border: #ff6c6c;
@@ -257,7 +261,7 @@ fieldset>legend {
     border: var(--box-border-width) solid var(--box-border);
 }
 
-.item>.thumbnail {
+.item .thumbnail {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -270,19 +274,57 @@ fieldset>legend {
     text-align: center;
 }
 
-.item>.name {
+.item .name {
     font-size: 1.25em;
 }
 
-.item>.details {
+.item .details {
     font-size: 0.8em;
     list-style-type: none;
 }
 
-.item>.buttons {
+.item .buttons {
     display: flex;
     flex-direction: row;
     gap: var(--pad);
+}
+
+.file.item {
+    color: var(--file-foreground);
+
+    background-color: #000;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    min-width: 128px;
+    min-height: 256px;
+
+    justify-content: end;
+}
+
+.file.item:has(.base) {
+    padding: 0;
+}
+
+.file.item>.base {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--pad) / 2);
+    padding: var(--pad);
+}
+
+.file.item .base {
+    background: var(--file-background);
+}
+
+.file.item p,
+.file.item li {
+    text-shadow: 2px 2px 0 var(--file-shadow);
+}
+
+.file.item .button,
+.file.item button {
+    box-shadow: 2px 2px 0 0 var(--file-shadow);
 }
 
 /** BOX */
