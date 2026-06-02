@@ -4,6 +4,7 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/storage.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/id.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/thumbnails.php";
 
 session_start();
 
@@ -15,16 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
         null
     );
     exit;
-}
-
-if (!is_dir(CONFIG["files"]["directory"]) && !mkdir(CONFIG["files"]["directory"], 0777, true)) {
-    generate_alert(
-        '/',
-        "Failed to create a directory for user files",
-        500,
-        null
-    );
-    exit();
 }
 
 try {
@@ -150,14 +141,48 @@ try {
         }
     }
 
+    // -- generating thumbnails
+    if (THUMBNAILER !== null) {
+        $s3_thumb = THUMBNAILER instanceof S3ProxyThumbnailer;
+        $data = [];
+        foreach ($uploaded_files as &$f) {
+            if (!is_array($f) && ($s3_thumb || $f->system_path)) {
+                array_push($data, [
+                    'input_path' => $s3_thumb ? "{$f->id}.{$f->extension}" : $f->system_path,
+                    'width' => CONFIG['thumbnails']['width'],
+                    'height' => CONFIG['thumbnails']['height'],
+                ]);
+            }
+        }
+        unset($f);
+
+        $thumbnails = THUMBNAILER->generate_thumbnails($data);
+        foreach ($thumbnails as $id => $url) {
+            foreach ($uploaded_files as &$f) {
+                if (!is_array($f) && $f->id === $id) {
+                    $f->thumbnail_url = $url;
+                    break;
+                }
+            }
+            unset($f);
+        }
+    }
+
     if (isset($_POST['save_upload_list']) && boolval($_POST['save_upload_list'])) {
         $_SESSION['recently_uploaded_files'] = $uploaded_files;
     }
 
+    $bad_status_count = 0;
+    foreach ($uploaded_files as $x) {
+        if (is_array($x) && isset($x['error']))
+            $bad_status_count++;
+    }
+
+
     generate_alert(
         "/",
         null,
-        array_all($uploaded_files, fn($x) => is_array($x) && isset($x['error'])) ? 400 : 201,
+        $bad_status_count === count($uploaded_files) ? 400 : 201,
         match (true) {
             count($uploaded_files) == 1 => $uploaded_files[0],
             default => $uploaded_files

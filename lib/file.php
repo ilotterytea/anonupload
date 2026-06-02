@@ -375,7 +375,8 @@ class BaseFile implements JsonSerializable
     public DateTime $uploaded_at;
     public int $size;
     public string|null $password;
-    public string|null $url;
+    public string|null $url = null, $thumbnail_url = null;
+    public string|null $system_path = null;
 
     public function jsonSerialize(): mixed
     {
@@ -386,7 +387,8 @@ class BaseFile implements JsonSerializable
             'size' => $this->size,
             'uploaded_at' => $this->uploaded_at->getTimestamp(),
             'urls' => [
-                'download_url' => '/',
+                'download_url' => CONFIG['instance']['url'] . "/{$this->id}.{$this->extension}",
+                'thumbnail_url' => $this->thumbnail_url,
                 'raw_url' => $this->url,
                 'deletion_url' => null
             ]

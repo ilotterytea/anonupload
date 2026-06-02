@@ -204,12 +204,16 @@ $cfg = [
         "maxduration" => 60 * 5,
         "quality" => "worst"
     ],
-    "thumbnails" => [
-        "enable" => true,
-        "directory" => "{$_SERVER['DOCUMENT_ROOT']}/userdata/thumbnails",
-        "url" => "/userdata/thumbnails",
-        "width" => 128,
-        "height" => 128
+    'thumbnails' => [
+        'type' => 'none',
+        'url' => null,
+        'bucket' => null,
+        'output_bucket' => null,
+        'authorization_key' => null,
+        'width' => 128,
+        'height' => 128,
+        'directory' => './userdata/thumbnails',
+        'prefix' => '/userdata/thumbnails'
     ],
     "metadata" => [
         "directory" => "{$_SERVER['DOCUMENT_ROOT']}/userdata/metadata"
