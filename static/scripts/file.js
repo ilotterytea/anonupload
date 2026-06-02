@@ -27,6 +27,7 @@ function createFile(file) {
     const thumbnail = document.createElement("img");
     thumbnail.alt = `[thumbnail of ${fileName}]`;
     thumbnail.title = thumbnail.alt;
+    thumbnail.loading = 'lazy';
 
     {
         const wrapper = document.createElement("div");
@@ -37,8 +38,6 @@ function createFile(file) {
 
     if (file.urls && file.urls.thumbnail_url) {
         thumbnail.src = file.urls.thumbnail_url;
-    } else {
-        thumbnail.src = `/-/${file.id}.webp`;
     }
 
     // -- creating name

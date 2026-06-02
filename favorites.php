@@ -1,6 +1,7 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/thumbnails.php';
 ?>
 <!DOCTYPE html>
 <html>
@@ -45,6 +46,10 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
 
         for (let file of files) {
             file.is_favorite = true;
+            <?php if (THUMBNAILER !== null): ?>
+                if (!file.urls) file.urls = {};
+                if (!file.urls.thumbnail_url) file.urls.thumbnail_url = `<?= THUMBNAILER->get_thumbnail_root() ?>/${file.id}.<?= THUMBNAILER->get_thumbnail_extension() ?>`;
+            <?php endif; ?>
             favoriteFiles.append(createFile(file));
         }
 

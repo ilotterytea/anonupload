@@ -4,6 +4,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/storage.php';
 
 interface Thumbnailer
 {
+    public function get_thumbnail_root(): string;
+    public function get_thumbnail_extension(): string;
     public function generate_thumbnail(string $input_path, int $width, int $height): string;
     public function generate_thumbnails(mixed $data): array;
 }
@@ -23,6 +25,16 @@ class LocalThumbnailer implements Thumbnailer
         } else if (!IMAGEMAGICK_COMMAND) {
             throw new RuntimeException("No ImageMagick installed");
         }
+    }
+
+    public function get_thumbnail_root(): string
+    {
+        return $this->prefix;
+    }
+
+    public function get_thumbnail_extension(): string
+    {
+        return $this->extension;
     }
 
     public function generate_thumbnail(string $input_path, int $width, int $height): string
@@ -108,15 +120,27 @@ class LocalThumbnailer implements Thumbnailer
 
 class S3ProxyThumbnailer implements Thumbnailer
 {
-    private string $url, $bucket, $output_bucket;
+    private string $url, $bucket, $output_bucket, $extension, $prefix;
     private string|null $authorization_key;
 
-    public function __construct(string $url, string $bucket, string $output_bucket, string|null $authorization_key = null)
+    public function __construct(string $url, string $prefix, string $bucket, string $output_bucket, string|null $authorization_key = null)
     {
         $this->url = $url;
         $this->bucket = $bucket;
         $this->output_bucket = $output_bucket;
         $this->authorization_key = $authorization_key;
+        $this->prefix = $prefix;
+        $this->extension = "webp";
+    }
+
+    public function get_thumbnail_root(): string
+    {
+        return $this->prefix;
+    }
+
+    public function get_thumbnail_extension(): string
+    {
+        return $this->extension;
     }
 
     public function generate_thumbnail(string $input_path, int $width, int $height): string
@@ -137,7 +161,7 @@ class S3ProxyThumbnailer implements Thumbnailer
                 'output_bucket' => $this->output_bucket,
                 'width' => $width,
                 'height' => $height,
-                'extension' => 'webp'
+                'extension' => $this->extension
             ]
         ]));
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -166,7 +190,7 @@ class S3ProxyThumbnailer implements Thumbnailer
                 'output_bucket' => $this->output_bucket,
                 'width' => $f['width'],
                 'height' => $f['height'],
-                'extension' => 'webp'
+                'extension' => $this->extension
             ]);
         }
 
@@ -197,6 +221,7 @@ class S3ProxyThumbnailer implements Thumbnailer
 define("THUMBNAILER", match (true) {
     CONFIG['thumbnails']['type'] === "s3" && FILESTORAGE instanceof S3FileStorage => new S3ProxyThumbnailer(
         CONFIG['thumbnails']['url'],
+        CONFIG['thumbnails']['prefix'],
         CONFIG['thumbnails']['bucket'],
         CONFIG['thumbnails']['output_bucket'],
         CONFIG['thumbnails']['authorization_key']
