@@ -123,7 +123,7 @@ function html_footer()
         <li><a href="/preferences">preferences</a></li>
         <?php if (!empty($dropdown_links)): ?>
             <li class="dropdown">
-                <button class="drop-button">other</button>
+                <button class="drop-button"><?= CONFIG['instance']['linkname'] ?></button>
                 <div class="drop-content">
                     <?php foreach ($dropdown_links as $url => $name): ?>
                         <a href="<?= $url ?>" target="_blank"><?= $name ?></a>

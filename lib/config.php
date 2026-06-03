@@ -7,6 +7,7 @@ $cfg = [
         "name" => $_SERVER['HTTP_HOST'],
         "mirrors" => [],
         "url" => (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]",
+        'linkname' => 'other',
         "links" => [],
         "defaultstyle" => "default"
     ],
