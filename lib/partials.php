@@ -93,10 +93,24 @@ function html_header()
 function html_footer()
 {
     $dropdown_links = CONFIG['instance']['links'];
+    $mirrors = CONFIG['instance']['mirrors'];
 
     ?>
     <ul class="horizontal links">
-        <li><a href="/"><?= CONFIG['instance']['name'] ?></a></li>
+        <?php if (empty($mirrors)): ?>
+            <li>
+                <a href="/"><?= CONFIG['instance']['name'] ?></a>
+            </li>
+        <?php else: ?>
+            <li class="dropdown">
+                <button class="drop-button"><?= CONFIG['instance']['name'] ?></button>
+                <div class="drop-content">
+                    <?php foreach ($mirrors as $url => $name): ?>
+                        <a href="<?= $url ?>" target="_blank"><?= $name ?></a>
+                    <?php endforeach; ?>
+                </div>
+            </li>
+        <?php endif; ?>
         <?php if (CONFIG['surpriseme']['enable']): ?>
             <li><a href="/?random">surprise me</a></li>
         <?php endif; ?>
