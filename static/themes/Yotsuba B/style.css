@@ -1,31 +1,56 @@
 :root {
-    --background: #d4e7ff;
-    --background-2: #f0f4f7;
-    --foreground: #003b88;
-    --box-tab-background-dark: #9ca9d3;
-    --box-tab-background: #c2dbef;
-    --box-tab-background-light: #a8c7e4;
-    --box-tab-foreground: #003b88;
-    --box-border: #003b88;
-    --box-content-background: #fff;
-    --box-content-background-2: #d9e0e6;
-    --anchor-color: #001ec9;
-    --anchor-color-hovered: #2f00ff;
+    --background: linear-gradient(0deg, #f3f0f7, #dad4ff);
+    --foreground: #3d2994;
+
+    --anchor-foreground: #4c3da1;
+    --anchor-background: #d8d4ff;
+
+    --button-background: #5b34e7;
+    --button-background-hover: #303030;
+
+    --code-background: #300088;
+    --code-foreground: #d8d4ff;
+
+    --box-border-width: 2px;
+    --box-border: #341e97;
+    --box-background: #fff;
+    --box-background-hover: #dad9e6;
+    --box-foreground: #190088;
+
+    --box-tab-background: #c9c2ef;
+    --box-tab-foreground: #240088;
+
+    --options-background: linear-gradient(0deg, #d7d4eb 95%, #89859b);
+    --options-border: #5b597e;
+
+    --showcase-button-background: #4a4a80;
+    --showcase-button-background-hover: #6566b6;
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --background: #262626;
-        --background-2: #202020;
+        --background: linear-gradient(0deg, #262626, #202020);
         --foreground: #ffffff;
-        --box-tab-background-dark: #000550;
-        --box-tab-background: #003b88;
-        --box-tab-background-light: #000f62;
-        --box-tab-foreground: #fff;
+
+        --button-background: #9698ff;
+        --button-background-hover: #7476d1;
+        --button-foreground: #23232e;
+
+        --anchor-foreground: #9698ff;
+        --anchor-background: #23232e;
+
+        --code-background: #9698ff;
+        --code-foreground: #252142;
+
         --box-border: #575757;
-        --box-content-background: #3a3a3a;
-        --box-content-background-2: #282828;
-        --anchor-color: #9698ff;
-        --anchor-color-hovered: #e2daff;
+        --box-background: #3a3a3a;
+        --box-background-hover: #414141;
+        --box-foreground: #9698ff;
+
+        --box-tab-background: #9698ff;
+        --box-tab-foreground: #23232e;
+
+        --options-background: linear-gradient(0deg, #3a3a3a 95%, #202020);
+        --options-border: #221a1a;
     }
 }

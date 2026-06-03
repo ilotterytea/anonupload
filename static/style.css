@@ -2,6 +2,9 @@
     --background: #ffffff;
     --foreground: #000000;
 
+    --anchor-foreground: #000;
+    --anchor-background: #fff;
+
     --button-background: #000;
     --button-background-hover: #303030;
     --button-foreground: #fff;
@@ -59,6 +62,12 @@
 
 body {
     background: var(--background);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    color: var(--foreground);
 }
 
 header,
@@ -106,13 +115,13 @@ noscript {
 }
 
 a {
-    color: var(--foreground);
+    color: var(--anchor-foreground);
     text-decoration: underline;
 }
 
 a:hover {
-    background: var(--foreground);
-    color: var(--background);
+    background: var(--anchor-foreground);
+    color: var(--anchor-background);
     text-decoration: line-through;
 }
 
@@ -394,6 +403,7 @@ fieldset>legend {
 }
 
 .box>.content {
+    background: var(--box-background);
     padding: var(--pad);
 }
 
@@ -556,7 +566,7 @@ body:has(> .file-preview) {
 
 .drop-button {
     background: initial;
-    color: initial;
+    color: var(--anchor-foreground);
     padding: initial;
     text-decoration: underline;
 }
@@ -566,8 +576,8 @@ body:has(> .file-preview) {
 }
 
 .dropdown:hover .drop-button {
-    background: var(--foreground);
-    color: var(--background);
+    background: var(--anchor-foreground);
+    color: var(--anchor-background);
     text-decoration: line-through;
 }
 

@@ -1,31 +1,57 @@
 :root {
-    --background: #ffe1d4;
-    --background-2: #f7f0f0;
+    --background: linear-gradient(0deg, #f7f0f0, #ffe1d4);
     --foreground: #800;
-    --box-tab-background-dark: #d39c9c;
-    --box-tab-background: #efc2c2;
-    --box-tab-background-light: #e4a8a8;
-    --box-tab-foreground: #800;
+
+    --anchor-foreground: #c90000;
+    --anchor-background: #ffe1d4;
+
+    --button-background: #800;
+    --button-background-hover: #303030;
+
+    --code-background: #efc2c2;
+    --code-foreground: #800;
+
+    --box-border-width: 2px;
     --box-border: #800;
-    --box-content-background: #fff;
-    --box-content-background-2: #e6d9d9;
-    --anchor-color: #c90000;
-    --anchor-color-hovered: #f00;
+    --box-background: #fff6f6;
+    --box-background-hover: #f7cccc;
+    --box-foreground: #800;
+
+    --box-tab-background: #efc2c2;
+    --box-tab-foreground: #800;
+
+    --options-background: linear-gradient(0deg, #ccb8b8 95%, #9b8585);
+    --options-border: #7e5959;
+
+    --showcase-button-background: #800;
+    --showcase-button-background-hover: #bb1111;
+
+    --font: Arial, Helvetica, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --background: #262626;
-        --background-2: #202020;
-        --foreground: #ffffff;
-        --box-tab-background-dark: #500000;
-        --box-tab-background: #800;
-        --box-tab-background-light: #620000;
-        --box-tab-foreground: #fff;
+        --background: linear-gradient(0deg, #202020, #262626);
+        --foreground: #fff6f6;
+
+        --anchor-foreground: #ff6161;
+        --anchor-background: #291d1d;
+
+        --button-background: #800;
+        --button-background-hover: #303030;
+
+        --code-background: #800;
+        --code-foreground: #fff;
+
         --box-border: #575757;
-        --box-content-background: #3a3a3a;
-        --box-content-background-2: #282828;
-        --anchor-color: #ff6161;
-        --anchor-color-hovered: #ff9696;
+        --box-background: #3a3a3a;
+        --box-background-hover: #414141;
+        --box-foreground: #ff6161;
+
+        --box-tab-background: #800;
+        --box-tab-foreground: #fff;
+
+        --options-background: linear-gradient(0deg, #3a3a3a 95%, #202020);
+        --options-border: #221a1a;
     }
 }
