@@ -28,7 +28,12 @@ function createFile(file) {
     root.append(base);
 
     if (file.urls && file.urls.thumbnail_url) {
-        root.style.backgroundImage = `url('${file.urls.thumbnail_url}')`;
+        const img = new Image();
+
+        img.addEventListener("load", () => root.style.backgroundImage = `url('${file.urls.thumbnail_url}')`);
+        img.addEventListener("error", () => root.style.backgroundImage = "url('/static/img/default-thumbnail.webp')");
+
+        img.src = file.urls.thumbnail_url;
     }
 
     // -- creating name
