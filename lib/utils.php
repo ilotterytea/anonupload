@@ -13,18 +13,6 @@ function send_json_response(mixed $data, string|null $message = null, int $code 
     ], JSON_UNESCAPED_SLASHES));
 }
 
-function generate_random_char_sequence(string $chars, int $length): string
-{
-    $chars = str_split($chars);
-    $o = "";
-
-    for ($i = 0; $i < $length; $i++) {
-        $o .= $chars[random_int(0, count($chars) - 1)];
-    }
-
-    return $o;
-}
-
 function format_timestamp(string|DateTime $datetime)
 {
     $dt = $datetime instanceof DateTime ? $datetime : new DateTime($datetime);
@@ -169,6 +157,23 @@ function bbcode_parse(string $text): string
     }
 
     return implode("\n", $paragraphs);
+}
+
+function get_commit(): array|null
+{
+    $commit = null;
+    $sh = trim(shell_exec('git show -s --format="%h %ct %s" HEAD'));
+
+    if ($sh) {
+        $commit = explode(' ', $sh, 3);
+        $commit = [
+            'sha' => $commit[0],
+            'timestamp' => (int) $commit[1],
+            'message' => $commit[2]
+        ];
+    }
+
+    return $commit;
 }
 
 class HTTPException extends Exception

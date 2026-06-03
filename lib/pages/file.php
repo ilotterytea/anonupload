@@ -3,6 +3,10 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/utils.php';
 
+if (IS_JSON_REQUEST) {
+    send_json_response($file);
+}
+
 $file_name = "{$file->id}.{$file->extension}";
 ?>
 <!DOCTYPE html>

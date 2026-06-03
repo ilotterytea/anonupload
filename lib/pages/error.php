@@ -1,6 +1,7 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/utils.php';
 
 $error_code = null;
 $error_reason = null;
@@ -15,12 +16,7 @@ if (isset($error)) {
 }
 
 if (IS_JSON_REQUEST) {
-    http_response_code($error_code);
-    exit(json_encode([
-        'status_code' => $error_code,
-        'message' => $error_reason,
-        'data' => null
-    ], JSON_UNESCAPED_SLASHES));
+    send_json_response(null, $error_reason, $error_code);
 }
 
 $image_name = null;

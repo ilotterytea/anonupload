@@ -5,6 +5,9 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/storage.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/utils.php';
 
 $stats = FILESTORAGE->get_stats();
+if (IS_JSON_REQUEST) {
+    send_json_response($stats);
+}
 ?>
 <!DOCTYPE html>
 <html>

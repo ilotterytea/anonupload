@@ -1,6 +1,11 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/utils.php';
+
+if (IS_JSON_REQUEST) {
+    send_json_response(get_commit());
+}
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
