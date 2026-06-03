@@ -44,8 +44,6 @@
     font-family: var(--font);
 }
 
-body {}
-
 header,
 main,
 footer {
@@ -379,6 +377,7 @@ body:has(> .file-preview) {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    background: var(--showcase-background);
 }
 
 .file-preview {
@@ -393,7 +392,6 @@ body:has(> .file-preview) {
     justify-content: center;
     align-items: center;
     flex-grow: 1;
-    background: var(--showcase-background);
 }
 
 .file-preview .preview>* {
@@ -433,6 +431,13 @@ body:has(> .file-preview) {
 
 .control-buttons .button:hover {
     background: var(--showcase-button-background-hover);
+}
+
+.disclaimer {
+    color: var(--showcase-control-foreground);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.75em;
+    text-align: center;
 }
 
 @media screen and (max-width: 800px) {

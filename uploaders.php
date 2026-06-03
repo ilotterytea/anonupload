@@ -9,8 +9,8 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 
 <body>
     <header>
-        <?php html_big_navbar() ?>
-        <h1>file uploaders</h1>
+        <?php html_header() ?>
+        <h2>file uploaders</h2>
         <p>configure your software to work with
             <?= CONFIG["instance"]["name"] ?>
         </p>

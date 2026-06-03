@@ -67,7 +67,7 @@ function html_mini_icon()
     echo "<a href='/'><img src='$brand_url' alt=''></a>";
 }
 
-function html_big_navbar()
+function html_header()
 {
     $brand_url = '/static/img/brand/big.webp';
     $static_folder = '/static/img/brand/big';
@@ -99,76 +99,6 @@ function html_big_navbar()
     <?php ;
 }
 
-function html_mini_navbar(string|null $subtitle = null, string $title = CONFIG['instance']['name'])
-{
-    $brand_url = '/static/img/brand/mini.webp';
-    $static_folder = '/static/img/brand/mini';
-    $brand_folder = $_SERVER['DOCUMENT_ROOT'] . $static_folder;
-
-    if (is_dir($brand_folder)) {
-        $files = glob("$brand_folder/*.*");
-
-        if (!empty($files)) {
-            $file = basename($files[random_int(0, count($files) - 1)]);
-            $brand_url = "$static_folder/$file";
-        }
-    }
-
-    echo '' ?>
-    <navbar>
-        <main>
-            <div class="brand">
-                <a href="/" class="row gap-8 align-bottom" style="text-decoration:none;color:inherit;">
-                    <img src="<?= $brand_url ?>" alt="">
-                    <div class="column">
-                        <?php if ($subtitle): ?>
-                            <p class="font-small" id="brand-subtitle"><?= $subtitle ?></p>
-                        <?php endif; ?>
-                        <h2><?= $title ?></h2>
-                    </div>
-                </a>
-            </div>
-
-            <div class="links">
-                <a href="/" class="button" id="home-button">
-                    Home
-                </a>
-                <?php if (CONFIG["filecatalog"]["public"] || (isset($_SESSION['user']) && $_SESSION['user']->role->as_value() >= UserRole::Moderator->as_value())): ?>
-                    <a href="/files/index.php" class="button" id="file-catalogue-button">
-                        Catalogue
-                    </a>
-                <?php endif; ?>
-                <?php if (CONFIG["supriseme"]["enable"]): ?>
-                    <?php if (isset($_COOKIE['doomscrolling'])): ?>
-                        <a href="/doomscrolling.php" class="button" id="doomscrolling-button">
-                            Burn My Receptors
-                        </a>
-                    <?php else: ?>
-                        <a href="/?random" class="button" id="surprise-me-button">
-                            Surprise Me
-                        </a>
-                    <?php endif; ?>
-                <?php endif; ?>
-                <a href="/uploaders.php" class="button" id="uploaders-button">
-                    Uploaders
-                </a>
-                <a href="/account/" class="button" id="account-button">
-                    Account
-                </a>
-            </div>
-
-            <?php if (isset($_SESSION['user'])): ?>
-                <div class="account-info">
-                    <p>Signed in as <span
-                            class="username <?= $_SESSION['user']->role->name ?>"><?= $_SESSION['user']->name ?></span></p>
-                    <a href="/account/logout.php"><img src="/static/img/icons/logout.png" alt="[Log out]" title="Log out"></a>
-                </div>
-            <?php endif; ?>
-        </main>
-    </navbar>
-    <?php ;
-}
-
 function html_footer()
 {
     ?>
@@ -178,21 +108,6 @@ function html_footer()
         <li><a href="/favorites">favorites</a></li>
         <li><a href="/uploaders">uploaders</a></li>
     </ul>
-    <?php ;
-}
-
-function html_mini_footer()
-{
-    echo '' ?>
-    <footer class="mini">
-        <main>
-            <?php html_debug_info(); ?>
-            <p>
-                All trademarks and copyrights belong to their respective owners.
-                The uploader is responsible for any content shared here.
-            </p>
-        </main>
-    </footer>
     <?php ;
 }
 

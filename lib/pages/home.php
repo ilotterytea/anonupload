@@ -18,7 +18,7 @@ unset($_SESSION['recently_uploaded_files']);
 
 <body>
     <header>
-        <?php html_big_navbar(); ?>
+        <?php html_header(); ?>
         <h2>max upload size is <?= get_cfg_var(option: 'upload_max_filesize') ?></h2>
     </header>
     <main>

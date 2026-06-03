@@ -12,7 +12,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/thumbnails.php';
 
 <body>
     <header>
-        <?php html_big_navbar(); ?>
+        <?php html_header(); ?>
         <h2>favorites</h2>
         <p>all the files you liked</p>
     </header>
