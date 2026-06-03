@@ -219,9 +219,7 @@ $cfg = [
         "directory" => "{$_SERVER['DOCUMENT_ROOT']}/userdata/metadata"
     ],
     "report" => [
-        "enable" => true,
-        "directory" => "{$_SERVER['DOCUMENT_ROOT']}/userdata/reports",
-        "reasons" => []
+        'mail' => null
     ],
     "moderation" => [
         "path" => "{$_SERVER['DOCUMENT_ROOT']}/.anonuploadpasswd",

@@ -41,6 +41,12 @@ $file_name = "{$file->id}.{$file->extension}";
                 <a href="<?= $file->url ?>" class="button" target="_blank">
                     <img src="/static/img/icons/fullsize.png" alt="full size" title="open in full size" />
                 </a>
+                <?php if (CONFIG['report']['mail']): ?>
+                    <a href="<?= sprintf('mailto:%s?subject=%s', CONFIG['report']['mail'], rawurlencode("File Report - $file_name")) ?>"
+                        class="button">
+                        <img src="/static/img/icons/flag.png" alt="report" title="report this file">
+                    </a>
+                <?php endif; ?>
             </div>
         </section>
     </section>
@@ -73,6 +79,22 @@ $file_name = "{$file->id}.{$file->extension}";
             }
         };
 
+        // -- copy button
+        if (navigator.clipboard) {
+            const icon = document.createElement("img");
+            icon.src = '/static/img/icons/link.png';
+            icon.alt = 'copy link';
+            icon.title = 'copy link';
+
+            const button = document.createElement("button");
+            button.classList.add("button");
+            button.append(icon);
+            button.addEventListener("click", () => navigator.clipboard.writeText(file.urls.download_url));
+            buttons.prepend(button);
+        }
+
+        // -- favorite button
+        {
         const goodIcon = document.createElement("img");
         goodIcon.src = '/static/img/icons/star.png';
         goodIcon.alt = 'unfavorite';
@@ -96,6 +118,7 @@ $file_name = "{$file->id}.{$file->extension}";
             setFavoriteIcon(file, favoriteButton, goodIcon, badIcon);
         });
         buttons.append(favoriteButton);
+        }
     });
 
     // live timestamp counting
