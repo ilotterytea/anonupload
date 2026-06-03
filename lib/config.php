@@ -7,7 +7,7 @@ $cfg = [
         "name" => $_SERVER['HTTP_HOST'],
         "mirrors" => [],
         "url" => (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]",
-        "footerlinks" => [],
+        "links" => [],
         "defaultstyle" => "default"
     ],
     'storage' => [
@@ -255,6 +255,21 @@ if (file_exists(CONFIG_FILE_PATH)) {
         foreach ($r as $k => $v) {
             if (!array_key_exists($k, $cfg[$s])) {
                 continue;
+            }
+
+            // value is a map
+            if (str_starts_with($v, '{') && str_ends_with($v, '}')) {
+                $c = strlen($v);
+                $v = substr($v, 1, $c - 2);
+                $ls = explode("\t", $v);
+                $arr = [];
+
+                foreach ($ls as $l) {
+                    $p = explode("=", $l, 2);
+                    $arr[$p[0]] = $p[1];
+                }
+
+                $v = $arr;
             }
 
             $cfg[$s][$k] = $v;

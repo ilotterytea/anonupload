@@ -92,6 +92,8 @@ function html_header()
 
 function html_footer()
 {
+    $dropdown_links = CONFIG['instance']['links'];
+
     ?>
     <ul class="horizontal links">
         <li><a href="/"><?= CONFIG['instance']['name'] ?></a></li>
@@ -102,6 +104,16 @@ function html_footer()
         <li><a href="/favorites">favorites</a></li>
         <li><a href="/uploaders">uploaders</a></li>
         <li><a href="/preferences">preferences</a></li>
+        <?php if (!empty($dropdown_links)): ?>
+            <li class="dropdown">
+                <button class="drop-button">other</button>
+                <div class="drop-content">
+                    <?php foreach ($dropdown_links as $url => $name): ?>
+                        <a href="<?= $url ?>" target="_blank"><?= $name ?></a>
+                    <?php endforeach; ?>
+                </div>
+            </li>
+        <?php endif; ?>
     </ul>
     <?php ;
 }
