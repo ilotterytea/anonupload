@@ -118,6 +118,7 @@ unset($_SESSION['recently_uploaded_files']);
     </footer>
 </body>
 
+<script src="/static/scripts/options.js"></script>
 <script src="/static/scripts/file.js"></script>
 <script>
     let cachedFiles = [];
@@ -126,6 +127,8 @@ unset($_SESSION['recently_uploaded_files']);
         element.style.display = message.length > 0 ? 'flex' : 'none';
         element.textContent = message;
     }
+
+    window.addEventListener("load", () => initOptions("form-upload"));
 
     window.addEventListener("load", () => {
         const form = document.getElementById("form-upload");
