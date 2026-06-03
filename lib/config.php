@@ -10,18 +10,22 @@ $cfg = [
         "footerlinks" => [],
         "defaultstyle" => "default"
     ],
-    "storage" => [
-        "type" => "file"
-    ],
-    "database" => [
-        "driver" => "mysql",
-        "host" => "localhost",
-        "port" => 3306,
-        "name" => "anonupload",
-        "user" => "default",
-        "pass" => "default"
-    ],
-    's3' => [
+    'storage' => [
+        'type' => 'local',
+
+        // local & sql
+        'directory' => './userdata/uploads',
+        'prefix' => '/userdata/uploads',
+
+        // sql
+        'driver' => "mysql",
+        'host' => "localhost",
+        'port' => 3306,
+        'name' => "anonupload",
+        'user' => "default",
+        'pass' => "default",
+
+        // s3 only
         'version' => 'latest',
         'access_key' => null,
         'secret_key' => null,
@@ -29,7 +33,7 @@ $cfg = [
         'bucket' => null,
         'endpoint' => null,
         'web_endpoint' => null,
-        'use_path_style_endpoint' => true
+        'use_path_style_endpoint' => true,
     ],
     "driver" => [
         "ruffle" => false,
@@ -260,8 +264,8 @@ if (file_exists(CONFIG_FILE_PATH)) {
     }
 }
 
-if (!empty($cfg['database']['host'])) {
-    $cfg['database']['url'] = "{$cfg['database']['driver']}:host={$cfg['database']['host']};dbname={$cfg['database']['name']};port={$cfg['database']['port']}";
+if ($cfg['storage']['type'] === 'sql' && !empty($cfg['storage']['host'])) {
+    $cfg['storage']['url'] = "{$cfg['storage']['driver']}:host={$cfg['storage']['host']};dbname={$cfg['storage']['name']};port={$cfg['storage']['port']}";
 }
 
 define("CONFIG", $cfg);
