@@ -135,7 +135,8 @@ fieldset>legend {
     padding: calc(var(--pad) / 2) var(--pad);
 }
 
-.software-uploaders {
+.software-uploaders,
+.preferences {
     display: flex;
     flex-direction: column;
     gap: var(--pad);
