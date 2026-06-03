@@ -23,6 +23,7 @@ $file_name = "{$file->id}.{$file->extension}";
         </section>
 
         <section class="disclaimer">
+            <?php html_legal(); ?>
             <p>
                 All trademarks and copyrights belong to their respective owners.
                 The uploader is responsible for any content shared here.

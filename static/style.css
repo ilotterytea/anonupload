@@ -82,6 +82,14 @@ main {
     flex-direction: column;
 }
 
+ol {
+    margin: 1.5em;
+}
+
+ul.horizontal li {
+    margin: 0;
+}
+
 ul.horizontal li {
     display: inline;
 }
@@ -499,7 +507,16 @@ body:has(> .file-preview) {
     color: var(--showcase-control-foreground);
     font-family: 'Courier New', Courier, monospace;
     font-size: 0.75em;
-    text-align: center;
+    text-align: right;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: end;
+}
+
+.disclaimer a {
+    color: var(--showcase-control-foreground);
 }
 
 /** DROPDOWN */

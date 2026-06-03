@@ -135,6 +135,20 @@ function html_footer()
     <?php ;
 }
 
+function html_legal()
+{
+    echo '' ?>
+    <ul class="horizontal links">
+        <?php if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/TOS.txt")): ?>
+            <li><a href="/tos">terms of service</a></li>
+        <?php endif; ?>
+        <?php if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/PRIVACY.txt")): ?>
+            <li><a href="/privacy">privacy policy</a></li>
+        <?php endif; ?>
+    </ul>
+    <?php ;
+}
+
 function html_debug_info()
 {
     $compile_time = (floor(microtime(true) * 1000) - GEN_TIMESTAMP) / 1000;

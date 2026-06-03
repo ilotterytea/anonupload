@@ -11,28 +11,32 @@ if (!file_exists($file_path)) {
 
 $data = [
     'content' => bbcode_parse(file_get_contents($file_path) ?: "Don't upload anything bad."),
-    'lastupdated' => (new DateTime())->setTimestamp(filemtime($file_path) ?: 0)
+    'last_updated' => (new DateTime())->setTimestamp(filemtime($file_path) ?: 0)
 ];
 
-if ($data['lastupdated']->getTimestamp() === 0)
-    $data['lastupdated'] = null;
+if ($data['last_updated']->getTimestamp() === 0)
+    $data['last_updated'] = null;
 ?>
 <!DOCTYPE html>
 <html>
 
-<head><?php html_head("Terms of Service"); ?></head>
+<head><?php html_head("terms of service"); ?></head>
 
 <body>
-    <?php html_mini_navbar() ?>
-    <main>
-        <h1>Terms of Service</h1>
-        <?php if ($data['lastupdated']): ?>
-            <p><i>Last updated: <?= $data['lastupdated']->format('M d, Y') ?>
-                    (<?= format_timestamp($data['lastupdated']) ?> ago)</i></p>
+    <header>
+        <?php html_header(); ?>
+        <h2>terms of service</h2>
+        <?php if ($data['last_updated']): ?>
+            <p>last updated: <?= $data['last_updated']->format('M d, Y') ?></p>
         <?php endif; ?>
-        <hr>
+    </header>
+    <main>
         <?= $data['content'] ?>
     </main>
+    <footer>
+        <?php html_footer(); ?>
+        <?php html_legal(); ?>
+    </footer>
 </body>
 
 </html>

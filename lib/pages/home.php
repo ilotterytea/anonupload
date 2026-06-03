@@ -120,6 +120,7 @@ unset($_SESSION['recently_uploaded_files']);
     </main>
     <footer>
         <?php html_footer(); ?>
+        <?php html_legal(); ?>
     </footer>
 </body>
 
