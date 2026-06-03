@@ -117,6 +117,9 @@ function html_footer()
         <li><a href="/history">history</a></li>
         <li><a href="/favorites">favorites</a></li>
         <li><a href="/uploaders">uploaders</a></li>
+        <?php if (CONFIG['stats']['enabled']): ?>
+            <li><a href="/stats">statistics</a></li>
+        <?php endif; ?>
         <li><a href="/preferences">preferences</a></li>
         <?php if (!empty($dropdown_links)): ?>
             <li class="dropdown">
@@ -186,26 +189,24 @@ function html_debug_info()
     <?php ;
 }
 
-function html_file_brick(File $file, string|null $custom_url = null)
+function html_file_brick(BaseFile $file)
 {
-    if ($custom_url === null) {
-        $custom_url = "/{$file->id}.{$file->extension}";
-    }
+    $name = "{$file->id}.{$file->extension}";
+
     echo '' ?>
     <div class="brick<?= isset($file->color) ? " {$file->color}" : '' ?>">
-        <a href="<?= $custom_url ?>">
-            <i title="<?= "{$file->id}.{$file->extension} // {$file->mime} ({$file->extension})" ?>">
+        <a href="<?= $file->url ?>">
+            <i title="<?= $name ?>">
                 <?php if (str_starts_with($file->mime, 'image/') || str_starts_with($file->mime, 'video/')): ?>
-                    <img src="<?= sprintf('%s/%s.webp', CONFIG["thumbnails"]["url"], $file->id) ?>" alt="No thumbnail."
-                        loading="lazy">
+                    <img src="<?= $file->thumbnail_url ?>" alt="<?= $name ?>" loading="lazy">
                 <?php elseif (str_starts_with($file->mime, 'audio/')): ?>
-                    <img src="/static/img/icons/file_audio.png" alt="No thumbnail." loading="lazy" class="thumbnail stock">
+                    <img src="/static/img/icons/file_audio.png" alt="<?= $name ?>" loading="lazy" class="thumbnail stock">
                 <?php elseif (str_starts_with($file->mime, 'text/')): ?>
-                    <img src="/static/img/icons/file_text.png" alt="No thumbnail." loading="lazy" class="thumbnail stock">
+                    <img src="/static/img/icons/file_text.png" alt="<?= $name ?>" loading="lazy" class="thumbnail stock">
                 <?php elseif ($file->mime == 'application/x-shockwave-flash'): ?>
-                    <img src="/static/img/icons/file_flash.png" alt="No thumbnail." loading="lazy" class="thumbnail stock">
+                    <img src="/static/img/icons/file_flash.png" alt="<?= $name ?>" loading="lazy" class="thumbnail stock">
                 <?php else: ?>
-                    <img src="/static/img/icons/file.png" alt="No thumbnail." class="thumbnail stock">
+                    <img src="/static/img/icons/file.png" alt="<?= $name ?>" class="thumbnail stock">
                 <?php endif; ?>
             </i>
         </a>

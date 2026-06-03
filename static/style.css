@@ -144,6 +144,10 @@ table.vertical th {
     text-align: right;
 }
 
+table.vertical.left th {
+    text-align: left;
+}
+
 table.vertical tr>* {
     padding: calc(var(--pad) / 4);
 }
@@ -171,7 +175,8 @@ fieldset>legend {
 }
 
 .software-uploaders,
-.preferences {
+.preferences,
+.statistics {
     display: flex;
     flex-direction: column;
     gap: var(--pad);
@@ -360,6 +365,12 @@ fieldset>legend {
 .file.item .button,
 .file.item button {
     box-shadow: 2px 2px 0 0 var(--file-shadow);
+}
+
+.wall {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pad);
 }
 
 /** BOX */

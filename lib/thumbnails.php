@@ -1,6 +1,5 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/config.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/storage.php';
 
 interface Thumbnailer
 {
@@ -219,13 +218,13 @@ class S3ProxyThumbnailer implements Thumbnailer
 }
 
 define("THUMBNAILER", match (true) {
-    CONFIG['thumbnails']['type'] === "s3" && FILESTORAGE instanceof S3FileStorage => new S3ProxyThumbnailer(
+    CONFIG['thumbnails']['type'] === "s3" && CONFIG['storage']['type'] === "s3" => new S3ProxyThumbnailer(
         CONFIG['thumbnails']['url'],
         CONFIG['thumbnails']['prefix'],
         CONFIG['thumbnails']['bucket'],
         CONFIG['thumbnails']['output_bucket'],
         CONFIG['thumbnails']['authorization_key']
     ),
-    CONFIG['thumbnails']['type'] === "local" && !(FILESTORAGE instanceof S3FileStorage) => new LocalThumbnailer(CONFIG['thumbnails']['directory'], CONFIG['thumbnails']['prefix']),
+    CONFIG['thumbnails']['type'] === "local" && CONFIG['storage']['type'] !== "s3" => new LocalThumbnailer(CONFIG['thumbnails']['directory'], CONFIG['thumbnails']['prefix']),
     default => null
 });

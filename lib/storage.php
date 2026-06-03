@@ -3,6 +3,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/file.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/id.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/config.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/thumbnails.php';
 
 use Aws\S3\S3Client;
 use Aws\S3\MultipartUploader;
@@ -15,6 +16,7 @@ interface FileStorage
     public function get_random_file(): BaseFile|null;
     public function save_file(string $name, string $input_path, FileMetadata|null $metadata): BaseFile|null;
     public function delete_file(string $name): bool;
+    public function get_stats(): array|null;
 }
 
 class LocalFileStorage implements FileStorage
@@ -96,6 +98,47 @@ class LocalFileStorage implements FileStorage
     {
         $path = "{$this->directory}/$name";
         return is_file($path) && unlink($path);
+    }
+
+    public function get_stats(): array|null
+    {
+        $result = $this->get_files();
+        $serving_files = $result['count'];
+        if ($serving_files === 0) {
+            return null;
+        }
+
+        $active_content = 0;
+        $min_timestamp = PHP_INT_MAX;
+        $max_timestamp = 0;
+
+        foreach ($result['filenames'] as $path) {
+            $path = "{$this->directory}/$path";
+            $active_content += filesize($path);
+
+            $timestamp = filemtime($path);
+
+            $min_timestamp = min($min_timestamp, $timestamp);
+            $max_timestamp = max($max_timestamp, $timestamp);
+        }
+
+        $average_file_size = $active_content / $serving_files;
+        $duration = max(1, ($max_timestamp - $min_timestamp) / 60);
+
+        // calculating the count of future files
+        $serving_future_files = null;
+        if (CONFIG['stats']['disk_size'] > 0) {
+            $size = CONFIG['stats']['disk_size'];
+            $serving_future_files = floor($size / $average_file_size);
+        }
+
+        return [
+            'serving_files' => $serving_files,
+            'active_content' => $active_content,
+            'average_file_size' => $average_file_size,
+            'average_upload_rate' => $serving_files / $duration,
+            'serving_future_files' => $serving_future_files
+        ];
     }
 }
 
@@ -246,6 +289,59 @@ class SQLFileStorage extends LocalFileStorage
 
         return true;
     }
+
+    public function get_stats(): array|null
+    {
+        // -- basic info
+        $stmt = $this->db->query("SELECT COUNT(*) AS serving_files, SUM(size) AS active_content, AVG(size) AS average_file_size,
+                COUNT(*) / TIMESTAMPDIFF(MINUTE, MIN(uploaded_at), MAX(uploaded_at)) AS average_upload_rate
+                FROM files
+                WHERE id NOT IN (SELECT id FROM file_bans)
+            ");
+
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$res) {
+            return null;
+        }
+
+        // calculating the count of future files
+        $serving_future_files = null;
+        if (CONFIG['stats']['disk_size'] > 0) {
+            $size = CONFIG['stats']['disk_size'];
+            $serving_future_files = floor($size / $res['average_file_size']);
+        }
+        $res['serving_future_files'] = $serving_future_files;
+
+
+        // -- timeline
+        $stmt = $this->db->query("SELECT YEAR(uploaded_at) AS year, QUARTER(uploaded_at) AS quarter, COUNT(*) AS file_count
+                FROM files
+                WHERE uploaded_at >= DATE_SUB(CURDATE(), INTERVAL 5 YEAR)
+                GROUP BY YEAR(uploaded_at), QUARTER(uploaded_at)
+                ORDER BY year, quarter
+            ");
+        $res['timeline'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // -- the most viewed files
+        $stmt = $this->db->query("SELECT id, extension, mime, `size` FROM files ORDER BY views DESC LIMIT 5");
+
+        $files = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $file = new BaseFile();
+            $file->id = $row['id'];
+            $file->extension = $row['extension'];
+            $file->mime = $row['mime'];
+            $file->size = $row['size'];
+            $file->url = "/{$file->id}.{$file->extension}";
+            if (THUMBNAILER !== null) {
+                $file->thumbnail_url = sprintf("%s/%s.%s", THUMBNAILER->get_thumbnail_root(), $file->id, THUMBNAILER->get_thumbnail_extension());
+            }
+            array_push($files, $file);
+        }
+        $res['most_viewed'] = $files;
+
+        return $res;
+    }
 }
 
 class S3FileStorage implements FileStorage
@@ -377,6 +473,49 @@ class S3FileStorage implements FileStorage
         }
 
         return true;
+    }
+
+    public function get_stats(): array|null
+    {
+        $result = $this->s3->listObjectsV2([
+            'Bucket' => $this->bucket
+        ]);
+
+        $serving_files = $result['KeyCount'];
+        if ($serving_files === 0) {
+            return null;
+        }
+
+        $active_content = 0;
+        $min_timestamp = PHP_INT_MAX;
+        $max_timestamp = 0;
+
+        foreach ($result['Contents'] as $content) {
+            $active_content += $content['Size'];
+
+            $timestamp = $content['LastModified']->getTimestamp();
+
+            $min_timestamp = min($min_timestamp, $timestamp);
+            $max_timestamp = max($max_timestamp, $timestamp);
+        }
+
+        $average_file_size = $active_content / $serving_files;
+        $duration = max(1, ($max_timestamp - $min_timestamp) / 60);
+
+        // calculating the count of future files
+        $serving_future_files = null;
+        if (CONFIG['stats']['disk_size'] > 0) {
+            $size = CONFIG['stats']['disk_size'];
+            $serving_future_files = floor($size / $average_file_size);
+        }
+
+        return [
+            'serving_files' => $serving_files,
+            'active_content' => $active_content,
+            'average_file_size' => $average_file_size,
+            'average_upload_rate' => $serving_files / $duration,
+            'serving_future_files' => $serving_future_files
+        ];
     }
 }
 

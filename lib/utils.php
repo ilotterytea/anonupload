@@ -2,15 +2,15 @@
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 define('IS_JSON_REQUEST', isset($_SERVER['HTTP_ACCEPT']) && $_SERVER['HTTP_ACCEPT'] == 'application/json');
 
-function json_response(mixed $data, string|null $message, int $code = 200)
+function send_json_response(mixed $data, string|null $message = null, int $code = 200)
 {
     http_response_code($code);
     header('Content-Type: application/json');
-    echo json_encode([
+    die(json_encode([
         'status_code' => $code,
         'message' => $message,
         'data' => $data
-    ], JSON_UNESCAPED_SLASHES);
+    ], JSON_UNESCAPED_SLASHES));
 }
 
 function generate_random_char_sequence(string $chars, int $length): string
@@ -55,6 +55,19 @@ function format_timestamp(string|DateTime $datetime)
     } else {
         return "$years year" . ($years > 1 ? "s" : "");
     }
+}
+
+function format_filesize($file_size)
+{
+    $suffix = 'MB';
+    $file_size /= 1024 * 1024; // MB
+
+    if ($file_size >= 1024) {
+        $file_size /= 1024;
+        $suffix = 'GB';
+    }
+
+    return sprintf('%.2f%s', $file_size, $suffix);
 }
 
 function str_safe(string $s, int|null $max_length, bool $remove_new_lines = true): string

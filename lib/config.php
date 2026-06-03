@@ -237,11 +237,9 @@ $cfg = [
         "usernamemaxlength" => 25,
         "passwordminlength" => 8
     ],
-    "stats" => [
-        "enable" => true,
-        "lastfiles" => true,
-        "mostviewed" => true,
-        "disksize" => 0
+    'stats' => [
+        'enabled' => false,
+        'disk_size' => 0
     ]
 ];
 
