@@ -49,51 +49,45 @@ function html_head(string|null $title = null, string|null $description = null, B
 function html_mini_icon()
 {
     $brand_url = '/static/img/brand/mini.webp';
-    $static_folder = '/static/img/brand/mini';
-    $brand_folder = $_SERVER['DOCUMENT_ROOT'] . $static_folder;
+    $folder_path = '/static/instances/' . CONFIG['instance']['name'] . '/img/brand/mini';
 
-    if (is_dir($brand_folder)) {
-        $files = glob("$brand_folder/*.*");
+    if (!is_dir($_SERVER['DOCUMENT_ROOT'] . $folder_path)) {
+        $folder_path = '/static/img/brand/mini';
+    }
+
+    if (is_dir($_SERVER['DOCUMENT_ROOT'] . $folder_path)) {
+        $files = glob($_SERVER['DOCUMENT_ROOT'] . "$folder_path/*.*");
 
         if (!empty($files)) {
             $file = basename($files[random_int(0, count($files) - 1)]);
-            $brand_url = "$static_folder/$file";
+            $brand_url = "$folder_path/$file";
         }
     }
 
-    echo "<a href='/'><img src='$brand_url' alt=''></a>";
+    echo "<a href='/'><img src='$brand_url' alt='' height='32'></a>";
 }
 
 function html_header()
 {
     $brand_url = '/static/img/brand/big.webp';
-    $static_folder = '/static/img/brand/big';
-    $brand_folder = $_SERVER['DOCUMENT_ROOT'] . $static_folder;
+    $folder_path = '/static/instances/' . CONFIG['instance']['name'] . '/img/brand/big';
 
-    if (is_dir($brand_folder)) {
-        $files = glob("$brand_folder/*.*");
+    if (!is_dir($_SERVER['DOCUMENT_ROOT'] . $folder_path)) {
+        $folder_path = '/static/img/brand/big';
+    }
+
+    if (is_dir($_SERVER['DOCUMENT_ROOT'] . $folder_path)) {
+        $files = glob($_SERVER['DOCUMENT_ROOT'] . "$folder_path/*.*");
 
         if (!empty($files)) {
             $file = basename($files[random_int(0, count($files) - 1)]);
-            $brand_url = "$static_folder/$file";
+            $brand_url = "$folder_path/$file";
         }
     }
 
-    $line = null;
-    $line_path = $_SERVER['DOCUMENT_ROOT'] . '/../MOTD.txt';
-    if (file_exists($line_path) && $contents = file_get_contents($line_path)) {
-        $lines = explode("\n", trim($contents));
-        $line_count = count($lines);
-        if ($line_count > 0) {
-            $line = $lines[intval(date('j')) % $line_count];
-        }
-    }
-
-    ?>
-    <a href="/">
-        <img src="<?= $brand_url ?>" alt="<?= CONFIG['instance']['name'] ?>" />
-    </a>
-    <?php ;
+    echo '<a href="/">';
+    echo "<img src='$brand_url' alt='" . CONFIG['instance']['name'] . "'/>";
+    echo '</a>';
 }
 
 function html_footer()

@@ -6,10 +6,6 @@
 anonupload.json
 .bannedhashes
 .anonuploadpasswd
-big/
-mini/
-404/
-403/
 
 *.ini
 *.db
@@ -28,3 +24,4 @@ static/themes/*
 !static/themes/TinyEmotes/
 !static/themes/Yotsuba/
 !static/themes/Yotsuba B/
+static/instances/*

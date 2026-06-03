@@ -32,23 +32,43 @@ if (is_dir($dir_path)) {
         $image_name = basename($names[random_int(0, $c - 1)]);
     }
 }
+
+// -- choosing error image
+$brand_url = null;
+$folder_path = '/static/instances/' . CONFIG['instance']['name'] . "/img/$error_code";
+
+if (!is_dir($_SERVER['DOCUMENT_ROOT'] . $folder_path)) {
+    $folder_path = "/static/img/$error_code";
+}
+
+if (is_dir($_SERVER['DOCUMENT_ROOT'] . $folder_path)) {
+    $files = glob($_SERVER['DOCUMENT_ROOT'] . "$folder_path/*.*");
+
+    if (!empty($files)) {
+        $file = basename($files[random_int(0, count($files) - 1)]);
+        $brand_url = "$folder_path/$file";
+    }
+}
 ?>
 <!DOCTYPE html>
 <html>
 
 <head>
     <?php html_head("$error_code $error_reason"); ?>
+    <meta http-equiv="refresh" content="5; url=<?= CONFIG['instance']['url'] ?>">
 </head>
 
 <body>
     <main>
-        <section class="box error">
+        <section class="box error-page">
             <div class="tab">
-                <p><?= "$error_code $error_reason" ?></p>
+                <p>
+                    <?= "$error_code $error_reason" ?>
+                </p>
             </div>
             <div class="content">
-                <?php if (isset($image_name)): ?>
-                    <img src="/static/img/<?= "$error_code/$image_name" ?>" alt="There is nothing to see here.">
+                <?php if (isset($brand_url)): ?>
+                    <img src="<?= $brand_url ?>" alt="There is nothing to see here.">
                 <?php else: ?>
                     <p>There is nothing to see here.</p>
                 <?php endif; ?>

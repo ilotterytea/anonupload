@@ -347,9 +347,24 @@ fieldset>legend {
     padding: 0;
 }
 
-.box.error {
+/** ERRORS  */
+.box.error-page {
     font-size: 1.25em;
     text-align: center;
+}
+
+.box.error-page .content {
+    line-height: 0;
+}
+
+.box.error-page .content p {
+    line-height: initial;
+}
+
+main:has(> .error-page) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 }
 
 /** MESSAGES & HINTS */
