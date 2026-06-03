@@ -4,9 +4,13 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/storage.php';
 
 $file = null;
 
-// retrieving file
+// -- retrieving file
 $file_name_specified = isset($_GET['i']) || isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] !== '/';
-if ($file_name_specified) {
+
+// retrieving random file
+if (CONFIG['surpriseme']['enable'] && isset($_GET['random'])) {
+    $file = FILESTORAGE->get_random_file();
+} elseif ($file_name_specified) {
     $file_name = basename($_GET['i'] ?? $_SERVER['REQUEST_URI']);
     $file = FILESTORAGE->get_file($file_name);
 }

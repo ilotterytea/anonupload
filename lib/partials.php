@@ -2,12 +2,9 @@
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
-include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/user.php";
 
-function html_head(string|null $title = null, string|null $description = null, File|null $file = null)
+function html_head(string|null $title = null, string|null $description = null, BaseFile|null $file = null)
 {
-    USER->authorize_with_cookie();
-
     $ititle = CONFIG['instance']['name'];
     if (!$description) {
         $description = "$ititle is a simple, free and anonymous file sharing site. We do not store anything other than the files you upload.";
@@ -104,6 +101,9 @@ function html_footer()
     ?>
     <ul class="horizontal links">
         <li><a href="/"><?= CONFIG['instance']['name'] ?></a></li>
+        <?php if (CONFIG['surpriseme']['enable']): ?>
+            <li><a href="/?random">surprise me</a></li>
+        <?php endif; ?>
         <li><a href="/history">history</a></li>
         <li><a href="/favorites">favorites</a></li>
         <li><a href="/uploaders">uploaders</a></li>

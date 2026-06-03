@@ -18,6 +18,13 @@ $file_name = "{$file->id}.{$file->extension}";
             <?php html_file_full($file); ?>
         </section>
 
+        <section class="disclaimer">
+            <p>
+                All trademarks and copyrights belong to their respective owners.
+                The uploader is responsible for any content shared here.
+            </p>
+        </section>
+
         <section class="control-panel">
             <div class="icon">
                 <?= html_mini_icon(); ?>
@@ -35,6 +42,11 @@ $file_name = "{$file->id}.{$file->extension}";
                 <p style="display:none" id="file-url"><?= "/{$file->id}.{$file->extension}" ?></p>
             </div>
             <div class="control-buttons" id="control-buttons">
+                <?php if (isset($_GET['random'])): ?>
+                    <a href="/?random" class="button">
+                        <img src="/static/img/icons/reroll.png" alt="re-roll" title="re-roll" />
+                    </a>
+                <?php endif; ?>
                 <a href="<?= $file->url ?>" download="<?= $file_name ?>" class="button">
                     <img src="/static/img/icons/download.png" alt="download" title="download file" />
                 </a>
@@ -95,29 +107,29 @@ $file_name = "{$file->id}.{$file->extension}";
 
         // -- favorite button
         {
-        const goodIcon = document.createElement("img");
-        goodIcon.src = '/static/img/icons/star.png';
-        goodIcon.alt = 'unfavorite';
-        goodIcon.title = 'unfavorite this file';
+            const goodIcon = document.createElement("img");
+            goodIcon.src = '/static/img/icons/star.png';
+            goodIcon.alt = 'unfavorite';
+            goodIcon.title = 'unfavorite this file';
 
-        const badIcon = document.createElement("img");
-        badIcon.src = '/static/img/icons/star-gray.png';
-        badIcon.alt = 'favorite';
-        badIcon.title = 'favorite this file';
+            const badIcon = document.createElement("img");
+            badIcon.src = '/static/img/icons/star-gray.png';
+            badIcon.alt = 'favorite';
+            badIcon.title = 'favorite this file';
 
-        const favoriteButton = document.createElement("button");
-        favoriteButton.classList.add("button");
-        setFavoriteIcon(file, favoriteButton, goodIcon, badIcon);
-        favoriteButton.addEventListener("click", () => {
-            if (isFavoriteFile(file)) {
-                removeFavoriteFile(file);
-            } else {
-                addFavoriteFile(file);
-            }
-
+            const favoriteButton = document.createElement("button");
+            favoriteButton.classList.add("button");
             setFavoriteIcon(file, favoriteButton, goodIcon, badIcon);
-        });
-        buttons.append(favoriteButton);
+            favoriteButton.addEventListener("click", () => {
+                if (isFavoriteFile(file)) {
+                    removeFavoriteFile(file);
+                } else {
+                    addFavoriteFile(file);
+                }
+
+                setFavoriteIcon(file, favoriteButton, goodIcon, badIcon);
+            });
+            buttons.append(favoriteButton);
         }
     });
 

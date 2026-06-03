@@ -44,10 +44,8 @@ $cfg = [
         "limit" => 50,
         "includemimetypes" => [],
     ],
-    "supriseme" => [
-        "enable" => true,
-        "order" => "rand()",
-        "where" => false
+    "surpriseme" => [
+        "enable" => false,
     ],
     "files" => [
         "fancyview" => true,
