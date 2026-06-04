@@ -274,6 +274,10 @@ fieldset>legend {
     flex-direction: column;
 }
 
+#file-upload-queue table {
+    border-spacing: 0;
+}
+
 #file-upload-queue tbody tr>td {
     padding: calc(var(--pad) / 2);
 }
@@ -290,12 +294,47 @@ fieldset>legend {
     width: 40%;
 }
 
-#file-upload-queue .details {
+#file-upload-queue tbody td:nth-child(3) {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: var(--pad);
 }
+
+#file-upload-queue .details {
+    display: flex;
+    flex-direction: row;
+    gap: var(--pad);
+}
+
+#file-upload-queue tbody tr td {
+    border-bottom: 1px solid var(--box-border);
+}
+
+#file-upload-queue tbody tr[status="error"] {
+    background: var(--error-background);
+    color: var(--error-foreground);
+}
+
+#file-upload-queue tbody tr[status="error"] td {
+    border-color: var(--error-border);
+}
+
+#file-upload-queue tbody tr[status="deleted"] td,
+#file-upload-queue tbody tr[status="abort"] td {
+    position: relative;
+    color: red;
+}
+
+#file-upload-queue tbody tr[status="deleted"] td::before,
+#file-upload-queue tbody tr[status="abort"] td::before {
+    content: '';
+    position: absolute;
+    border-bottom: 1px solid red;
+    top: 50%;
+    width: 100%;
+}
+
 
 /** ITEMS */
 .item-list {

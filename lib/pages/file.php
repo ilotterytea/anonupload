@@ -69,7 +69,9 @@ $file_name = "{$file->id}.{$file->extension}";
     </section>
 </body>
 
+<script src="/static/scripts/player.js"></script>
 <script src="/static/scripts/favorites.js"></script>
+<script src="/static/scripts/file.js"></script>
 <script>
     function setFavoriteIcon(file, btn, goodIcon, badIcon) {
         while (btn.firstChild) btn.firstChild.remove();

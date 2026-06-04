@@ -33,7 +33,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/thumbnails.php';
             return;
         }
 
-        const files = JSON.parse(localStorage.getItem("uploaded_files") ?? '[]');
+        const files = getUploadedFiles();
 
         for (const file of files) {
             <?php if (THUMBNAILER !== null): ?>
