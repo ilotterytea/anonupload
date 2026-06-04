@@ -241,7 +241,7 @@ unset($_SESSION['recently_uploaded_files']);
                 fileOpenButton.style.display = 'none';
 
                 const fileCopyButton = document.createElement("button");
-                fileCopyButton.innerHTML = '<img src="/static/img/icons/paste_plain.png" alt="[C]" title="copy URL" />';
+                fileCopyButton.innerHTML = '<img src="/static/img/icons/copy.png" alt="[C]" title="copy URL" />';
                 fileCopyButton.style.display = 'none';
 
                 const fileDeleteButton = document.createElement("button");

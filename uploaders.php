@@ -154,7 +154,7 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
                 const content = copyButton.innerHTML;
                 const button = document.createElement("button");
 
-                button.innerHTML = '<img src="/static/img/icons/paste_plain.png" alt="Copy" />';
+                button.innerHTML = '<img src="/static/img/icons/copy.png" alt="Copy" />';
                 button.addEventListener("click", () => {
                     navigator.clipboard.writeText(content);
                 });

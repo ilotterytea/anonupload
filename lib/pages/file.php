@@ -99,7 +99,7 @@ $file_name = "{$file->id}.{$file->extension}";
         // -- copy button
         if (navigator.clipboard) {
             const icon = document.createElement("img");
-            icon.src = '/static/img/icons/link.png';
+            icon.src = '/static/img/icons/copy.png';
             icon.alt = 'copy link';
             icon.title = 'copy link';
 
