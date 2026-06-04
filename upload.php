@@ -5,6 +5,7 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/storage.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/id.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/thumbnails.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
 
 session_start();
 
@@ -18,8 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     exit;
 }
 
+$status = new FileTrackStatus($_POST['track_id'] ?: "0");
+
 try {
     $files = [];
+
+    $status->send('up_prep', 'preparing...');
 
     if (isset($_FILES['file'])) {
         $f = $_FILES['file'];
@@ -65,6 +70,10 @@ try {
         throw new HTTPException("No file to upload");
     }
 
+    if (count($files) > 1 && $status->exists()) {
+        throw new HTTPException("File track is available only for singular uploads", 400);
+    }
+
     $strip_exif = boolval($_POST['strip_exif'] ?? '0');
     $password = $_POST['password'] ?? null;
 
@@ -92,6 +101,8 @@ try {
                     throw new HTTPException('Unknown errors');
             }
 
+            $status->send('up_integrity', 'verifying file integrity...');
+
             // checking file mimetype
             $finfo = new finfo(FILEINFO_MIME_TYPE);
             if (false === $file_ext = array_search($finfo->file($file['tmp_name']), CONFIG["upload"]["acceptedmimetypes"], true)) {
@@ -111,6 +122,7 @@ try {
             }
 
             // -- generating file id
+            $status->send('up_genid', 're-rolling IDs...');
             $attempts = 0;
             $id_length = CONFIG["id"]["length"];
             $id_prefix = CONFIG["id"]["prefix"] ?? '';
@@ -126,6 +138,13 @@ try {
             $meta = new FileMetadata();
             $meta->content_type = $file_mime;
             $meta->password = $password;
+
+            $status->send('up_save', match (CONFIG['storage']['type']) {
+                'local' => 'writing files to disk...',
+                'sql' => 'writing files to database...',
+                's3' => 'saving files to object storage (may take a long time)...',
+                default => 'saving...',
+            });
 
             $data = FILESTORAGE->save_file("$file_id.$file_ext", $file['tmp_name'], $meta);
             if (!$data) {
@@ -143,6 +162,7 @@ try {
 
     // -- generating thumbnails
     if (THUMBNAILER !== null) {
+        $status->send('up_thumbnail', 'drawing thumbnails...');
         $s3_thumb = THUMBNAILER instanceof S3ProxyThumbnailer;
         $data = [];
         foreach ($uploaded_files as &$f) {
@@ -178,6 +198,7 @@ try {
             $bad_status_count++;
     }
 
+    $status->send('success', null);
 
     generate_alert(
         "/",
@@ -189,7 +210,8 @@ try {
         }
     );
 } catch (HTTPException $e) {
-    generate_alert('/', $e->getMessage(), $e->getCode());
+    $status->send('error', $e->getMessage());
+    generate_alert('/', $e->getMessage(), $e->getStatusCode());
 } catch (Exception $e) {
     generate_alert('/', $e->getMessage(), 400);
 }

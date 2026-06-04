@@ -4,7 +4,9 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/utils.php';
 
 if (IS_JSON_REQUEST) {
-    send_json_response(get_commit());
+    $x = get_commit();
+    $x['app_name'] = 'anonupload';
+    send_json_response($x);
 }
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -192,10 +194,28 @@ unset($_SESSION['recently_uploaded_files']);
 
             for (const file of cachedFiles) {
                 const f = new FormData(form);
-                f.set("file", f);
+                f.set("file[]", file);
 
-                const element = uploadData(file, f);
-                fileUploadQueue.prepend(element.root);
+                fetch('/track?create', {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                    .then((r) => {
+                        if (r.status !== 201) {
+                            return Promise.reject(`${r.status} ${r.statusText}`);
+                        }
+                        return r.json();
+                    })
+                    .then((j) => {
+                        f.set("track_id", j.data.id);
+                        const element = uploadData(file, f);
+                        fileUploadQueue.prepend(element.root);
+                    })
+                    .catch((err) => {
+                        const element = uploadData(file, f);
+                        fileUploadQueue.prepend(element.root);
+                    });
             }
 
             cachedFiles = [];

@@ -189,4 +189,9 @@ class HTTPException extends Exception
     {
         http_response_code($this->statusCode);
     }
+
+    public function getStatusCode()
+    {
+        return $this->statusCode;
+    }
 }

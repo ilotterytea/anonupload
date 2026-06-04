@@ -36,6 +36,9 @@ $cfg = [
         'web_endpoint' => null,
         'use_path_style_endpoint' => true,
     ],
+    'memcached' => [
+        'hosts' => null
+    ],
     "driver" => [
         "ruffle" => false,
         "chart" => false
@@ -59,7 +62,8 @@ $cfg = [
         "url" => "/userdata/uploads",
         "deletion" => true,
         "deletionkeylength" => 16,
-        "defaultvisibility" => 1
+        "defaultvisibility" => 1,
+        'track_ttl' => 300
     ],
     'id' => [
         'type' => 'chars',
@@ -301,3 +305,18 @@ if (shell_exec("which magick")) {
 define("IMAGEMAGICK_COMMAND", $imagemagick);
 
 define("THEME_LIST", array_map(fn($x) => basename($x), glob("{$_SERVER['DOCUMENT_ROOT']}/static/themes/*", GLOB_ONLYDIR)));
+
+if ($cfg['memcached']['hosts']) {
+    $hosts = explode("\t", $cfg['memcached']['hosts']);
+    $mem = new Memcached();
+    foreach ($hosts as $host) {
+        $parts = explode(" ", $host, 3);
+        $h = $parts[0];
+        $p = $parts[1];
+        $w = $parts[2] ?? 0;
+        $mem->addServer($h, $p, $w);
+    }
+    define("MEMCACHED", $mem);
+} else {
+    define("MEMCACHED", null);
+}

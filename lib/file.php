@@ -405,3 +405,41 @@ class BaseFile implements JsonSerializable
         return $d;
     }
 }
+
+class FileTrackStatus
+{
+    public string|null $id;
+    public int $ttl;
+
+    public function __construct(string $id)
+    {
+        $this->id = $id == "0" ? null : "anonupload_track_$id";
+        $this->ttl = CONFIG['files']['track_ttl'];
+    }
+
+    public function exists(): bool
+    {
+        $r = $this->get();
+        return $r !== false && $r !== null;
+    }
+
+    public function get(): mixed
+    {
+        return MEMCACHED?->get($this->id);
+    }
+
+    public function set(mixed $data)
+    {
+        if ($this->id)
+            MEMCACHED?->set($this->id, $data, $this->ttl);
+    }
+
+    public function send(string $stage, string|null $message = null, mixed $data = null)
+    {
+        $this->set([
+            'stage' => $stage,
+            'message' => $message,
+            'data' => $data
+        ]);
+    }
+}

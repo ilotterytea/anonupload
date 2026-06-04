@@ -113,7 +113,6 @@ function createFile(file) {
 
     // delete button
     if (file.urls.deletion_url) {
-        console.log(file);
         const deletionButton = document.createElement("button");
         deletionButton.innerHTML = '<img src="/static/img/icons/cross.png" alt="delete" title="delete this file" />';
         deletionButton.addEventListener("click", () => {
@@ -198,6 +197,7 @@ function createFileUploadProgress(file) {
     fileElement.append(fileActions);
 
     const fileStatusElement = document.createElement("p");
+    fileStatusElement.classList.add("status");
     fileActions.append(fileStatusElement);
 
     const fileProgressElement = document.createElement("progress");
@@ -250,7 +250,6 @@ function createFileUploadProgress(file) {
     };
 
     f.setProgress = (v) => {
-        console.log(v);
         fileProgressElement.style.display = v < 100 ? 'flex' : 'none';
         fileProgressElement.value = v;
     };
@@ -263,6 +262,23 @@ function uploadData(data, form = null) {
     file.setStatus('waiting...', 'queue');
     file.setProgress(100);
 
+    const trackId = form.get("track_id");
+    let source = null;
+    if (trackId) {
+        source = new EventSource(`/track?id=${trackId}`);
+        source.addEventListener("message", (e) => {
+            const d = JSON.parse(e.data);
+
+            file.setStatus(d.message, d.stage);
+
+            if (d.stage === "success" || d.stage === "error") {
+                source.close();
+            }
+        });
+
+        source.addEventListener("error", (e) => console.error(e));
+    }
+
     const abortButton = document.createElement("button");
     file.buttons.root.append(abortButton);
 
@@ -274,11 +290,17 @@ function uploadData(data, form = null) {
     xhr.upload.addEventListener("progress", (e) => {
         if (e.lengthComputable) {
             const percent = Math.round((e.loaded / e.total) * 100);
-            console.log(percent);
             file.setProgress(percent);
-            file.setStatus(percent < 100 ? `uploading... (${percent}%)` : 'finishing...', 'in_progress');
+
+
+            if (percent < 100) {
+                file.setStatus(`uploading... (${percent}%)`, 'cl_progress');
+            } else {
+                abortButton.remove();
+                file.setStatus('finishing...', 'cl_progress');
+            }
         } else {
-            file.setStatus('uploading...', 'in_progress');
+            file.setStatus('uploading...', 'cl_progress');
         }
     });
 
@@ -333,6 +355,7 @@ function uploadData(data, form = null) {
     // abort button
     abortButton.addEventListener("click", () => {
         xhr.abort();
+        if (source != null) source.close();
         file.setStatus('aborted', 'abort');
     });
 
