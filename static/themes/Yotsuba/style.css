@@ -11,11 +11,11 @@
     --code-background: #efc2c2;
     --code-foreground: #800;
 
-    --box-border-width: 2px;
-    --box-border: #800;
     --box-background: #fff6f6;
     --box-background-hover: #f7cccc;
     --box-foreground: #800;
+    --box-border: 4px solid #fff6f6;
+    --box-shadow: 2px 2px 0 0 #aaa;
 
     --box-tab-background: #efc2c2;
     --box-tab-foreground: #800;
@@ -43,10 +43,11 @@
         --code-background: #800;
         --code-foreground: #fff;
 
-        --box-border: #575757;
         --box-background: #3a3a3a;
         --box-background-hover: #414141;
         --box-foreground: #ff6161;
+        --box-border: 4px solid #3a3a3a;
+        --box-shadow: 2px 2px 0 0 #181818;
 
         --box-tab-background: #800;
         --box-tab-foreground: #fff;

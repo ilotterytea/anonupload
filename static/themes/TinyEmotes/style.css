@@ -14,12 +14,11 @@
     --code-background: #daebc7;
     --code-foreground: #425514;
 
-    --box-border-width: 2px;
-    --box-border: #95a186;
     --box-background: #e4ebdc;
     --box-background-hover: #c8e2b7;
     --box-foreground: #636363;
-    --box-shadow: #000;
+    --box-border: 2px solid #e4ebdc;
+    --box-shadow: 2px 2px 0 0 #748e74;
 
     --box-tab-background: #daebc7;
     --box-tab-foreground: #425514;
@@ -44,11 +43,11 @@
         --code-background: #4d583f;
         --code-foreground: #fff;
 
-        --box-border-width: 2px;
-        --box-border: #575757;
         --box-background: #3a3a3a;
         --box-background-hover: #575757;
         --box-foreground: #c2ff61;
+        --box-border: 2px solid #3a3a3a;
+        --box-shadow: 2px 2px 0 0 #181818;
 
         --box-tab-background: #4d583f;
         --box-tab-foreground: #fff;

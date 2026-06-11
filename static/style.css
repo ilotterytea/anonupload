@@ -12,23 +12,23 @@
     --code-background: #b8b8d6;
     --code-foreground: #201b37;
 
-    --box-border-width: 4px;
-    --box-border: #d5d5d5;
     --box-background: #f1f1f1;
     --box-background-hover: #f6f6f6;
     --box-foreground: #636363;
-    --box-shadow: #000;
+    --box-border: 4px solid #f1f1f1;
+    --box-shadow: 2px 2px 0 0 #a2a2a2;
 
     --box-tab-background: #eaeaea;
     --box-tab-foreground: #3a3a3a;
 
+    --upload-box-border: 4px dashed #c3c3c3;
     --file-foreground: #fff;
     --file-background: linear-gradient(0deg, #000000, transparent);
     --file-shadow: #202020;
 
     --error-background: #ff8181;
     --error-foreground: #6d2828;
-    --error-border: #ff6c6c;
+    --error-border: 4px solid #ff6c6c;
 
     --showcase-background: #191a1b;
     --showcase-control-background: #26282a;
@@ -110,7 +110,7 @@ ul.horizontal li:not(:first-child)::before {
 noscript {
     background: var(--error-background);
     color: var(--error-foreground);
-    border: var(--box-border-width) solid var(--error-border);
+    border: var(--error-border);
     text-align: center;
 }
 
@@ -180,14 +180,14 @@ code {
 fieldset {
     background: var(--box-background);
     color: var(--box-foreground);
-    border: var(--box-border-width) solid var(--box-border);
+    border: var(--box-border);
     padding: var(--pad);
 }
 
 fieldset>legend {
     background: var(--box-tab-background);
     color: var(--box-tab-foreground);
-    border: var(--box-border-width) solid var(--box-border);
+    border: var(--box-border);
     padding: calc(var(--pad) / 2) var(--pad);
 }
 
@@ -210,7 +210,7 @@ fieldset>legend {
 #huge-upload-button {
     background: var(--box-background);
     color: var(--box-foreground);
-    border: var(--box-border-width) dashed var(--box-border);
+    border: var(--upload-box-border);
     border-radius: 0;
 
     display: flex;
@@ -363,7 +363,8 @@ fieldset>legend {
     flex-direction: column;
     gap: calc(var(--pad) / 2);
     padding: var(--pad);
-    border: var(--box-border-width) solid var(--box-border);
+    border: var(--box-border);
+    box-shadow: var(--box-shadow);
 }
 
 .item .thumbnail {
@@ -441,13 +442,21 @@ fieldset>legend {
 
 /** BOX */
 .box {
-    border: var(--box-border-width) solid var(--box-border);
+    background: var(--box-background);
+    border: var(--box-border);
+    padding: var(--pad);
+    box-shadow: var(--box-shadow);
+}
+
+.box:has(>.tab):has(>.content) {
+    background: none;
+    padding: 0;
 }
 
 .box>.tab {
     background: var(--box-tab-background);
     color: var(--box-tab-foreground);
-    border-bottom: var(--box-border-width) solid var(--box-border);
+    border-bottom: var(--box-border);
     padding: var(--pad);
 }
 
@@ -482,10 +491,10 @@ main:has(> .error-page) {
 
 /** MESSAGES & HINTS */
 .message {
-    background: var(--box-background);
+    background: var(--box-tab-background);
     color: var(--box-foreground);
     padding: var(--pad);
-    border: var(--box-border-width) solid var(--box-border);
+    border: var(--box-border);
 }
 
 .hint:not(.iconless)::before {
@@ -534,7 +543,7 @@ body:has(> .file-preview) {
 
     background: var(--showcase-control-background);
     color: var(--showcase-control-foreground);
-    border-top: var(--box-border-width) solid var(--showcase-control-foreground);
+    border-top: 4px solid var(--showcase-control-foreground);
 
     padding: var(--pad);
     gap: var(--pad);
