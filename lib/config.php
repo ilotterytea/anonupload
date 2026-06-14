@@ -39,6 +39,20 @@ $cfg = [
     'memcached' => [
         'hosts' => null
     ],
+    'metadata' => [
+        'type' => 'local',
+
+        // local
+        'directory' => './userdata/metadata',
+
+        // sql
+        'driver' => "mysql",
+        'host' => "localhost",
+        'port' => 3306,
+        'name' => "anonupload",
+        'user' => "default",
+        'pass' => "default",
+    ],
     "driver" => [
         "ruffle" => false,
         "chart" => false
@@ -222,9 +236,6 @@ $cfg = [
         'directory' => './userdata/thumbnails',
         'prefix' => '/userdata/thumbnails'
     ],
-    "metadata" => [
-        "directory" => "{$_SERVER['DOCUMENT_ROOT']}/userdata/metadata"
-    ],
     "report" => [
         'mail' => null
     ],
@@ -280,8 +291,8 @@ if (file_exists(CONFIG_FILE_PATH)) {
     }
 }
 
-if ($cfg['storage']['type'] === 'sql' && !empty($cfg['storage']['host'])) {
-    $cfg['storage']['url'] = "{$cfg['storage']['driver']}:host={$cfg['storage']['host']};dbname={$cfg['storage']['name']};port={$cfg['storage']['port']}";
+if ($cfg['metadata']['type'] === 'sql' && !empty($cfg['metadata']['host'])) {
+    $cfg['metadata']['url'] = "{$cfg['metadata']['driver']}:host={$cfg['metadata']['host']};dbname={$cfg['metadata']['name']};port={$cfg['metadata']['port']}";
 }
 
 define("CONFIG", $cfg);

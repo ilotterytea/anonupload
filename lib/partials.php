@@ -116,6 +116,7 @@ function html_footer()
         <?php endif; ?>
         <li><a href="/history">history</a></li>
         <li><a href="/favorites">favorites</a></li>
+        <li><a href="/sync">sync</a></li>
         <li><a href="/uploaders">uploaders</a></li>
         <?php if (CONFIG['stats']['enabled']): ?>
             <li><a href="/stats">statistics</a></li>
