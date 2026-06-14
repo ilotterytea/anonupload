@@ -9,6 +9,14 @@
     --button-background-hover: #303030;
     --button-foreground: #fff;
 
+    /** INPUT */
+    --input-background: #fff;
+    --input-foreground: #000;
+    --input-foreground-placeholder: #777;
+    --input-border: 1px solid #6c6c6c;
+    --input-border-active: 1px solid #1e1e1e;
+
+    /** CODE */
     --code-background: #b8b8d6;
     --code-foreground: #201b37;
 
@@ -157,6 +165,24 @@ button:has(> img:only-child):hover,
     text-decoration: none;
 }
 
+/** INPUT */
+input[type="text"] {
+    background: var(--input-background);
+    color: var(--input-foreground);
+    border: var(--input-border);
+    padding: calc(var(--pad) / 2);
+    outline: none;
+}
+
+input[type="text"]:focus {
+    border: var(--input-border-active);
+}
+
+input[type="text"]::placeholder {
+    color: var(--input-foreground-placeholder);
+}
+
+/** TABLES */
 table.vertical th {
     text-align: right;
 }

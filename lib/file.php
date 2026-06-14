@@ -366,28 +366,42 @@ function convert_file(string $input_path, string $output_path)
 class FileMetadata
 {
     public string|null $content_type;
-    public string|null $password;
 }
 
 class BaseFile implements JsonSerializable
 {
     public string $id, $extension, $mime;
     public int $size;
+    public string|null $path = null;
+
+    public function jsonSerialize(): mixed
+    {
+        return [
+            'id' => $this->id,
+            'extension' => $this->extension,
+            'mime' => $this->mime,
+            'size' => $this->size
+        ];
+    }
+}
+
+class ExtendedFile extends BaseFile
+{
+    public string $alias_id;
+
     public DateTime|null $uploaded_at = null;
-    public string|null $password = null;
-    public string|null $url = null, $thumbnail_url = null;
-    public string|null $system_path = null;
+    public string|null $password = null, $url = null, $thumbnail_url = null;
 
     public function jsonSerialize(): mixed
     {
         $d = [
-            'id' => $this->id,
+            'id' => $this->alias_id,
             'extension' => $this->extension,
             'mime' => $this->mime,
             'size' => $this->size,
             'uploaded_at' => null,
             'urls' => [
-                'download_url' => CONFIG['instance']['url'] . "/{$this->id}.{$this->extension}",
+                'download_url' => CONFIG['instance']['url'] . "/{$this->alias_id}.{$this->extension}",
                 'thumbnail_url' => $this->thumbnail_url,
                 'raw_url' => $this->url,
                 'deletion_url' => null
@@ -395,7 +409,7 @@ class BaseFile implements JsonSerializable
         ];
 
         if ($this->password && password_get_info($this->password)['algo'] === null) {
-            $d['urls']['deletion_url'] = "/delete?id={$this->id}.{$this->extension}&key={$this->password}";
+            $d['urls']['deletion_url'] = "/delete?id={$this->alias_id}.{$this->extension}&key={$this->password}";
         }
 
         if ($this->uploaded_at !== null) {
@@ -403,6 +417,11 @@ class BaseFile implements JsonSerializable
         }
 
         return $d;
+    }
+
+    public function name(): string
+    {
+        return "{$this->alias_id}.{$this->extension}";
     }
 }
 

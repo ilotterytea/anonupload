@@ -3,7 +3,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/thumbnails.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/utils.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/metadata.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/registry.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);

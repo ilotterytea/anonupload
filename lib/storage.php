@@ -12,11 +12,8 @@ interface FileStorage
 {
     public function has_file(string $name): bool;
     public function get_file(string $name): BaseFile|null;
-    public function get_files(): array;
-    public function get_random_file(): BaseFile|null;
     public function save_file(string $name, string $input_path, FileMetadata|null $metadata): BaseFile|null;
     public function delete_file(string $name): bool;
-    public function get_stats(): array|null;
 }
 
 class LocalFileStorage implements FileStorage
@@ -41,45 +38,16 @@ class LocalFileStorage implements FileStorage
         }
 
         $splitname = new SplitFilename($name);
+        $path = "{$this->directory}/$name";
 
         $file = new BaseFile();
         $file->id = $splitname->name;
         $file->extension = $splitname->extension;
-        $file->system_path = "{$this->directory}/$name";
-        $file->size = filesize($file->system_path);
+        $file->path = "local://$path";
+        $file->size = filesize($path);
         $file->mime = CONFIG['upload']['acceptedmimetypes'][$file->extension];
-        $file->uploaded_at = (new DateTime())->setTimestamp(filemtime($file->system_path));
-        $file->password = null;
-        $file->url = "{$this->prefix}/{$file->id}.{$file->extension}";
-        $file->thumbnail_url = null;
 
         return $file;
-    }
-
-    public function get_files(): array
-    {
-        $iter = new DirectoryIterator($this->directory);
-        $count = 0;
-        $arr = [];
-
-        foreach ($iter as $file) {
-            if (!$file->isFile()) {
-                continue;
-            }
-            $count++;
-            array_push($arr, $file->getFilename());
-        }
-
-        return [
-            'count' => $count,
-            'filenames' => $arr
-        ];
-    }
-
-    public function get_random_file(): BaseFile|null
-    {
-        $files = $this->get_files();
-        return $this->get_file($files['filenames'][random_int(0, $files['count'] - 1)]);
     }
 
     public function save_file(string $name, string $input_path, FileMetadata|null $metadata = null): BaseFile|null
@@ -98,249 +66,6 @@ class LocalFileStorage implements FileStorage
     {
         $path = "{$this->directory}/$name";
         return is_file($path) && unlink($path);
-    }
-
-    public function get_stats(): array|null
-    {
-        $result = $this->get_files();
-        $serving_files = $result['count'];
-        if ($serving_files === 0) {
-            return null;
-        }
-
-        $active_content = 0;
-        $min_timestamp = PHP_INT_MAX;
-        $max_timestamp = 0;
-
-        foreach ($result['filenames'] as $path) {
-            $path = "{$this->directory}/$path";
-            $active_content += filesize($path);
-
-            $timestamp = filemtime($path);
-
-            $min_timestamp = min($min_timestamp, $timestamp);
-            $max_timestamp = max($max_timestamp, $timestamp);
-        }
-
-        $average_file_size = $active_content / $serving_files;
-        $duration = max(1, ($max_timestamp - $min_timestamp) / 60);
-
-        // calculating the count of future files
-        $serving_future_files = null;
-        if (CONFIG['stats']['disk_size'] > 0) {
-            $size = CONFIG['stats']['disk_size'];
-            $serving_future_files = floor($size / $average_file_size);
-        }
-
-        return [
-            'serving_files' => $serving_files,
-            'active_content' => $active_content,
-            'average_file_size' => $average_file_size,
-            'average_upload_rate' => $serving_files / $duration,
-            'serving_future_files' => $serving_future_files
-        ];
-    }
-}
-
-class SQLFileStorage extends LocalFileStorage
-{
-    private PDO $db;
-
-    public function __construct(string $local_directory, string $prefix, string $database_url, string $database_user, string $database_password)
-    {
-        parent::__construct($local_directory, $prefix);
-        $this->db = new PDO($database_url, $database_user, $database_password);
-    }
-
-    public function has_file(string $name): bool
-    {
-        $name = new SplitFilename($name);
-
-        $stmt = $this->db->prepare('SELECT id FROM files WHERE id = ? AND extension = ?');
-        $stmt->execute([$name->name, $name->extension]);
-
-        return $stmt->rowCount() > 0;
-    }
-
-    public function get_file(string $name): BaseFile|null
-    {
-        $name = new SplitFilename($name);
-
-        $stmt = $this->db->prepare('SELECT fm.*, f.*
-        FROM files f
-        LEFT JOIN file_metadata fm ON fm.id = f.id
-        WHERE f.id = ? AND f.extension = ?
-        ');
-        $stmt->execute([$name->name, $name->extension]);
-
-        $res = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-
-        if (!$res) {
-            return null;
-        }
-
-        $file = new BaseFile();
-        $file->id = $res['id'];
-        $file->extension = $res['extension'];
-        $file->mime = $res['mime'];
-        $file->size = $res['size'];
-        $file->password = $res['password'] ?? null;
-
-        if (isset($res['uploaded_at'])) {
-            $file->uploaded_at = new DateTime();
-
-            if (is_numeric($res['uploaded_at'])) {
-                $file->uploaded_at->setTimestamp(intval($res['uploaded_at']));
-            } elseif (isset($res['uploaded_at']['date'])) {
-                $file->uploaded_at->setTimestamp(strtotime($res['uploaded_at']['date']));
-            } else {
-                $file->uploaded_at->setTimestamp(strtotime($res['uploaded_at']));
-            }
-        } else {
-            $file->uploaded_at = null;
-        }
-
-        $file->url = "{$this->prefix}/{$file->id}.{$file->extension}";
-        $file->system_path = null;
-        $file->thumbnail_url = null;
-
-        return $file;
-    }
-
-    public function get_files(): array
-    {
-        $stmt = $this->db->query("SELECT CONCAT(f.id, '.', f.extension) AS file_name FROM files f ORDER BY uploaded_at ASC");
-        $stmt->execute();
-
-        $count = 0;
-        $arr = [];
-
-        while ($res = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $count++;
-            array_push($arr, $res['file_name']);
-        }
-
-        return [
-            'count' => $count,
-            'filenames' => $arr
-        ];
-    }
-
-    public function get_random_file(): BaseFile|null
-    {
-        $stmt = $this->db->query("SELECT CONCAT(f.id, '.', f.extension) AS file_name FROM files f ORDER BY rand() LIMIT 1");
-        $stmt->execute();
-
-        $res = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-
-        return $res ? $this->get_file($res['file_name']) : null;
-    }
-
-    public function save_file(string $name, string $input_path, FileMetadata|null $metadata = null): BaseFile|null
-    {
-        $base = parent::save_file($name, $input_path, $metadata);
-        if (!$base) {
-            return null;
-        }
-
-        if ($metadata?->password) {
-            $base->password = password_hash($metadata?->password, PASSWORD_DEFAULT);
-        }
-
-        $query = null;
-        $params = null;
-
-        if ($this->has_file($name)) {
-            $query = 'INSERT INTO files(id, mime, extension, `size`, `password`, uploaded_at) VALUES (?, ?, ?, ?, ?, ?)';
-            $params = [
-                $base->id,
-                $base->mime,
-                $base->extension,
-                $base->size,
-                $base->password,
-                $base->uploaded_at
-            ];
-        } else {
-            $query = 'UPDATE files SET `size` = ?, `uploaded_at` = ? WHERE id = ? AND extension = ?';
-            $params = [
-                $base->size,
-                $base->uploaded_at,
-                $base->id,
-                $base->extension
-            ];
-        }
-
-        $stmt = $this->db->prepare($query);
-        $stmt->execute($params);
-
-        return $this->get_file($name);
-    }
-
-    public function delete_file(string $name): bool
-    {
-        if (!parent::delete_file($name)) {
-            return false;
-        }
-
-        $name = new SplitFilename($name);
-
-        $this->db->prepare('DELETE FROM files WHERE id = ? AND extension = ?')
-            ->execute([$name->name, $name->extension]);
-
-        return true;
-    }
-
-    public function get_stats(): array|null
-    {
-        // -- basic info
-        $stmt = $this->db->query("SELECT COUNT(*) AS serving_files, SUM(size) AS active_content, AVG(size) AS average_file_size,
-                COUNT(*) / TIMESTAMPDIFF(MINUTE, MIN(uploaded_at), MAX(uploaded_at)) AS average_upload_rate
-                FROM files
-                WHERE id NOT IN (SELECT id FROM file_bans)
-            ");
-
-        $res = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$res) {
-            return null;
-        }
-
-        // calculating the count of future files
-        $serving_future_files = null;
-        if (CONFIG['stats']['disk_size'] > 0) {
-            $size = CONFIG['stats']['disk_size'];
-            $serving_future_files = floor($size / $res['average_file_size']);
-        }
-        $res['serving_future_files'] = $serving_future_files;
-
-
-        // -- timeline
-        $stmt = $this->db->query("SELECT YEAR(uploaded_at) AS year, QUARTER(uploaded_at) AS quarter, COUNT(*) AS file_count
-                FROM files
-                WHERE uploaded_at >= DATE_SUB(CURDATE(), INTERVAL 5 YEAR)
-                GROUP BY YEAR(uploaded_at), QUARTER(uploaded_at)
-                ORDER BY year, quarter
-            ");
-        $res['timeline'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // -- the most viewed files
-        $stmt = $this->db->query("SELECT id, extension, mime, `size` FROM files ORDER BY views DESC LIMIT 5");
-
-        $files = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $file = new BaseFile();
-            $file->id = $row['id'];
-            $file->extension = $row['extension'];
-            $file->mime = $row['mime'];
-            $file->size = $row['size'];
-            $file->url = "/{$file->id}.{$file->extension}";
-            if (THUMBNAILER !== null) {
-                $file->thumbnail_url = sprintf("%s/%s.%s", THUMBNAILER->get_thumbnail_root(), $file->id, THUMBNAILER->get_thumbnail_extension());
-            }
-            array_push($files, $file);
-        }
-        $res['most_viewed'] = $files;
-
-        return $res;
     }
 }
 
@@ -389,42 +114,9 @@ class S3FileStorage implements FileStorage
         $file->extension = $k[1];
         $file->mime = $result->get("ContentType");
         $file->size = $result->get("ContentLength");
-        $file->uploaded_at = new DateTime($result->get("LastModified"));
-        $file->url = "{$this->web_host}/$name";
-
-        if ($metadata = $result->get("Metadata")) {
-            $file->password = $metadata['Password'] ?? null;
-        }
+        $file->path = "s3://{$this->web_host}/$name";
 
         return $file;
-    }
-
-    public function get_files(): array
-    {
-        $result = $this->s3->listObjectsV2([
-            'Bucket' => $this->bucket
-        ]);
-
-        $arr = [
-            'count' => $result['KeyCount'],
-            'filenames' => []
-        ];
-
-        foreach ($result['Contents'] as $content) {
-            array_push($arr['filenames'], $content['Key']);
-        }
-
-        return $arr;
-    }
-
-    public function get_random_file(): BaseFile|null
-    {
-        $files = $this->get_files();
-        if ($files['count'] == 0) {
-            return null;
-        }
-
-        return $this->get_file($files['filenames'][random_int(0, $files['count'] - 1)]);
     }
 
     public function save_file(string $name, string $input_path, FileMetadata|null $metadata = null): BaseFile|null
@@ -439,12 +131,6 @@ class S3FileStorage implements FileStorage
             $m['Params']['ContentType'] = $metadata->content_type;
         }
 
-        if ($metadata?->password) {
-            $m['Params']['Metadata'] = [
-                'Password' => password_hash($metadata?->password, PASSWORD_DEFAULT)
-            ];
-        }
-
         $uploader = new MultipartUploader($this->s3, $input_path, $m);
 
         $result = $uploader->upload();
@@ -454,9 +140,6 @@ class S3FileStorage implements FileStorage
         if (!$file) {
             return null;
         }
-
-        $file->password = $metadata?->password;
-        $file->url = "{$this->web_host}/$key";
 
         return $file;
     }
@@ -474,60 +157,10 @@ class S3FileStorage implements FileStorage
 
         return true;
     }
-
-    public function get_stats(): array|null
-    {
-        $result = $this->s3->listObjectsV2([
-            'Bucket' => $this->bucket
-        ]);
-
-        $serving_files = $result['KeyCount'];
-        if ($serving_files === 0) {
-            return null;
-        }
-
-        $active_content = 0;
-        $min_timestamp = PHP_INT_MAX;
-        $max_timestamp = 0;
-
-        foreach ($result['Contents'] as $content) {
-            $active_content += $content['Size'];
-
-            $timestamp = $content['LastModified']->getTimestamp();
-
-            $min_timestamp = min($min_timestamp, $timestamp);
-            $max_timestamp = max($max_timestamp, $timestamp);
-        }
-
-        $average_file_size = $active_content / $serving_files;
-        $duration = max(1, ($max_timestamp - $min_timestamp) / 60);
-
-        // calculating the count of future files
-        $serving_future_files = null;
-        if (CONFIG['stats']['disk_size'] > 0) {
-            $size = CONFIG['stats']['disk_size'];
-            $serving_future_files = floor($size / $average_file_size);
-        }
-
-        return [
-            'serving_files' => $serving_files,
-            'active_content' => $active_content,
-            'average_file_size' => $average_file_size,
-            'average_upload_rate' => $serving_files / $duration,
-            'serving_future_files' => $serving_future_files
-        ];
-    }
 }
 
 define('FILESTORAGE', match (CONFIG['storage']['type']) {
     'local' => new LocalFileStorage(CONFIG['storage']['directory'], CONFIG['storage']['prefix']),
-    'sql' => new SQLFileStorage(
-        CONFIG['storage']['directory'],
-        CONFIG['storage']['prefix'],
-        CONFIG['storage']['url'],
-        CONFIG['storage']['user'],
-        CONFIG['storage']['pass'],
-    ),
     's3' => new S3FileStorage(CONFIG['storage']),
     default => null
 });
