@@ -165,11 +165,11 @@ $single_attachment = $post->single_attachment();
         };
 
         if (files.length === 1) {
-            const firstFile = files[0];
+            const firstFile = files[0].querySelector(".file-preview");
             file.mime = firstFile.getAttribute("file-mime");
             file.size = firstFile.getAttribute("file-size");
             file.extension = firstFile.getAttribute("file-ext");
-            file.urls.thumbnail_url = firstFile.getAttribute("file-thumb-url") ?? null;
+            file.urls.thumbnail_url = firstFile.getAttribute("file-thumb-url");
         } else {
             file.count = files.length;
         }

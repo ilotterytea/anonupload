@@ -144,7 +144,7 @@ function createFile(file) {
         favoriteButton.innerHTML = '<img src="/static/img/icons/star.png" alt="unfavorite" title="unfavorite this file" />';
         favoriteButton.addEventListener("click", () => {
             removeFavoriteFile(file);
-            base.remove();
+            root.remove();
         });
         buttons.append(favoriteButton);
     }
@@ -160,12 +160,8 @@ function createFile(file) {
     return root;
 }
 
-function createFileUploadProgress(form) {
-    let file = null;
-    const count = form.getAll("file[]").length;
-    if (count === 1) {
-        file = form.get("file[]");
-    }
+function createFileUploadProgress(files) {
+    let file = files.length === 1 ? files[0] : null;
 
     const fileElement = document.createElement("tr");
     fileElement.setAttribute("status", "progress");
@@ -177,7 +173,7 @@ function createFileUploadProgress(form) {
     fileIconColumn.append(fileIconElement);
 
     // setting icon according to file type (not thumbnail)
-    if (file) {
+    if (file && file.type) {
         if (file.type.startsWith("image/")) {
             fileIconElement.src = '/static/img/icons/file_image.png';
             fileIconElement.alt = '[I]';
@@ -221,7 +217,7 @@ function createFileUploadProgress(form) {
             fileNameElement.textContent = file.name;
         }
     } else {
-        fileNameElement.textContent = `${count} files...`;
+        fileNameElement.textContent = `${files.length} files`;
     }
     fileInfo.append(fileNameElement);
 
@@ -291,7 +287,7 @@ function createFileUploadProgress(form) {
 }
 
 function uploadData(form) {
-    const file = createFileUploadProgress(form);
+    let file = createFileUploadProgress(form.getAll("file[]"));
     file.setStatus('waiting...', 'queue');
     file.setProgress(100);
 
@@ -346,36 +342,57 @@ function uploadData(form) {
         }
 
         const j = JSON.parse(xhr.responseText);
-        const d = j.data;
+        let d = j.data;
         if (j.status_code !== 201) {
             file.setStatus(j.message ?? d.error ?? `received ${j.status_code} code`, 'error');
             return;
         }
 
-        file.name.textContent = `${d.id}`;
-        file.setStatus(null, 'success');
+        d = Array.isArray(d) ? d : [d];
 
-        if (d.urls) {
-            if (d.urls.download_url) {
-                file.buttons.open.style.display = 'inline';
-                file.buttons.open.addEventListener("click", () => window.open(d.urls.download_url, '_blank'));
-                if (navigator.clipboard) {
-                    file.buttons.copy.style.display = 'inline';
-                    file.buttons.copy.addEventListener("click", () => navigator.clipboard.writeText(d.urls.download_url));
+        const parent = file.root.parentElement;
+        file.root.remove();
+
+        for (const f of d) {
+            f.name = `${f.id}`;
+            f.type = null;
+
+            if (f.attachments && f.attachments.length === 1) {
+                const a = f.attachments[0];
+                f.type = a.mime;
+                f.name += `.${a.extension}`;
+                if (a.urls && a.urls.thumbnail_url) {
+                    f.urls.thumbnail_url = a.urls.thumbnail_url;
                 }
             }
 
-            if (d.urls.deletion_url) {
-                file.buttons.delete.style.display = 'inline';
-                file.buttons.delete.addEventListener('click', () => {
-                    file.buttons.delete.style.display = 'none';
-                    file.setStatus('deleting...', 'delete_wait');
-                    deleteUploadedFile(d.id, file);
-                });
-            }
-        }
+            file = createFileUploadProgress([f]);
+            file.setProgress(100);
+            file.setStatus(null, 'success');
 
-        saveUploadedFile(d);
+            if (f.urls) {
+                if (f.urls.download_url) {
+                    file.buttons.open.style.display = 'inline';
+                    file.buttons.open.addEventListener("click", () => window.open(f.urls.download_url, '_blank'));
+                    if (navigator.clipboard) {
+                        file.buttons.copy.style.display = 'inline';
+                        file.buttons.copy.addEventListener("click", () => navigator.clipboard.writeText(f.urls.download_url));
+                    }
+                }
+
+                if (f.urls.deletion_url) {
+                    file.buttons.delete.style.display = 'inline';
+                    file.buttons.delete.addEventListener('click', () => {
+                        file.buttons.delete.style.display = 'none';
+                        file.setStatus('deleting...', 'delete_wait');
+                        deleteUploadedFile(f.id, file);
+                    });
+                }
+            }
+
+            parent.prepend(file.root);
+            saveUploadedFile(f);
+        }
     });
 
     xhr.addEventListener("error", () => {
