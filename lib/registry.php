@@ -233,12 +233,13 @@ class SQLFileRegistry implements FileRegistry
             ->execute([$file->id]);
 
         $similar_posts = $this->get_posts_by_hash($file->hash);
-        if (
-            $similar_posts['count'] == 0 &&
-            defined("FILESTORAGE") &&
-            !FILESTORAGE->delete_file("{$file->name}.{$file->extension}")
-        ) {
-            return false;
+        if ($similar_posts['count'] == 0 && defined("FILESTORAGE")) {
+            if (!FILESTORAGE->delete_file("{$file->name}.{$file->extension}")) {
+                return false;
+            }
+
+            $this->db->prepare('DELETE FROM files WHERE id = ?')
+                ->execute([$file->name]);
         }
 
         return true;
