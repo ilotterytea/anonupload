@@ -198,6 +198,7 @@ $cfg = [
             'mov' => 'mp4',
             'mkv' => 'mp4'
         ],
+        'max_files_per_request' => 5,
         "verifymimetype" => true,
         "stripexif" => true,
         "idcharacters" => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_",

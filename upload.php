@@ -105,6 +105,10 @@ try {
         throw new HTTPException("No file to upload");
     }
 
+    if (count($files) > CONFIG['upload']['max_files_per_request']) {
+        throw new HTTPException("Exceeded file upload limit", 413);
+    }
+
     $single_url = boolval($_POST['single_url'] ?? '0');
     $strip_exif = boolval($_POST['strip_exif'] ?? '0');
     $password = $_POST['password'] ?? null;
