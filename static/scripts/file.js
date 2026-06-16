@@ -143,7 +143,13 @@ function createFile(file) {
     return root;
 }
 
-function createFileUploadProgress(file) {
+function createFileUploadProgress(form) {
+    let file = null;
+    const count = form.getAll("file[]").length;
+    if (count === 1) {
+        file = form.get("file[]");
+    }
+
     const fileElement = document.createElement("tr");
     fileElement.setAttribute("status", "progress");
 
@@ -154,30 +160,36 @@ function createFileUploadProgress(file) {
     fileIconColumn.append(fileIconElement);
 
     // setting icon according to file type (not thumbnail)
-    if (file.type.startsWith("image/")) {
-        fileIconElement.src = '/static/img/icons/file_image.png';
-        fileIconElement.alt = '[I]';
-        fileIconElement.title = 'image file';
-    } else if (file.type.startsWith("video/")) {
-        fileIconElement.src = '/static/img/icons/file_video.png';
-        fileIconElement.alt = '[V]';
-        fileIconElement.title = 'video file';
-    } else if (file.type.startsWith("audio/")) {
-        fileIconElement.src = '/static/img/icons/file_audio.png';
-        fileIconElement.alt = '[A]';
-        fileIconElement.title = 'audio file';
-    } else if (file.type.startsWith("text/")) {
-        fileIconElement.src = '/static/img/icons/file_text.png';
-        fileIconElement.alt = '[T]';
-        fileIconElement.title = 'text file';
-    } else if (file.type === "application/x-shockwave-flash") {
-        fileIconElement.src = '/static/img/icons/file_flash.png';
-        fileIconElement.alt = '[S]';
-        fileIconElement.title = 'flash file';
+    if (file) {
+        if (file.type.startsWith("image/")) {
+            fileIconElement.src = '/static/img/icons/file_image.png';
+            fileIconElement.alt = '[I]';
+            fileIconElement.title = 'image file';
+        } else if (file.type.startsWith("video/")) {
+            fileIconElement.src = '/static/img/icons/file_video.png';
+            fileIconElement.alt = '[V]';
+            fileIconElement.title = 'video file';
+        } else if (file.type.startsWith("audio/")) {
+            fileIconElement.src = '/static/img/icons/file_audio.png';
+            fileIconElement.alt = '[A]';
+            fileIconElement.title = 'audio file';
+        } else if (file.type.startsWith("text/")) {
+            fileIconElement.src = '/static/img/icons/file_text.png';
+            fileIconElement.alt = '[T]';
+            fileIconElement.title = 'text file';
+        } else if (file.type === "application/x-shockwave-flash") {
+            fileIconElement.src = '/static/img/icons/file_flash.png';
+            fileIconElement.alt = '[S]';
+            fileIconElement.title = 'flash file';
+        } else {
+            fileIconElement.src = '/static/img/icons/file.png';
+            fileIconElement.alt = '[F]';
+            fileIconElement.title = 'file';
+        }
     } else {
-        fileIconElement.src = '/static/img/icons/file.png';
-        fileIconElement.alt = '[F]';
-        fileIconElement.title = 'file';
+        fileIconElement.src = '/static/img/icons/file_multi.png';
+        fileIconElement.alt = '[M]';
+        fileIconElement.title = 'multi-file';
     }
 
     const fileInfo = document.createElement("td");
@@ -185,10 +197,14 @@ function createFileUploadProgress(file) {
 
     const fileNameElement = document.createElement("p");
     fileNameElement.classList.add("file-name");
-    if (file.name.length > 16) {
-        fileNameElement.textContent = file.name.substring(0, 13) + '...';
+    if (file) {
+        if (file.name.length > 16) {
+            fileNameElement.textContent = file.name.substring(0, 13) + '...';
+        } else {
+            fileNameElement.textContent = file.name;
+        }
     } else {
-        fileNameElement.textContent = file.name;
+        fileNameElement.textContent = `${count} files...`;
     }
     fileInfo.append(fileNameElement);
 
@@ -257,8 +273,8 @@ function createFileUploadProgress(file) {
     return f;
 }
 
-function uploadData(data, form = null) {
-    const file = createFileUploadProgress(data);
+function uploadData(form) {
+    const file = createFileUploadProgress(form);
     file.setStatus('waiting...', 'queue');
     file.setProgress(100);
 
@@ -292,7 +308,6 @@ function uploadData(data, form = null) {
             const percent = Math.round((e.loaded / e.total) * 100);
             file.setProgress(percent);
 
-
             if (percent < 100) {
                 file.setStatus(`uploading... (${percent}%)`, 'cl_progress');
             } else {
@@ -320,7 +335,7 @@ function uploadData(data, form = null) {
             return;
         }
 
-        file.name.textContent = `${d.id}.${d.extension}`;
+        file.name.textContent = `${d.id}`;
         file.setStatus(null, 'success');
 
         if (d.urls) {
@@ -350,7 +365,7 @@ function uploadData(data, form = null) {
         file.status.setStatus('upload error', 'error');
     });
 
-    xhr.send(form ?? data);
+    xhr.send(form);
 
     // abort button
     abortButton.addEventListener("click", () => {
@@ -361,7 +376,7 @@ function uploadData(data, form = null) {
 
     const abortButtonImg = document.createElement('img');
     abortButtonImg.alt = 'abort';
-    abortButtonImg.title = 'abort file';
+    abortButtonImg.title = 'abort upload';
     abortButtonImg.src = '/static/img/icons/cross.png';
     abortButton.appendChild(abortButtonImg);
 

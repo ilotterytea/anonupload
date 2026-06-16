@@ -240,6 +240,7 @@ fieldset>legend {
     border-radius: 0;
 
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 32px;
@@ -555,6 +556,10 @@ p.error {
     border: var(--box-border);
 }
 
+.hint {
+    font-size: 0.8em !important;
+}
+
 .hint:not(.iconless)::before {
     position: relative;
     left: 0;
@@ -569,33 +574,62 @@ p.error {
 }
 
 /** FILES */
-body:has(> .file-preview) {
+body:has(> .post-preview) {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     background: var(--showcase-background);
 }
 
-.file-preview {
+.post-preview {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 }
 
-.file-preview .preview {
+.feed {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    gap: var(--pad);
+
+    scroll-snap-type: x mandatory;
+}
+
+.feed>.preview {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    flex-grow: 1;
 }
 
-.file-preview .preview>* {
+.file-preview {
+    display: flex;
+    flex-direction: column;
+}
+
+.file-preview>.file-contents>* {
     max-width: 80vw;
     max-height: 80vh;
 }
 
-.file-preview>.control-panel {
+.file-preview>.file-metadata {
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    font-size: 0.8em;
+    flex-wrap: 1;
+    color: var(--showcase-control-foreground);
+    gap: var(--pad);
+}
+
+.post-preview>.control-panel {
     display: flex;
     flex-direction: row;
 
@@ -708,27 +742,27 @@ body:has(> .file-preview) {
 
 @keyframes shaking {
     0% {
-        transform: translate(0px, 0px);
+        transform: translate(0px, 0px) rotateZ(0deg) scale(1);
     }
 
     20% {
-        transform: translate(1px, 0px);
+        transform: translate(1px, 0px) rotateZ(1deg) scale(1.05);
     }
 
     40% {
-        transform: translate(1px, -3px);
+        transform: translate(1px, -3px) rotateZ(-3deg) scale(1.1);
     }
 
     60% {
-        transform: translate(3px, -1px);
+        transform: translate(3px, -1px) rotateZ(0deg) scale(1.05);
     }
 
     80% {
-        transform: translate(2px, -2px);
+        transform: translate(2px, -2px) rotateZ(2deg) scale(0.8);
     }
 
     100% {
-        transform: translate(0px, 0px);
+        transform: translate(0px, 0px) rotateZ(0deg) scale(1);
     }
 }
 
@@ -740,5 +774,18 @@ body:has(> .file-preview) {
 
     #form-upload .options {
         flex-direction: column;
+    }
+
+    .feed {
+        flex-direction: column;
+
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        scroll-snap-type: y mandatory;
+    }
+
+    .feed>.preview {
+        min-height: 100%;
     }
 }

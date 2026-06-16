@@ -204,9 +204,9 @@ function html_debug_info()
     <?php ;
 }
 
-function html_file_brick(ExtendedFile $file)
+function html_file_brick(BaseFile $file)
 {
-    $name = "{$file->id}.{$file->extension}";
+    $name = "{$file->name}.{$file->extension}";
 
     echo '' ?>
     <div class="brick<?= isset($file->color) ? " {$file->color}" : '' ?>">
@@ -233,6 +233,11 @@ function html_file_full(BaseFile $file)
 {
     $loop = isset($_COOKIE['noloop']) ? '' : 'loop';
     $autoplay = isset($_COOKIE['noautoplay']) ? '' : 'autoplay';
+
+    echo '<div class="file-preview">';
+
+    // -- contents
+    echo '<div class="file-contents">';
 
     if (str_starts_with($file->mime, 'image/')) {
         echo "<img src='{$file->raw_url()}' alt='Image file.'>";
@@ -270,4 +275,14 @@ function html_file_full(BaseFile $file)
     } else {
         echo '<p><i>This file cannot be displayed.</i></p>';
     }
+
+    echo '</div>';
+
+    // -- metadata
+    echo '<div class="file-metadata">';
+    echo '<p class="file-size">' . format_filesize($file->size) . '</p>';
+    echo "<p class='file-mime'>{$file->mime} (<span class='file-extension'>{$file->extension}</span>)</p>";
+    echo '</div>';
+
+    echo '</div>';
 }

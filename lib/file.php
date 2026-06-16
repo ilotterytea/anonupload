@@ -348,83 +348,65 @@ class BaseFile implements JsonSerializable
             'extension' => $this->extension,
             'mime' => $this->mime,
             'size' => $this->size,
-            'hash' => $this->hash
+            'hash' => $this->hash,
+            'urls' => [
+                'download_url' => $this->raw_url(),
+                'thumbnail_url' => $this->thumbnail_url()
+            ]
         ];
     }
 }
 
-class ExtendedFile extends BaseFile
+class Post implements JsonSerializable
 {
     public string $id;
+    public array $attachments = [];
 
     public DateTime|null $uploaded_at = null;
     public string|null $password = null;
 
-    public static function from_base_file(BaseFile $file): ExtendedFile
+    public static function from_array(array $res): Post
     {
-        $f = new ExtendedFile();
-        $f->name = $file->name;
-        $f->extension = $file->extension;
-        $f->mime = $file->mime;
-        $f->size = $file->size;
-        $f->path = $file->path;
-        $f->hash = $file->hash;
-        return $f;
-    }
-
-    public static function from_array(array $res): ExtendedFile
-    {
-        $file = new ExtendedFile();
-        $file->name = $res['file_id'];
-        $file->id = $res['id'];
-        $file->hash = $res['hash'];
-        $file->extension = $res['extension'];
-        $file->mime = $res['mime'];
-        $file->size = $res['size'];
-        $file->password = $res['password'] ?? null;
+        $o = new Post();
+        $o->id = $res['id'];
+        $o->password = $res['password'] ?? null;
 
         if (isset($res['uploaded_at'])) {
-            $file->uploaded_at = new DateTime();
+            $o->uploaded_at = new DateTime();
 
             if (is_numeric($res['uploaded_at'])) {
-                $file->uploaded_at->setTimestamp(intval($res['uploaded_at']));
+                $o->uploaded_at->setTimestamp(intval($res['uploaded_at']));
             } elseif (isset($res['uploaded_at']['date'])) {
-                $file->uploaded_at->setTimestamp(strtotime($res['uploaded_at']['date']));
+                $o->uploaded_at->setTimestamp(strtotime($res['uploaded_at']['date']));
             } else {
-                $file->uploaded_at->setTimestamp(strtotime($res['uploaded_at']));
+                $o->uploaded_at->setTimestamp(strtotime($res['uploaded_at']));
             }
         } else {
-            $file->uploaded_at = null;
+            $o->uploaded_at = null;
         }
 
-        return $file;
+        return $o;
     }
 
     public function url(): string
     {
-        return CONFIG['instance']['url'] . "/{$this->id}.{$this->extension}";
+        return CONFIG['instance']['url'] . "/{$this->id}";
     }
 
     public function jsonSerialize(): mixed
     {
         $d = [
             'id' => $this->id,
-            'system_id' => $this->name,
-            'hash' => $this->hash,
-            'extension' => $this->extension,
-            'mime' => $this->mime,
-            'size' => $this->size,
             'uploaded_at' => null,
             'urls' => [
                 'download_url' => $this->url(),
-                'thumbnail_url' => $this->thumbnail_url(),
-                'raw_url' => $this->raw_url(),
                 'deletion_url' => null
-            ]
+            ],
+            'attachments' => $this->attachments
         ];
 
         if ($this->password && password_get_info($this->password)['algo'] === null) {
-            $d['urls']['deletion_url'] = "/delete?id={$this->id}.{$this->extension}&key={$this->password}";
+            $d['urls']['deletion_url'] = "/delete?id={$this->id}&key={$this->password}";
         }
 
         if ($this->uploaded_at !== null) {
@@ -436,7 +418,12 @@ class ExtendedFile extends BaseFile
 
     public function name(): string
     {
-        return "{$this->id}.{$this->extension}";
+        return $this->id;
+    }
+
+    public function single_attachment(): BaseFile|null
+    {
+        return count($this->attachments) === 1 ? $this->attachments[0] : null;
     }
 }
 

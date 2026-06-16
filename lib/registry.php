@@ -6,15 +6,18 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/id.php";
 interface FileRegistry
 {
     public function get_files(): array;
+
     public function get_posts_by_hash(string $hash): array;
 
-    public function get_file_by_hash(string $hash): BaseFile|null;
-    public function get_file_by_post_id(string $post_id): ExtendedFile|null;
-    public function get_file(string $name): ExtendedFile|null;
+    public function has_post(string $id): bool;
+    public function get_post(string $id): Post|null;
+    public function put_post(Post $post): bool;
+    public function delete_post(Post $file): bool;
+    public function attach_to_post(Post &$post, BaseFile $file): bool;
+    public function get_random_post(): Post|null;
 
-    public function get_random_file(): ExtendedFile|null;
-    public function put_file(ExtendedFile $file): ExtendedFile|null;
-    public function delete_post(ExtendedFile $file): bool;
+    public function get_file_by_hash(string $hash): BaseFile|null;
+
     public function get_stats(): array|null;
 
     public function has_storage_data(string $id): bool;
@@ -33,42 +36,41 @@ class SQLFileRegistry implements FileRegistry
         $this->db->exec($sql);
     }
 
-    public function get_file_by_post_id(string $post_id): ExtendedFile|null
+    public function has_post(string $id): bool
     {
-        $name = new SplitFilename($post_id);
-
-        $stmt = $this->db->prepare('SELECT
-        f.id AS file_id, f.mime, f.extension, f.size, f.hash,
-        fm.*, p.*
-        FROM posts p
-        JOIN post_attachments pa ON pa.post_id = p.id
-        JOIN files f ON f.id = pa.file_id
-        LEFT JOIN file_metadata fm ON fm.id = f.id
-        WHERE p.id = ? AND f.extension = ?
-        ');
-        $stmt->execute([$name->name, $name->extension]);
-
-        $res = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-        return $res ? ExtendedFile::from_array($res) : null;
+        $stmt = $this->db->prepare('SELECT 1 FROM posts WHERE id = ?');
+        $stmt->execute([$id]);
+        return $stmt->rowCount() > 0;
     }
 
-    public function get_file(string $name): ExtendedFile|null
+    public function get_post(string $id): Post|null
     {
-        $name = new SplitFilename($name);
+        $name = new SplitFilename($id);
 
-        $stmt = $this->db->prepare('SELECT
-        f.id AS file_id, f.mime, f.extension, f.size, f.hash,
-        fm.*, p.*
-        FROM posts p
-        JOIN post_attachments pa ON pa.post_id = p.id
-        JOIN files f ON f.id = pa.file_id
-        LEFT JOIN file_metadata fm ON fm.id = f.id
-        WHERE p.id = ? AND f.extension = ?
-        ');
-        $stmt->execute([$name->name, $name->extension]);
+        $stmt = $this->db->prepare('SELECT * FROM posts WHERE id = ?');
+        $stmt->execute([$name->name]);
 
-        $res = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-        return $res ? ExtendedFile::from_array($res) : null;
+        if ($res = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $post = Post::from_array($res);
+
+            // fetching attachments
+            $stmt = $this->db->prepare('SELECT
+                fm.*, f.*
+            FROM files f
+            JOIN post_attachments pa ON pa.post_id = ?
+            LEFT JOIN file_metadata fm ON fm.id = f.id
+            WHERE f.id = pa.file_id
+            ');
+            $stmt->execute([$post->id]);
+
+            while ($res = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                array_push($post->attachments, BaseFile::from_array($res));
+            }
+
+            return $post;
+        }
+
+        return null;
     }
 
     public function get_file_by_hash(string $hash): BaseFile|null
@@ -80,20 +82,14 @@ class SQLFileRegistry implements FileRegistry
         return $res ? BaseFile::from_array($res) : null;
     }
 
-    public function get_random_file(): ExtendedFile|null
+    public function get_random_post(): Post|null
     {
-        $stmt = $this->db->query("SELECT
-            CONCAT(p.id, '.', f.extension) AS post_name
-        FROM posts p
-        JOIN post_attachments pa ON pa.post_id = p.id
-        JOIN files f ON f.id = pa.file_id
-        ORDER BY rand()
-        LIMIT 1");
+        $stmt = $this->db->query("SELECT id FROM posts ORDER BY rand() LIMIT 1");
         $stmt->execute();
 
         $res = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
-        return $res ? $this->get_file($res['post_name']) : null;
+        return $res ? $this->get_post($res['id']) : null;
     }
 
     public function get_files(): array
@@ -139,17 +135,32 @@ class SQLFileRegistry implements FileRegistry
         ];
     }
 
-    public function put_file(ExtendedFile $file): ExtendedFile|null
+    public function put_post(Post $post): bool
     {
-        if ($file?->password) {
-            $file->password = password_hash($file?->password, PASSWORD_DEFAULT);
+        if ($post->password) {
+            $post->password = password_hash($post->password, PASSWORD_DEFAULT);
         }
 
-        // saving file data
+        // saving post data
         $stmt = $this->db->prepare("INSERT IGNORE INTO
-            files(id, mime, extension, size, hash)
-            VALUES(:id, :mime, :ext, :size, :hash)
+            posts(id, uploaded_at, password)
+            VALUES(:id, :uat, :password)
         ");
+        $stmt->execute([
+            ':id' => $post->id,
+            ':uat' => $post->uploaded_at->format('Y-m-d H:i:s'),
+            ':password' => $post->password
+        ]);
+
+        return true;
+    }
+
+    public function attach_to_post(Post &$post, BaseFile $file): bool
+    {
+        $stmt = $this->db->prepare("INSERT IGNORE INTO
+                files(id, mime, extension, size, hash)
+                VALUES(:id, :mime, :ext, :size, :hash)
+            ");
         $stmt->execute([
             ':id' => $file->name,
             ':mime' => $file->mime,
@@ -158,28 +169,18 @@ class SQLFileRegistry implements FileRegistry
             ':hash' => $file->hash
         ]);
 
-        // saving post data
         $stmt = $this->db->prepare("INSERT INTO
-            posts(id, uploaded_at, password)
-            VALUES(:id, :uat, :password)
-        ");
+                post_attachments(post_id, file_id)
+                VALUES(:pid, :fid)
+            ");
         $stmt->execute([
-            ':id' => $file->id,
-            ':uat' => $file->uploaded_at->format('Y-m-d H:i:s'),
-            ':password' => $file->password
-        ]);
-
-        // linking file to the post
-        $stmt = $this->db->prepare("INSERT INTO
-            post_attachments(post_id, file_id)
-            VALUES(:pid, :fid)
-        ");
-        $stmt->execute([
-            ':pid' => $file->id,
+            ':pid' => $post->id,
             ':fid' => $file->name
         ]);
 
-        return $this->get_file_by_post_id($file->name());
+        array_push($post->attachments, $file);
+
+        return true;
     }
 
     public function get_stats(): array|null
@@ -212,34 +213,34 @@ class SQLFileRegistry implements FileRegistry
         $res['timeline'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // -- the most viewed files
-        $stmt = $this->db->query("SELECT f.id AS file_id, p.id, f.extension, f.mime, f.size, f.hash
+        $stmt = $this->db->query("SELECT p.id
         FROM posts p
-        JOIN post_attachments pa ON pa.post_id = p.id
-        JOIN files f ON f.id = pa.file_id
         ORDER BY views DESC LIMIT 5");
 
         $files = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            array_push($files, ExtendedFile::from_array($row));
+            array_push($files, Post::from_array($row));
         }
         $res['most_viewed'] = $files;
 
         return $res;
     }
 
-    public function delete_post(ExtendedFile $file): bool
+    public function delete_post(Post $post): bool
     {
         $this->db->prepare('DELETE FROM posts WHERE id = ?')
-            ->execute([$file->id]);
+            ->execute([$post->id]);
 
-        $similar_posts = $this->get_posts_by_hash($file->hash);
-        if ($similar_posts['count'] == 0 && defined("FILESTORAGE")) {
-            if (!FILESTORAGE->delete_file("{$file->name}.{$file->extension}")) {
-                return false;
+        foreach ($post->attachments as $file) {
+            $similar_posts = $this->get_posts_by_hash($file->hash);
+            if ($similar_posts['count'] == 0 && defined("FILESTORAGE")) {
+                if (!FILESTORAGE->delete_file("{$file->name}.{$file->extension}")) {
+                    return false;
+                }
+
+                $this->db->prepare('DELETE FROM files WHERE id = ?')
+                    ->execute([$file->name]);
             }
-
-            $this->db->prepare('DELETE FROM files WHERE id = ?')
-                ->execute([$file->name]);
         }
 
         return true;

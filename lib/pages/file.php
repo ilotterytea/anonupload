@@ -4,22 +4,27 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/partials.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/utils.php';
 
 if (IS_JSON_REQUEST) {
-    send_json_response($file);
+    send_json_response($post);
 }
 
-$file_name = "{$file->id}.{$file->extension}";
+$single_attachment = $post->single_attachment();
+
 ?>
 <!DOCTYPE html>
 <html>
 
 <head>
-    <?php html_head($file_name); ?>
+    <?php html_head($post->id); ?>
 </head>
 
 <body>
-    <section class="file-preview">
-        <section class="preview">
-            <?php html_file_full($file); ?>
+    <section class="post-preview">
+        <section class="feed">
+            <?php foreach ($post->attachments as $file): ?>
+                <div class="preview">
+                    <?php html_file_full($file); ?>
+                </div>
+            <?php endforeach; ?>
         </section>
 
         <section class="disclaimer">
@@ -35,16 +40,22 @@ $file_name = "{$file->id}.{$file->extension}";
                 <?= html_mini_icon(); ?>
             </div>
             <div class="metadata">
-                <p>
-                    <span id="file-id"><?= $file->id ?></span>.<span id="file-extension"><?= $file->extension ?></span>
-                    (<span id="file-mime"><?= $file->mime ?></span>)
+                <?php if ($single_attachment): ?>
+                    <p>
+                        <span id="post-id"><?= $post->id ?></span>.<span
+                            id="file-extension"><?= $single_attachment->extension ?></span>
+                        (<span id="file-mime"><?= $single_attachment->mime ?></span>)
+                    </p>
+                <?php else: ?>
+                    <p>
+                        <span id="post-id"><?= $post->id ?></span>
+                        (multiple attachments)
+                    </p>
+                <?php endif; ?>
+                <p id="post-timestamp" timestamp="<?= $post->uploaded_at->getTimestamp() ?>">uploaded
+                    <?= format_timestamp($post->uploaded_at) ?> ago
                 </p>
-                <p id="file-timestamp" timestamp="<?= $file->uploaded_at->getTimestamp() ?>">uploaded
-                    <?= format_timestamp($file->uploaded_at) ?> ago
-                </p>
-                <p style="display:none" id="file-size"><?= $file->size ?></p>
-                <p style="display:none" id="file-raw-url"><?= $file->raw_url() ?></p>
-                <p style="display:none" id="file-url"><?= $file->url() ?></p>
+                <p style="display:none" id="post-url"><?= $post->url() ?></p>
             </div>
             <div class="control-buttons" id="control-buttons">
                 <?php if (isset($_GET['random'])): ?>
@@ -52,12 +63,12 @@ $file_name = "{$file->id}.{$file->extension}";
                         <img src="/static/img/icons/reroll.png" alt="re-roll" title="re-roll" />
                     </a>
                 <?php endif; ?>
-                <a href="<?= $file->raw_url() ?>" download="<?= $file_name ?>" class="button">
+                <!-- <a href="<?= $file->raw_url() ?>" download="<?= $file_name ?>" class="button">
                     <img src="/static/img/icons/download.png" alt="download" title="download file" />
                 </a>
                 <a href="<?= $file->raw_url() ?>" class="button" target="_blank">
                     <img src="/static/img/icons/fullsize.png" alt="full size" title="open in full size" />
-                </a>
+                </a> -->
                 <?php if (CONFIG['report']['mail']): ?>
                     <a href="<?= sprintf('mailto:%s?subject=%s', CONFIG['report']['mail'], rawurlencode("File Report - $file_name")) ?>"
                         class="button">
@@ -167,7 +178,7 @@ $file_name = "{$file->id}.{$file->extension}";
     }
 
     window.addEventListener("load", () => {
-        const timestampElement = document.getElementById("file-timestamp");
+        const timestampElement = document.getElementById("post-timestamp");
         if (!timestampElement) return;
 
         const timestamp = timestampElement.getAttribute("timestamp");

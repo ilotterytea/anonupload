@@ -44,6 +44,11 @@ unset($_SESSION['recently_uploaded_files']);
                             <td><input type="text" name="password" id="file-password"
                                     placeholder="leave empty for permanent file"></td>
                         </tr>
+                        <tr>
+                            <th><label for="file-singleurl">single URL<sup class="hint iconless"
+                                        title="attach all files to a single link">[?]</sup>:</label></th>
+                            <td><input type="checkbox" name="single_url" id="file-singleurl" value="1"></td>
+                        </tr>
                     </table>
                 </fieldset>
                 <fieldset>
@@ -192,10 +197,17 @@ unset($_SESSION['recently_uploaded_files']);
         // -- file upload via fetch
         form.addEventListener("submit", (ev) => {
             ev.preventDefault();
+            const cf = cachedFiles;
 
+            if (cf.length === 0) {
+                return;
+            }
+
+            const f = new FormData(form);
+            f.delete("file[]");
             for (const file of cachedFiles) {
-                const f = new FormData(form);
-                f.set("file[]", file);
+                f.append("file[]", file);
+            }
 
                 fetch('/track?create', {
                     headers: {
@@ -210,14 +222,13 @@ unset($_SESSION['recently_uploaded_files']);
                     })
                     .then((j) => {
                         f.set("track_id", j.data.id);
-                        const element = uploadData(file, f);
+                    const element = uploadData(f);
                         fileUploadQueue.prepend(element.root);
                     })
                     .catch((err) => {
-                        const element = uploadData(file, f);
+                    const element = uploadData(f);
                         fileUploadQueue.prepend(element.root);
                     });
-            }
 
             cachedFiles = [];
         });

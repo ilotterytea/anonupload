@@ -26,6 +26,36 @@ $status = new FileTrackStatus(
     : "0"
 );
 
+function create_post(string|null $password): Post
+{
+    global $status;
+
+    // generating file id
+    $status->send('up_genid', 're-rolling IDs...');
+    $attempts = 0;
+    $id_length = CONFIG["id"]["length"];
+    $id_prefix = CONFIG["id"]["prefix"] ?? '';
+    do {
+        $post_id = $id_prefix . IDENTIFIER->generate($id_length);
+        if ($attempts > 20) {
+            $id_length++;
+            $attempts = 0;
+        }
+        $attempts++;
+    } while (FILEREGISTRY->has_post($post_id));
+
+    $p = new Post();
+    $p->id = $post_id;
+    $p->uploaded_at = new DateTime();
+    $p->password = $password;
+
+    if (!FILEREGISTRY->put_post($p)) {
+        throw new RuntimeException("Failed to save post");
+    }
+
+    return $p;
+}
+
 try {
     $files = [];
 
@@ -75,16 +105,18 @@ try {
         throw new HTTPException("No file to upload");
     }
 
-    if (count($files) > 1 && $status->exists()) {
-        throw new HTTPException("File track is available only for singular uploads", 400);
-    }
-
+    $single_url = boolval($_POST['single_url'] ?? '0');
     $strip_exif = boolval($_POST['strip_exif'] ?? '0');
     $password = $_POST['password'] ?? null;
 
-    $uploaded_files = [];
+    $root_post = $single_url ? create_post($password) : null;
+    $uploaded_posts = $single_url ? [$root_post] : [];
+    $file_count = count($files);
 
-    foreach ($files as $file) {
+    for ($i = 0; $i < $file_count; $i++) {
+        $file = $files[$i];
+        $ic = $i + 1;
+
         try {
             if (
                 !isset($file['error']) ||
@@ -106,7 +138,7 @@ try {
                     throw new HTTPException('Unknown errors');
             }
 
-            $status->send('up_integrity', 'verifying file integrity...');
+            $status->send('up_integrity', "verifying file integrity... ($ic/$file_count)");
 
             // checking file mimetype
             $finfo = new finfo(FILEINFO_MIME_TYPE);
@@ -126,19 +158,7 @@ try {
                 throw new RuntimeException('Failed to strip EXIF tags.');
             }
 
-            // -- generating file id
-            $status->send('up_genid', 're-rolling IDs...');
-            $attempts = 0;
-            $id_length = CONFIG["id"]["length"];
-            $id_prefix = CONFIG["id"]["prefix"] ?? '';
-            do {
-                $file_id = $id_prefix . IDENTIFIER->generate($id_length);
-                if ($attempts > 20) {
-                    $id_length++;
-                    $attempts = 0;
-                }
-                $attempts++;
-            } while (FILESTORAGE->has_file("$file_id.$file_ext"));
+            $post = $root_post ?? create_post($password);
 
             // searching for similar file
             $file_hash = hash_file("sha256", $file['tmp_name']);
@@ -156,7 +176,7 @@ try {
                     'sql' => 'writing files to database...',
                     's3' => 'saving files to object storage (may take a long time)...',
                     default => 'saving...',
-                });
+                } . " ($ic/$file_count)");
 
                 $snowflake_id = new SnowflakeIdentifier(CONFIG['instance']['id'], CONFIG['instance']['epoch']);
 
@@ -167,21 +187,15 @@ try {
                 $base_file->hash = $file_hash;
             }
 
-            $base_file = ExtendedFile::from_base_file($base_file);
-            $base_file->id = $file_id;
-            $base_file->password = $password;
-            $base_file->uploaded_at = new DateTime();
-
-            $data = FILEREGISTRY->put_file($base_file);
-            if (!$data) {
-                throw new HTTPException("Failed to save file in the registry.");
+            if (!FILEREGISTRY->attach_to_post($post, $base_file)) {
+                throw new HTTPException("Failed to attach file to the post.");
             }
-            $data->password = $password;
-            $data->path = $base_file->path;
 
-            array_push($uploaded_files, $data);
+            if (!$single_url) {
+                array_push($uploaded_posts, $post);
+            }
         } catch (Exception $e) {
-            array_push($uploaded_files, [
+            array_push($uploaded_posts, [
                 'original_name' => $file['name'],
                 'error' => $e->getMessage()
             ]);
@@ -193,26 +207,29 @@ try {
         $status->send('up_thumbnail', 'drawing thumbnails...');
         $s3_thumb = THUMBNAILER instanceof S3ProxyThumbnailer;
         $data = [];
-        foreach ($uploaded_files as &$f) {
-            if (!is_array($f) && ($s3_thumb || $f->path)) {
-                array_push($data, [
-                    'input_path' => $s3_thumb ? "{$f->id}.{$f->extension}" : $f->path,
-                    'width' => CONFIG['thumbnails']['width'],
-                    'height' => CONFIG['thumbnails']['height'],
-                ]);
+        foreach ($uploaded_posts as &$p) {
+            foreach ($p->attachments as &$f) {
+                if (!is_array($f) && ($s3_thumb || $f->path)) {
+                    array_push($data, [
+                        'input_path' => $s3_thumb ? "{$f->id}.{$f->extension}" : $f->path,
+                        'width' => CONFIG['thumbnails']['width'],
+                        'height' => CONFIG['thumbnails']['height'],
+                    ]);
+                }
             }
+            unset($f);
         }
-        unset($f);
+        unset($p);
 
         $thumbnails = THUMBNAILER->generate_thumbnails($data);
     }
 
     if (isset($_POST['save_upload_list']) && boolval($_POST['save_upload_list'])) {
-        $_SESSION['recently_uploaded_files'] = $uploaded_files;
+        $_SESSION['recently_uploaded_files'] = $uploaded_posts;
     }
 
     $bad_status_count = 0;
-    foreach ($uploaded_files as $x) {
+    foreach ($uploaded_posts as $x) {
         if (is_array($x) && isset($x['error']))
             $bad_status_count++;
     }
@@ -222,10 +239,10 @@ try {
     generate_alert(
         "/",
         null,
-        $bad_status_count === count($uploaded_files) ? 400 : 201,
+        $bad_status_count === count($uploaded_posts) ? 400 : 201,
         match (true) {
-            count($uploaded_files) == 1 => $uploaded_files[0],
-            default => $uploaded_files
+            count($uploaded_posts) == 1 => $uploaded_posts[0],
+            default => $uploaded_posts
         }
     );
 } catch (HTTPException $e) {

@@ -3,7 +3,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/config.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/registry.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/storage.php';
 
-$file = null;
+$post = null;
 
 // -- retrieving file
 $file_name_specified = isset($_GET['i']) || isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] !== '/';
@@ -11,13 +11,19 @@ $file_name_specified = isset($_GET['i']) || isset($_SERVER['REQUEST_URI']) && $_
 try {
     // retrieving random file
     if (CONFIG['surpriseme']['enable'] && isset($_GET['random'])) {
-        $file = FILEREGISTRY->get_random_file();
+        $post = FILEREGISTRY->get_random_post();
     } elseif ($file_name_specified) {
         $file_name = basename($_GET['i'] ?? $_SERVER['REQUEST_URI']);
-        $file = FILEREGISTRY->get_file_by_post_id($file_name);
+        $post = FILEREGISTRY->get_post($file_name);
 
-        if ($file && !FILESTORAGE->ensure_file($file)) {
-            $file = null;
+        if ($post) {
+            foreach ($post->attachments as &$file) {
+                if (!FILESTORAGE->ensure_file($file)) {
+                    $post = null;
+                    break;
+                }
+            }
+            unset($file);
         }
     }
 } catch (Exception $e) {
@@ -26,7 +32,7 @@ try {
     die();
 }
 
-if ($file) {
+if ($post) {
     include $_SERVER['DOCUMENT_ROOT'] . '/lib/pages/file.php';
 } elseif ($file_name_specified) {
     $error = '404 Not Found';
