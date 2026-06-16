@@ -84,7 +84,7 @@ class LocalFileStorage implements FileStorage
 class S3FileStorage implements FileStorage
 {
     private S3Client $s3;
-    private string $bucket, $web_host;
+    private string $bucket;
 
     public function __construct($data)
     {
@@ -99,7 +99,6 @@ class S3FileStorage implements FileStorage
             'use_path_style_endpoint' => $data['use_path_style_endpoint'] ?? false
         ]);
         $this->bucket = $data['bucket'];
-        $this->web_host = $data['web_endpoint'];
     }
 
     public function has_file(string $name): bool
@@ -126,7 +125,7 @@ class S3FileStorage implements FileStorage
         $file->extension = $k[1];
         $file->mime = $result->get("ContentType");
         $file->size = $result->get("ContentLength");
-        $file->path = "s3://{$this->web_host}/$name";
+        $file->path = "s3:///$name";
 
         return $file;
     }

@@ -177,6 +177,7 @@ try {
                 throw new HTTPException("Failed to save file in the registry.");
             }
             $data->password = $password;
+            $data->path = $base_file->path;
 
             array_push($uploaded_files, $data);
         } catch (Exception $e) {

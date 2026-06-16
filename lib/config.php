@@ -35,7 +35,6 @@ $cfg = [
         'region' => null,
         'bucket' => null,
         'endpoint' => null,
-        'web_endpoint' => null,
         'use_path_style_endpoint' => true,
     ],
     'memcached' => [

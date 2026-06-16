@@ -13,11 +13,11 @@ class LocalThumbnailer implements Thumbnailer
 {
     private string $directory, $prefix, $extension;
 
-    public function __construct(string $directory, string $prefix)
+    public function __construct(string $directory, string $prefix, string $extension)
     {
         $this->directory = $directory;
         $this->prefix = $prefix;
-        $this->extension = "webp";
+        $this->extension = $extension;
 
         if (!is_dir($this->directory) && !mkdir($this->directory, 0770, true)) {
             throw new RuntimeException("Failed to create directory for thumbnails: {$this->directory}");
@@ -75,6 +75,10 @@ class LocalThumbnailer implements Thumbnailer
                 throw new RuntimeException("Files must have input_path, width, height");
             }
 
+            if (str_starts_with($f['input_path'], 'local://')) {
+                $f['input_path'] = substr($f['input_path'], 8);
+            }
+
             $id = pathinfo($f['input_path'], PATHINFO_FILENAME);
             $paths[$id] = $this->generate_thumbnail($f['input_path'], $f['width'], $f['height']);
         }
@@ -122,14 +126,14 @@ class S3ProxyThumbnailer implements Thumbnailer
     private string $url, $bucket, $output_bucket, $extension, $prefix;
     private string|null $authorization_key;
 
-    public function __construct(string $url, string $prefix, string $bucket, string $output_bucket, string|null $authorization_key = null)
+    public function __construct(string $url, string $prefix, string $extension, string $bucket, string $output_bucket, string|null $authorization_key = null)
     {
         $this->url = $url;
         $this->bucket = $bucket;
         $this->output_bucket = $output_bucket;
         $this->authorization_key = $authorization_key;
         $this->prefix = $prefix;
-        $this->extension = "webp";
+        $this->extension = $extension;
     }
 
     public function get_thumbnail_root(): string
@@ -221,10 +225,15 @@ define("THUMBNAILER", match (true) {
     CONFIG['thumbnails']['type'] === "s3" && CONFIG['storage']['type'] === "s3" => new S3ProxyThumbnailer(
         CONFIG['thumbnails']['url'],
         CONFIG['thumbnails']['prefix'],
+        CONFIG['thumbnails']['extension'],
         CONFIG['thumbnails']['bucket'],
         CONFIG['thumbnails']['output_bucket'],
         CONFIG['thumbnails']['authorization_key']
     ),
-    CONFIG['thumbnails']['type'] === "local" && CONFIG['storage']['type'] !== "s3" => new LocalThumbnailer(CONFIG['thumbnails']['directory'], CONFIG['thumbnails']['prefix']),
+    CONFIG['thumbnails']['type'] === "local" && CONFIG['storage']['type'] !== "s3" => new LocalThumbnailer(
+        CONFIG['thumbnails']['directory'],
+        CONFIG['thumbnails']['prefix'],
+        CONFIG['thumbnails']['extension']
+    ),
     default => null
 });

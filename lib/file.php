@@ -325,17 +325,11 @@ class BaseFile implements JsonSerializable
 
     public function raw_url(): string|null
     {
-        if ($this->path === null) {
-            return null;
-        }
-
-        if (str_starts_with($this->path, 'local://')) {
-            return sprintf("%s%s/%s.%s", CONFIG['instance']['url'], CONFIG['storage']['prefix'], $this->name, $this->extension);
-        } else if (str_starts_with($this->path, 's3://')) {
-            return sprintf("%s/%s.%s", CONFIG['storage']['prefix'], $this->name, $this->extension);
-        }
-
-        return null;
+        return match (CONFIG['storage']['type']) {
+            "local" => sprintf("%s%s/%s.%s", CONFIG['instance']['url'], CONFIG['storage']['prefix'], $this->name, $this->extension),
+            "s3" => sprintf("%s/%s.%s", CONFIG['storage']['prefix'], $this->name, $this->extension),
+            default => null
+        };
     }
 
     public function thumbnail_url(): string|null
