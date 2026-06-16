@@ -9,6 +9,16 @@ function saveUploadedFiles(list) {
 
 function saveUploadedFile(data) {
     const files = getUploadedFiles();
+
+    if (data.attachments && data.attachments.length === 1) {
+        const a = data.attachments[0];
+        data.size = a.size;
+        data.mime = a.mime;
+        data.extension = a.extension;
+    } else {
+        data.count = data.attachments.length;
+    }
+
     files.unshift(data);
     saveUploadedFiles(files);
 }
@@ -58,7 +68,10 @@ function deleteUploadedFile(id, element = null) {
 
 // -- dom functions
 function createFile(file) {
-    const fileName = `${file.id}.${file.extension}`;
+    let fileName = file.id;
+    if (file.extension) {
+        fileName += `.${file.extension}`;
+    }
 
     const root = document.createElement("div");
     root.classList.add("file", "item");
@@ -89,7 +102,11 @@ function createFile(file) {
 
     // filesize
     const fileSize = document.createElement("li");
-    fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + " MB";
+    if (file.size) {
+        fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + " MB";
+    } else if (file.count) {
+        fileSize.textContent = `${file.count} files`;
+    }
     details.append(fileSize);
 
     // -- buttons

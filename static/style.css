@@ -165,6 +165,10 @@ button:has(> img:only-child):hover,
     text-decoration: none;
 }
 
+.button[href=""] {
+    display: none;
+}
+
 /** INPUT */
 input[type="text"] {
     background: var(--input-background);
@@ -573,6 +577,14 @@ p.error {
     height: 16px;
 }
 
+.unsupported-playback {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: var(--pad);
+}
+
 /** FILES */
 body:has(> .post-preview) {
     display: flex;
@@ -598,6 +610,7 @@ body:has(> .post-preview) {
     gap: var(--pad);
 
     scroll-snap-type: x mandatory;
+    scrollbar-color: var(--showcase-control-foreground);
 }
 
 .feed>.preview {
@@ -672,7 +685,7 @@ body:has(> .post-preview) {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: end;
+    align-items: center;
 }
 
 .disclaimer a {

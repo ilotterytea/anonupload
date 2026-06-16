@@ -8,7 +8,6 @@ if (IS_JSON_REQUEST) {
 }
 
 $single_attachment = $post->single_attachment();
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -19,20 +18,20 @@ $single_attachment = $post->single_attachment();
 
 <body>
     <section class="post-preview">
-        <section class="feed">
-            <?php foreach ($post->attachments as $file): ?>
-                <div class="preview">
-                    <?php html_file_full($file); ?>
-                </div>
-            <?php endforeach; ?>
-        </section>
-
         <section class="disclaimer">
             <?php html_legal(); ?>
             <p>
                 All trademarks and copyrights belong to their respective owners.
                 The uploader is responsible for any content shared here.
             </p>
+        </section>
+
+        <section class="feed" feed-id="<?= $post->id ?>" feed-url="<?= $post->url() ?>">
+            <?php foreach ($post->attachments as $file): ?>
+                <div class="preview">
+                    <?php html_file_full($file); ?>
+                </div>
+            <?php endforeach; ?>
         </section>
 
         <section class="control-panel">
@@ -63,12 +62,15 @@ $single_attachment = $post->single_attachment();
                         <img src="/static/img/icons/reroll.png" alt="re-roll" title="re-roll" />
                     </a>
                 <?php endif; ?>
-                <!-- <a href="<?= $file->raw_url() ?>" download="<?= $file_name ?>" class="button">
+
+                <a href="<?= $single_attachment?->raw_url() ?>" download="<?= $file_name ?>"
+                    class="download-button button">
                     <img src="/static/img/icons/download.png" alt="download" title="download file" />
                 </a>
-                <a href="<?= $file->raw_url() ?>" class="button" target="_blank">
+                <a href="<?= $single_attachment?->raw_url() ?>" class="full-size-button button" target="_blank">
                     <img src="/static/img/icons/fullsize.png" alt="full size" title="open in full size" />
-                </a> -->
+                </a>
+
                 <?php if (CONFIG['report']['mail']): ?>
                     <a href="<?= sprintf('mailto:%s?subject=%s', CONFIG['report']['mail'], rawurlencode("File Report - $file_name")) ?>"
                         class="button">
@@ -95,19 +97,82 @@ $single_attachment = $post->single_attachment();
         return good;
     }
 
+    function updateControlButtons(file) {
+        const downloadButton = document.querySelector(".download-button");
+        const fullsizeButton = document.querySelector(".full-size-button");
+        if (!downloadButton || !fullsizeButton) return;
+
+        const url = file.getAttribute("file-raw-url");
+        downloadButton.href = url;
+        fullsizeButton.href = url;
+    }
+
     window.addEventListener("load", () => {
+        const buttons = document.getElementById("control-buttons");
+        const feed = document.querySelector(".feed");
+        const files = document.querySelectorAll(".feed .file-preview");
+        if (!buttons || !feed || !files) return;
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                const isIntersecting = entry.isIntersecting > 0.9;
+                if (isIntersecting) updateControlButtons(entry.target);
+
+                const media = entry.target.querySelector("video, audio");
+
+                if (!media) return;
+
+                const canPause =
+                    typeof media.pause === "function" &&
+                    typeof media.play === "function";
+
+                if (!canPause) return;
+
+                if (isIntersecting) {
+                    if (media.dataset.autoPaused === "true") {
+                        media.play().catch(() => { });
+                        delete media.dataset.autoPaused;
+                    }
+                } else {
+                    if (!media.paused) {
+                        media.dataset.autoPaused = "true";
+                        media.pause();
+                    }
+                }
+            });
+        },
+            {
+                threshold: [0, 0.9]
+            }
+        );
+
+        files.forEach(element => {
+            observer.observe(element);
+        });
+    });
+
+    window.addEventListener("load", () => {
+        const feed = document.querySelector(".feed");
+        const files = document.querySelectorAll(".feed>.preview");
         const buttons = document.getElementById("control-buttons");
         if (!buttons) return;
 
         const file = {
-            id: document.getElementById("file-id").textContent,
-            mime: document.getElementById("file-mime").textContent,
-            extension: document.getElementById("file-extension").textContent,
-            size: document.getElementById("file-size").textContent,
+            id: feed.getAttribute("feed-id"),
             urls: {
-                download_url: document.getElementById("file-url").textContent
+                download_url: feed.getAttribute("feed-url")
             }
         };
+
+        if (files.length === 1) {
+            const firstFile = files[0];
+            file.mime = firstFile.getAttribute("file-mime");
+            file.size = firstFile.getAttribute("file-size");
+            file.extension = firstFile.getAttribute("file-ext");
+            file.urls.thumbnail_url = firstFile.getAttribute("file-thumb-url") ?? null;
+        } else {
+            file.count = files.length;
+        }
 
         // -- copy button
         if (navigator.clipboard) {

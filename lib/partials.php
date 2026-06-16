@@ -234,7 +234,14 @@ function html_file_full(BaseFile $file)
     $loop = isset($_COOKIE['noloop']) ? '' : 'loop';
     $autoplay = isset($_COOKIE['noautoplay']) ? '' : 'autoplay';
 
-    echo '<div class="file-preview">';
+    echo '<div class="file-preview" ';
+    echo "file-name='{$file->name}' ";
+    echo "file-size='{$file->size}' ";
+    echo "file-mime='{$file->mime}' ";
+    echo "file-ext='{$file->extension}' ";
+    echo "file-raw-url='{$file->raw_url()}' ";
+    echo "file-thumb-url='{$file->thumbnail_url()}' ";
+    echo '>';
 
     // -- contents
     echo '<div class="file-contents">';
@@ -245,29 +252,6 @@ function html_file_full(BaseFile $file)
         echo "<video controls $autoplay $loop class='video-playback' file-name='{$file->name}'>";
         echo "<source src='{$file->raw_url()}' type='{$file->mime}'>";
         echo "</video>";
-
-        echo '' ?>
-        <div class="scan-bg unsupported-playback" file-name="<?= $file->name ?>" style="display:none">
-            <p>This file uses the <?= $file->mime ?> (<?= $file->extension ?>) format which your browser cannot play.</p>
-            <p>
-                You can <a href="<?= $file->raw_url() ?>" download="<?= "{$file->name}.{$file->extension}" ?>">download the
-                    file</a>
-                and watch it in a media player
-                or <b>use a different browser</b> that supports this codec.
-            </p>
-        </div>
-
-        <script>
-            const video = document.querySelector(".video-playback[file-name=\"<?= $file->name ?>\"]");
-            const msg = document.querySelector(".unsupported-playback[file-name=\"<?= $file->name ?>\"]");
-            const mime = document.querySelector("*[file-id=\"<?= $file->name ?>\"]>.file-mime");
-
-            if (mime && video && msg && !video.canPlayType(mime.textContent)) {
-                video.style.display = 'none';
-                msg.style.display = 'flex';
-            }
-        </script>
-        <?php ;
     } elseif (str_starts_with($file->mime, 'audio/')) {
         echo "<audio controls $autoplay>";
         echo "<source src='{$file->raw_url()}' type='{$file->mime}'>";
