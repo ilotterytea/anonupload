@@ -137,9 +137,7 @@ class SQLFileRegistry implements FileRegistry
 
     public function put_post(Post $post): bool
     {
-        if ($post->password) {
-            $post->password = password_hash($post->password, PASSWORD_DEFAULT);
-        }
+        $password = $post->password ? password_hash($post->password, PASSWORD_DEFAULT) : null;
 
         // saving post data
         $stmt = $this->db->prepare("INSERT IGNORE INTO
@@ -149,7 +147,7 @@ class SQLFileRegistry implements FileRegistry
         $stmt->execute([
             ':id' => $post->id,
             ':uat' => $post->uploaded_at->format('Y-m-d H:i:s'),
-            ':password' => $post->password
+            ':password' => $password
         ]);
 
         return true;

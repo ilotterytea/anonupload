@@ -18,21 +18,21 @@ if (empty($id) || empty($key)) {
     exit();
 }
 
-$file = FILEREGISTRY->get_file($id);
-if (!$file) {
+$post = FILEREGISTRY->get_post($id);
+if (!$post) {
     generate_alert('/', 'File does not exist or has been deleted', 404);
     exit();
 }
 
-if ($file->password === null || !password_verify($key, $file->password)) {
+if ($post->password === null || !password_verify($key, $post->password)) {
     generate_alert('/', 'Incorrect password or this file cannot be deleted', 400);
     exit();
 }
 
-if (!FILEREGISTRY->delete_post($file)) {
+if (!FILEREGISTRY->delete_post($post)) {
     generate_alert('/', 'Failed to delete the file. Try again later.', 500);
     exit();
 }
 
-generate_alert('/', "File {$file->id}.{$file->extension} has been deleted", 200, $file);
+generate_alert('/', "File {$post->id} has been deleted", 200, $post);
 
