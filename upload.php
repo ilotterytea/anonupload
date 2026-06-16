@@ -3,6 +3,7 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/storage.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/registry.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/id.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/thumbnails.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
@@ -19,7 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     exit;
 }
 
-$status = new FileTrackStatus($_POST['track_id'] ?: "0");
+$status = new FileTrackStatus(
+    isset($_POST['track_id']) && !empty(trim($_POST['track_id'])) ?
+    trim($_POST['track_id'])
+    : "0"
+);
 
 try {
     $files = [];
@@ -135,20 +140,41 @@ try {
                 $attempts++;
             } while (FILESTORAGE->has_file("$file_id.$file_ext"));
 
-            $meta = new FileMetadata();
-            $meta->content_type = $file_mime;
-            $meta->password = $password;
+            // searching for similar file
+            $file_hash = hash_file("sha256", $file['tmp_name']);
+            if (!$file_hash) {
+                throw new RuntimeException("Failed to calculate file hash");
+            }
 
-            $status->send('up_save', match (CONFIG['storage']['type']) {
-                'local' => 'writing files to disk...',
-                'sql' => 'writing files to database...',
-                's3' => 'saving files to object storage (may take a long time)...',
-                default => 'saving...',
-            });
+            $base_file = FILEREGISTRY->get_file_by_hash($file_hash);
+            if (!$base_file) {
+                $meta = new FileMetadata();
+                $meta->content_type = $file_mime;
 
-            $data = FILESTORAGE->save_file("$file_id.$file_ext", $file['tmp_name'], $meta);
+                $status->send('up_save', match (CONFIG['storage']['type']) {
+                    'local' => 'writing files to disk...',
+                    'sql' => 'writing files to database...',
+                    's3' => 'saving files to object storage (may take a long time)...',
+                    default => 'saving...',
+                });
+
+                $snowflake_id = new SnowflakeIdentifier(CONFIG['instance']['id'], CONFIG['instance']['epoch']);
+
+                $base_file = FILESTORAGE->save_file("{$snowflake_id->generate()}.$file_ext", $file['tmp_name'], $meta);
+                if (!$base_file) {
+                    throw new HTTPException('Failed to save file. Try again later.');
+                }
+                $base_file->hash = $file_hash;
+            }
+
+            $base_file = ExtendedFile::from_base_file($base_file);
+            $base_file->id = $file_id;
+            $base_file->password = $password;
+            $base_file->uploaded_at = new DateTime();
+
+            $data = FILEREGISTRY->put_file($base_file);
             if (!$data) {
-                throw new HTTPException('Failed to save file. Try again later.');
+                throw new HTTPException("Failed to save file in the registry.");
             }
 
             array_push($uploaded_files, $data);
@@ -166,9 +192,9 @@ try {
         $s3_thumb = THUMBNAILER instanceof S3ProxyThumbnailer;
         $data = [];
         foreach ($uploaded_files as &$f) {
-            if (!is_array($f) && ($s3_thumb || $f->system_path)) {
+            if (!is_array($f) && ($s3_thumb || $f->path)) {
                 array_push($data, [
-                    'input_path' => $s3_thumb ? "{$f->id}.{$f->extension}" : $f->system_path,
+                    'input_path' => $s3_thumb ? "{$f->id}.{$f->extension}" : $f->path,
                     'width' => CONFIG['thumbnails']['width'],
                     'height' => CONFIG['thumbnails']['height'],
                 ]);
@@ -177,15 +203,6 @@ try {
         unset($f);
 
         $thumbnails = THUMBNAILER->generate_thumbnails($data);
-        foreach ($thumbnails as $id => $url) {
-            foreach ($uploaded_files as &$f) {
-                if (!is_array($f) && $f->id === $id) {
-                    $f->thumbnail_url = $url;
-                    break;
-                }
-            }
-            unset($f);
-        }
     }
 
     if (isset($_POST['save_upload_list']) && boolval($_POST['save_upload_list'])) {

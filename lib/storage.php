@@ -14,6 +14,7 @@ interface FileStorage
     public function get_file(string $name): BaseFile|null;
     public function save_file(string $name, string $input_path, FileMetadata|null $metadata): BaseFile|null;
     public function delete_file(string $name): bool;
+    public function ensure_file(BaseFile &$file): bool;
 }
 
 class LocalFileStorage implements FileStorage
@@ -41,7 +42,7 @@ class LocalFileStorage implements FileStorage
         $path = "{$this->directory}/$name";
 
         $file = new BaseFile();
-        $file->id = $splitname->name;
+        $file->name = $splitname->name;
         $file->extension = $splitname->extension;
         $file->path = "local://$path";
         $file->size = filesize($path);
@@ -66,6 +67,17 @@ class LocalFileStorage implements FileStorage
     {
         $path = "{$this->directory}/$name";
         return is_file($path) && unlink($path);
+    }
+
+    public function ensure_file(BaseFile &$file): bool
+    {
+        $f = $this->get_file("{$file->name}.{$file->extension}");
+        if (!$f) {
+            return false;
+        }
+
+        $file->path = $f->path;
+        return true;
     }
 }
 
@@ -110,7 +122,7 @@ class S3FileStorage implements FileStorage
 
         $k = explode(".", $name, 2);
 
-        $file->id = $k[0];
+        $file->name = $k[0];
         $file->extension = $k[1];
         $file->mime = $result->get("ContentType");
         $file->size = $result->get("ContentLength");
@@ -155,6 +167,17 @@ class S3FileStorage implements FileStorage
             return false;
         }
 
+        return true;
+    }
+
+    public function ensure_file(BaseFile &$file): bool
+    {
+        $f = $this->get_file("{$file->name}.{$file->extension}");
+        if (!$f) {
+            return false;
+        }
+
+        $file->path = $f->path;
         return true;
     }
 }

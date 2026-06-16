@@ -1,68 +1,6 @@
 <?php
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 
-function generate_snowflake_id(int $machineId = 1, int $epoch = 1609459200000): int
-{
-    static $last_timestamp = 0;
-    static $sequence = 0;
-
-    $machine_id_bits = 10;
-    $sequence_bits = 12;
-
-    $max_machine_id = (1 << $machine_id_bits) - 1;
-    $max_sequence = (1 << $sequence_bits) - 1;
-
-    if ($machineId < 0 || $machineId > $max_machine_id) {
-        throw new InvalidArgumentException("Machine ID must be between 0 and $max_machine_id");
-    }
-
-    $timestamp = (int) floor(microtime(true) * 1000);
-
-    if ($timestamp < $last_timestamp) {
-        throw new RuntimeException("Clock moved backwards. Refusing to generate ID.");
-    }
-
-    if ($timestamp === $last_timestamp) {
-        $sequence = ($sequence + 1) & $max_sequence;
-
-        if ($sequence === 0) {
-            do {
-                $timestamp = (int) floor(microtime(true) * 1000);
-            } while ($timestamp <= $last_timestamp);
-        }
-    } else {
-        $sequence = 0;
-    }
-
-    $last_timestamp = $timestamp;
-
-    return
-        (($timestamp - $epoch) << ($machine_id_bits + $sequence_bits)) |
-        ($machineId << $sequence_bits) |
-        $sequence;
-}
-
-
-function parse_file_name(string|null $filename): array|null
-{
-    if ($filename === null) {
-        return null;
-    }
-
-    $parts = explode(".", $filename);
-    if (count($parts) < 2) {
-        return null;
-    }
-
-    $ext = $parts[count($parts) - 1];
-    unset($parts[count($parts) - 1]);
-
-    return [
-        'name' => implode(".", $parts),
-        'extension' => $ext
-    ];
-}
-
 function get_file_metadata(string $file_path): array|null
 {
     $ext = explode('.', basename($file_path));
@@ -370,46 +308,129 @@ class FileMetadata
 
 class BaseFile implements JsonSerializable
 {
-    public string $id, $extension, $mime;
+    public string $name, $extension, $mime, $hash;
     public int $size;
     public string|null $path = null;
+
+    public static function from_array(array $row): BaseFile
+    {
+        $f = new BaseFile();
+        $f->name = $row['id'];
+        $f->extension = $row['extension'];
+        $f->mime = $row['mime'];
+        $f->size = $row['size'];
+        $f->hash = $row['hash'];
+        return $f;
+    }
+
+    public function raw_url(): string|null
+    {
+        if ($this->path === null) {
+            return null;
+        }
+
+        if (str_starts_with($this->path, 'local://')) {
+            return sprintf("%s%s/%s.%s", CONFIG['instance']['url'], CONFIG['storage']['prefix'], $this->name, $this->extension);
+        } else if (str_starts_with($this->path, 's3://')) {
+            return sprintf("%s/%s.%s", CONFIG['storage']['prefix'], $this->name, $this->extension);
+        }
+
+        return null;
+    }
+
+    public function thumbnail_url(): string|null
+    {
+        return match (CONFIG['thumbnails']['type']) {
+            "local" => sprintf("%s%s/%s.%s", CONFIG['instance']['url'], CONFIG['thumbnails']['prefix'], $this->name, CONFIG['thumbnails']['extension']),
+            "s3" => sprintf("%s/%s.%s", CONFIG['thumbnails']['prefix'], $this->name, CONFIG['thumbnails']['extension']),
+            default => null
+        };
+    }
 
     public function jsonSerialize(): mixed
     {
         return [
-            'id' => $this->id,
+            'id' => $this->name,
             'extension' => $this->extension,
             'mime' => $this->mime,
-            'size' => $this->size
+            'size' => $this->size,
+            'hash' => $this->hash
         ];
     }
 }
 
 class ExtendedFile extends BaseFile
 {
-    public string $alias_id;
+    public string $id;
 
     public DateTime|null $uploaded_at = null;
-    public string|null $password = null, $url = null, $thumbnail_url = null;
+    public string|null $password = null;
+
+    public static function from_base_file(BaseFile $file): ExtendedFile
+    {
+        $f = new ExtendedFile();
+        $f->name = $file->name;
+        $f->extension = $file->extension;
+        $f->mime = $file->mime;
+        $f->size = $file->size;
+        $f->path = $file->path;
+        $f->hash = $file->hash;
+        return $f;
+    }
+
+    public static function from_array(array $res): ExtendedFile
+    {
+        $file = new ExtendedFile();
+        $file->name = $res['file_id'];
+        $file->id = $res['id'];
+        $file->hash = $res['hash'];
+        $file->extension = $res['extension'];
+        $file->mime = $res['mime'];
+        $file->size = $res['size'];
+        $file->password = $res['password'] ?? null;
+
+        if (isset($res['uploaded_at'])) {
+            $file->uploaded_at = new DateTime();
+
+            if (is_numeric($res['uploaded_at'])) {
+                $file->uploaded_at->setTimestamp(intval($res['uploaded_at']));
+            } elseif (isset($res['uploaded_at']['date'])) {
+                $file->uploaded_at->setTimestamp(strtotime($res['uploaded_at']['date']));
+            } else {
+                $file->uploaded_at->setTimestamp(strtotime($res['uploaded_at']));
+            }
+        } else {
+            $file->uploaded_at = null;
+        }
+
+        return $file;
+    }
+
+    public function url(): string
+    {
+        return CONFIG['instance']['url'] . "/{$this->id}.{$this->extension}";
+    }
 
     public function jsonSerialize(): mixed
     {
         $d = [
-            'id' => $this->alias_id,
+            'id' => $this->id,
+            'system_id' => $this->name,
+            'hash' => $this->hash,
             'extension' => $this->extension,
             'mime' => $this->mime,
             'size' => $this->size,
             'uploaded_at' => null,
             'urls' => [
-                'download_url' => CONFIG['instance']['url'] . "/{$this->alias_id}.{$this->extension}",
-                'thumbnail_url' => $this->thumbnail_url,
-                'raw_url' => $this->url,
+                'download_url' => $this->url(),
+                'thumbnail_url' => $this->thumbnail_url(),
+                'raw_url' => $this->raw_url(),
                 'deletion_url' => null
             ]
         ];
 
         if ($this->password && password_get_info($this->password)['algo'] === null) {
-            $d['urls']['deletion_url'] = "/delete?id={$this->alias_id}.{$this->extension}&key={$this->password}";
+            $d['urls']['deletion_url'] = "/delete?id={$this->id}.{$this->extension}&key={$this->password}";
         }
 
         if ($this->uploaded_at !== null) {
@@ -421,7 +442,7 @@ class ExtendedFile extends BaseFile
 
     public function name(): string
     {
-        return "{$this->alias_id}.{$this->extension}";
+        return "{$this->id}.{$this->extension}";
     }
 }
 

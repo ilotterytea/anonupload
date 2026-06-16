@@ -204,16 +204,16 @@ function html_debug_info()
     <?php ;
 }
 
-function html_file_brick(BaseFile $file)
+function html_file_brick(ExtendedFile $file)
 {
     $name = "{$file->id}.{$file->extension}";
 
     echo '' ?>
     <div class="brick<?= isset($file->color) ? " {$file->color}" : '' ?>">
-        <a href="<?= $file->url ?>">
+        <a href="<?= $file->url() ?>">
             <i title="<?= $name ?>">
                 <?php if (str_starts_with($file->mime, 'image/') || str_starts_with($file->mime, 'video/')): ?>
-                    <img src="<?= $file->thumbnail_url ?>" alt="<?= $name ?>" loading="lazy">
+                    <img src="<?= $file->thumbnail_url() ?>" alt="<?= $name ?>" loading="lazy">
                 <?php elseif (str_starts_with($file->mime, 'audio/')): ?>
                     <img src="/static/img/icons/file_audio.png" alt="<?= $name ?>" loading="lazy" class="thumbnail stock">
                 <?php elseif (str_starts_with($file->mime, 'text/')): ?>
@@ -235,26 +235,27 @@ function html_file_full(BaseFile $file)
     $autoplay = isset($_COOKIE['noautoplay']) ? '' : 'autoplay';
 
     if (str_starts_with($file->mime, 'image/')) {
-        echo "<img src='{$file->url}' alt='Image file.'>";
+        echo "<img src='{$file->raw_url()}' alt='Image file.'>";
     } elseif (str_starts_with($file->mime, 'video/')) {
-        echo "<video controls $autoplay $loop class='video-playback' file-id='{$file->id}'>";
-        echo "<source src='{$file->url}' type='{$file->mime}'>";
+        echo "<video controls $autoplay $loop class='video-playback' file-name='{$file->name}'>";
+        echo "<source src='{$file->raw_url()}' type='{$file->mime}'>";
         echo "</video>";
 
         echo '' ?>
-        <div class="scan-bg unsupported-playback" file-id="<?= $file->id ?>" style="display:none">
+        <div class="scan-bg unsupported-playback" file-name="<?= $file->name ?>" style="display:none">
             <p>This file uses the <?= $file->mime ?> (<?= $file->extension ?>) format which your browser cannot play.</p>
             <p>
-                You can <a href="<?= $file->url ?>" download="<?= "{$file->id}.{$file->extension}" ?>">download the file</a>
+                You can <a href="<?= $file->raw_url() ?>" download="<?= "{$file->name}.{$file->extension}" ?>">download the
+                    file</a>
                 and watch it in a media player
                 or <b>use a different browser</b> that supports this codec.
             </p>
         </div>
 
         <script>
-            const video = document.querySelector(".video-playback[file-id=\"<?= $file->id ?>\"]");
-            const msg = document.querySelector(".unsupported-playback[file-id=\"<?= $file->id ?>\"]");
-            const mime = document.querySelector("*[file-id=\"<?= $file->id ?>\"]>.file-mime");
+            const video = document.querySelector(".video-playback[file-name=\"<?= $file->name ?>\"]");
+            const msg = document.querySelector(".unsupported-playback[file-name=\"<?= $file->name ?>\"]");
+            const mime = document.querySelector("*[file-id=\"<?= $file->name ?>\"]>.file-mime");
 
             if (mime && video && msg && !video.canPlayType(mime.textContent)) {
                 video.style.display = 'none';
@@ -264,7 +265,7 @@ function html_file_full(BaseFile $file)
         <?php ;
     } elseif (str_starts_with($file->mime, 'audio/')) {
         echo "<audio controls $autoplay>";
-        echo "<source src='{$file->url}' type='{$file->mime}'>";
+        echo "<source src='{$file->raw_url()}' type='{$file->mime}'>";
         echo "</audio>";
     } else {
         echo '<p><i>This file cannot be displayed.</i></p>';

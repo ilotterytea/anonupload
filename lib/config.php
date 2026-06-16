@@ -9,7 +9,9 @@ $cfg = [
         "url" => (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]",
         'linkname' => 'other',
         "links" => [],
-        "defaultstyle" => "default"
+        "defaultstyle" => "default",
+        'id' => 1,
+        'epoch' => 1609459200000
     ],
     'storage' => [
         'type' => 'local',
@@ -233,6 +235,7 @@ $cfg = [
         'authorization_key' => null,
         'width' => 128,
         'height' => 128,
+        'extension' => 'webp',
         'directory' => './userdata/thumbnails',
         'prefix' => '/userdata/thumbnails'
     ],

@@ -5,7 +5,11 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
 interface FileRegistry
 {
     public function get_files(): array;
+
+    public function get_file_by_hash(string $hash): BaseFile|null;
+    public function get_file_by_post_id(string $post_id): ExtendedFile|null;
     public function get_file(string $name): ExtendedFile|null;
+
     public function get_random_file(): ExtendedFile|null;
     public function put_file(ExtendedFile $file): ExtendedFile|null;
     public function delete_file(ExtendedFile $file): bool;
@@ -27,56 +31,67 @@ class SQLFileRegistry implements FileRegistry
         $this->db->exec($sql);
     }
 
-    public function get_file(string $name): ExtendedFile|null
+    public function get_file_by_post_id(string $post_id): ExtendedFile|null
     {
-        $name = new SplitFilename($name);
+        $name = new SplitFilename($post_id);
 
-        $stmt = $this->db->prepare('SELECT fm.*, f.*
-        FROM files f
+        $stmt = $this->db->prepare('SELECT
+        f.id AS file_id, f.mime, f.extension, f.size, f.hash,
+        fm.*, p.*
+        FROM posts p
+        JOIN post_attachments pa ON pa.post_id = p.id
+        JOIN files f ON f.id = pa.file_id
         LEFT JOIN file_metadata fm ON fm.id = f.id
-        WHERE f.id = ? AND f.extension = ?
+        WHERE p.id = ? AND f.extension = ?
         ');
         $stmt->execute([$name->name, $name->extension]);
 
         $res = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        return $res ? ExtendedFile::from_array($res) : null;
+    }
 
-        if (!$res) {
-            return null;
-        }
+    public function get_file(string $name): ExtendedFile|null
+    {
+        $name = new SplitFilename($name);
 
-        $file = new ExtendedFile();
-        $file->id = $res['system_id'];
-        $file->alias_id = $res['id'];
-        $file->extension = $res['extension'];
-        $file->mime = $res['mime'];
-        $file->size = $res['size'];
-        $file->password = $res['password'] ?? null;
+        $stmt = $this->db->prepare('SELECT
+        f.id AS file_id, f.mime, f.extension, f.size, f.hash,
+        fm.*, p.*
+        FROM posts p
+        JOIN post_attachments pa ON pa.post_id = p.id
+        JOIN files f ON f.id = pa.file_id
+        LEFT JOIN file_metadata fm ON fm.id = f.id
+        WHERE p.id = ? AND f.extension = ?
+        ');
+        $stmt->execute([$name->name, $name->extension]);
 
-        if (isset($res['uploaded_at'])) {
-            $file->uploaded_at = new DateTime();
+        $res = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        return $res ? ExtendedFile::from_array($res) : null;
+    }
 
-            if (is_numeric($res['uploaded_at'])) {
-                $file->uploaded_at->setTimestamp(intval($res['uploaded_at']));
-            } elseif (isset($res['uploaded_at']['date'])) {
-                $file->uploaded_at->setTimestamp(strtotime($res['uploaded_at']['date']));
-            } else {
-                $file->uploaded_at->setTimestamp(strtotime($res['uploaded_at']));
-            }
-        } else {
-            $file->uploaded_at = null;
-        }
+    public function get_file_by_hash(string $hash): BaseFile|null
+    {
+        $stmt = $this->db->prepare('SELECT * FROM files WHERE hash = ?');
+        $stmt->execute([$hash]);
 
-        return $file;
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $res ? BaseFile::from_array($res) : null;
     }
 
     public function get_random_file(): ExtendedFile|null
     {
-        $stmt = $this->db->query("SELECT CONCAT(f.id, '.', f.extension) AS file_name FROM files f ORDER BY rand() LIMIT 1");
+        $stmt = $this->db->query("SELECT
+            CONCAT(p.id, '.', f.extension) AS post_name
+        FROM posts p
+        JOIN post_attachments pa ON pa.post_id = p.id
+        JOIN files f ON f.id = pa.file_id
+        ORDER BY rand()
+        LIMIT 1");
         $stmt->execute();
 
         $res = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
-        return $res ? $this->get_file($res['file_name']) : null;
+        return $res ? $this->get_file($res['post_name']) : null;
     }
 
     public function get_files(): array
@@ -104,30 +119,46 @@ class SQLFileRegistry implements FileRegistry
             $file->password = password_hash($file?->password, PASSWORD_DEFAULT);
         }
 
-        $stmt = $this->db->prepare("INSERT INTO
-            files(id, system_id, mime, extension, size, password, uploaded_at)
-            VALUES(:id, :sid, :mime, :ext, :size, :pass, :uat)
-            ON DUPLICATE KEY UPDATE
-            size = :size, uploaded_at = :uat, system_id = :sid
+        // saving file data
+        $stmt = $this->db->prepare("INSERT IGNORE INTO
+            files(id, mime, extension, size, hash)
+            VALUES(:id, :mime, :ext, :size, :hash)
         ");
         $stmt->execute([
-            ':id' => $file->alias_id,
-            ':sid' => $file->id,
+            ':id' => $file->name,
             ':mime' => $file->mime,
             ':ext' => $file->extension,
             ':size' => $file->size,
-            ':pass' => $file->password,
-            ':uat' => $file->uploaded_at
+            ':hash' => $file->hash
         ]);
 
-        return $this->get_file($file->name());
+        // saving post data
+        $stmt = $this->db->prepare("INSERT INTO
+            posts(id, uploaded_at)
+            VALUES(:id, :uat)
+        ");
+        $stmt->execute([
+            ':id' => $file->id,
+            ':uat' => $file->uploaded_at->format('Y-m-d H:i:s')
+        ]);
+
+        // linking file to the post
+        $stmt = $this->db->prepare("INSERT INTO
+            post_attachments(post_id, file_id)
+            VALUES(:pid, :fid)
+        ");
+        $stmt->execute([
+            ':pid' => $file->id,
+            ':fid' => $file->name
+        ]);
+
+        return $this->get_file_by_post_id($file->name());
     }
 
     public function get_stats(): array|null
     {
         // -- basic info
-        $stmt = $this->db->query("SELECT COUNT(*) AS serving_files, SUM(size) AS active_content, AVG(size) AS average_file_size,
-                COUNT(*) / TIMESTAMPDIFF(MINUTE, MIN(uploaded_at), MAX(uploaded_at)) AS average_upload_rate
+        $stmt = $this->db->query("SELECT COUNT(*) AS serving_files, SUM(size) AS active_content, AVG(size) AS average_file_size
                 FROM files
             ");
 
@@ -146,7 +177,7 @@ class SQLFileRegistry implements FileRegistry
 
         // -- timeline
         $stmt = $this->db->query("SELECT YEAR(uploaded_at) AS year, QUARTER(uploaded_at) AS quarter, COUNT(*) AS file_count
-                FROM files
+                FROM posts
                 WHERE uploaded_at >= DATE_SUB(CURDATE(), INTERVAL 5 YEAR)
                 GROUP BY YEAR(uploaded_at), QUARTER(uploaded_at)
                 ORDER BY year, quarter
@@ -154,20 +185,15 @@ class SQLFileRegistry implements FileRegistry
         $res['timeline'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // -- the most viewed files
-        $stmt = $this->db->query("SELECT id, extension, mime, `size` FROM files ORDER BY views DESC LIMIT 5");
+        $stmt = $this->db->query("SELECT f.id AS file_id, p.id, f.extension, f.mime, f.size, f.hash
+        FROM posts p
+        JOIN post_attachments pa ON pa.post_id = p.id
+        JOIN files f ON f.id = pa.file_id
+        ORDER BY views DESC LIMIT 5");
 
         $files = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $file = new ExtendedFile();
-            $file->alias_id = $row['id'];
-            $file->extension = $row['extension'];
-            $file->mime = $row['mime'];
-            $file->size = $row['size'];
-            $file->url = "/{$file->id}.{$file->extension}";
-            if (THUMBNAILER !== null) {
-                $file->thumbnail_url = sprintf("%s/%s.%s", THUMBNAILER->get_thumbnail_root(), $file->id, THUMBNAILER->get_thumbnail_extension());
-            }
-            array_push($files, $file);
+            array_push($files, ExtendedFile::from_array($row));
         }
         $res['most_viewed'] = $files;
 

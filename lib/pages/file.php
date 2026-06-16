@@ -43,8 +43,8 @@ $file_name = "{$file->id}.{$file->extension}";
                     <?= format_timestamp($file->uploaded_at) ?> ago
                 </p>
                 <p style="display:none" id="file-size"><?= $file->size ?></p>
-                <p style="display:none" id="file-raw-url"><?= $file->url ?></p>
-                <p style="display:none" id="file-url"><?= "/{$file->id}.{$file->extension}" ?></p>
+                <p style="display:none" id="file-raw-url"><?= $file->raw_url() ?></p>
+                <p style="display:none" id="file-url"><?= $file->url() ?></p>
             </div>
             <div class="control-buttons" id="control-buttons">
                 <?php if (isset($_GET['random'])): ?>
@@ -52,10 +52,10 @@ $file_name = "{$file->id}.{$file->extension}";
                         <img src="/static/img/icons/reroll.png" alt="re-roll" title="re-roll" />
                     </a>
                 <?php endif; ?>
-                <a href="<?= $file->url ?>" download="<?= $file_name ?>" class="button">
+                <a href="<?= $file->raw_url() ?>" download="<?= $file_name ?>" class="button">
                     <img src="/static/img/icons/download.png" alt="download" title="download file" />
                 </a>
-                <a href="<?= $file->url ?>" class="button" target="_blank">
+                <a href="<?= $file->raw_url() ?>" class="button" target="_blank">
                     <img src="/static/img/icons/fullsize.png" alt="full size" title="open in full size" />
                 </a>
                 <?php if (CONFIG['report']['mail']): ?>
