@@ -1,10 +1,12 @@
 <?php
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/id.php";
 
 interface FileRegistry
 {
     public function get_files(): array;
+    public function get_posts_by_hash(string $hash): array;
 
     public function get_file_by_hash(string $hash): BaseFile|null;
     public function get_file_by_post_id(string $post_id): ExtendedFile|null;
@@ -12,7 +14,7 @@ interface FileRegistry
 
     public function get_random_file(): ExtendedFile|null;
     public function put_file(ExtendedFile $file): ExtendedFile|null;
-    public function delete_file(ExtendedFile $file): bool;
+    public function delete_post(ExtendedFile $file): bool;
     public function get_stats(): array|null;
 
     public function has_storage_data(string $id): bool;
@@ -113,6 +115,30 @@ class SQLFileRegistry implements FileRegistry
         ];
     }
 
+    public function get_posts_by_hash(string $hash): array
+    {
+        $stmt = $this->db->prepare("SELECT
+            CONCAT(p.id, '.', f.extension) AS post_name
+        FROM posts p
+        JOIN post_attachments pa ON pa.post_id = p.id
+        JOIN files f ON f.id = pa.file_id
+        WHERE f.hash = ?");
+        $stmt->execute([$hash]);
+
+        $count = 0;
+        $arr = [];
+
+        while ($res = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $count++;
+            array_push($arr, $res['post_name']);
+        }
+
+        return [
+            'count' => $count,
+            'filenames' => $arr
+        ];
+    }
+
     public function put_file(ExtendedFile $file): ExtendedFile|null
     {
         if ($file?->password) {
@@ -134,12 +160,13 @@ class SQLFileRegistry implements FileRegistry
 
         // saving post data
         $stmt = $this->db->prepare("INSERT INTO
-            posts(id, uploaded_at)
-            VALUES(:id, :uat)
+            posts(id, uploaded_at, password)
+            VALUES(:id, :uat, :password)
         ");
         $stmt->execute([
             ':id' => $file->id,
-            ':uat' => $file->uploaded_at->format('Y-m-d H:i:s')
+            ':uat' => $file->uploaded_at->format('Y-m-d H:i:s'),
+            ':password' => $file->password
         ]);
 
         // linking file to the post
@@ -200,10 +227,20 @@ class SQLFileRegistry implements FileRegistry
         return $res;
     }
 
-    public function delete_file(ExtendedFile $file): bool
+    public function delete_post(ExtendedFile $file): bool
     {
-        $this->db->prepare('DELETE FROM files WHERE id = ? AND extension = ?')
-            ->execute([$file->alias_id, $file->extension]);
+        $this->db->prepare('DELETE FROM posts WHERE id = ?')
+            ->execute([$file->id]);
+
+        $similar_posts = $this->get_posts_by_hash($file->hash);
+        if (
+            $similar_posts['count'] == 0 &&
+            defined("FILESTORAGE") &&
+            !FILESTORAGE->delete_file("{$file->name}.{$file->extension}")
+        ) {
+            return false;
+        }
+
         return true;
     }
 

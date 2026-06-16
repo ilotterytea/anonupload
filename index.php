@@ -8,16 +8,22 @@ $file = null;
 // -- retrieving file
 $file_name_specified = isset($_GET['i']) || isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] !== '/';
 
-// retrieving random file
-if (CONFIG['surpriseme']['enable'] && isset($_GET['random'])) {
-    $file = FILEREGISTRY->get_random_file();
-} elseif ($file_name_specified) {
-    $file_name = basename($_GET['i'] ?? $_SERVER['REQUEST_URI']);
-    $file = FILEREGISTRY->get_file_by_post_id($file_name);
+try {
+    // retrieving random file
+    if (CONFIG['surpriseme']['enable'] && isset($_GET['random'])) {
+        $file = FILEREGISTRY->get_random_file();
+    } elseif ($file_name_specified) {
+        $file_name = basename($_GET['i'] ?? $_SERVER['REQUEST_URI']);
+        $file = FILEREGISTRY->get_file_by_post_id($file_name);
 
-    if ($file && !FILESTORAGE->ensure_file($file)) {
-        $file = null;
+        if ($file && !FILESTORAGE->ensure_file($file)) {
+            $file = null;
+        }
     }
+} catch (Exception $e) {
+    $error = "500 {$e->getMessage()}";
+    include $_SERVER['DOCUMENT_ROOT'] . '/lib/pages/error.php';
+    die();
 }
 
 if ($file) {

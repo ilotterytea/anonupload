@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS files (
     mime TEXT NOT NULL,
     extension TEXT NOT NULL,
     size BIGINT NOT NULL,
-    hash CHAR(64) NOT NULL
+    hash BINARY(64) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS file_metadata (
@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS file_metadata (
 CREATE TABLE IF NOT EXISTS posts (
     id CHAR(32) NOT NULL PRIMARY KEY,
     description TEXT,
+    password TEXT,
     uploaded_at TIMESTAMP NOT NULL DEFAULT UTC_TIMESTAMP,
     expires_at TIMESTAMP,
     views BIGINT NOT NULL DEFAULT 0

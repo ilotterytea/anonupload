@@ -15,6 +15,8 @@ if (isset($error)) {
     $error_reason = "Something went wrong";
 }
 
+http_response_code($error_code);
+
 if (IS_JSON_REQUEST) {
     send_json_response(null, $error_reason, $error_code);
 }

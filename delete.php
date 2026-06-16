@@ -3,6 +3,7 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/storage.php";
+include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/registry.php";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
     generate_alert('/', "Method not allowed", 405);
@@ -17,7 +18,7 @@ if (empty($id) || empty($key)) {
     exit();
 }
 
-$file = FILESTORAGE->get_file($id);
+$file = FILEREGISTRY->get_file($id);
 if (!$file) {
     generate_alert('/', 'File does not exist or has been deleted', 404);
     exit();
@@ -28,12 +29,10 @@ if ($file->password === null || !password_verify($key, $file->password)) {
     exit();
 }
 
-$name = "{$file->id}.{$file->extension}";
-
-if (!FILESTORAGE->delete_file($name)) {
+if (!FILEREGISTRY->delete_post($file)) {
     generate_alert('/', 'Failed to delete the file. Try again later.', 500);
     exit();
 }
 
-generate_alert('/', "File $name has been deleted", 200, $file);
+generate_alert('/', "File {$file->id}.{$file->extension} has been deleted", 200, $file);
 
