@@ -159,6 +159,8 @@ unset($_SESSION['recently_uploaded_files']);
 
         const hint = document.getElementById("upload-hint");
         if (hint) {
+            hint.remove();
+            fakeUploadButton.appendChild(hint);
             hint.textContent = "the upload will start immediately after selecting the file";
         }
 
@@ -209,26 +211,26 @@ unset($_SESSION['recently_uploaded_files']);
                 f.append("file[]", file);
             }
 
-                fetch('/track?create', {
-                    headers: {
-                        'Accept': 'application/json'
+            fetch('/track?create', {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+                .then((r) => {
+                    if (r.status !== 201) {
+                        return Promise.reject(`${r.status} ${r.statusText}`);
                     }
+                    return r.json();
                 })
-                    .then((r) => {
-                        if (r.status !== 201) {
-                            return Promise.reject(`${r.status} ${r.statusText}`);
-                        }
-                        return r.json();
-                    })
-                    .then((j) => {
-                        f.set("track_id", j.data.id);
+                .then((j) => {
+                    f.set("track_id", j.data.id);
                     const element = uploadData(f);
-                        fileUploadQueue.prepend(element.root);
-                    })
-                    .catch((err) => {
+                    fileUploadQueue.prepend(element.root);
+                })
+                .catch((err) => {
                     const element = uploadData(f);
-                        fileUploadQueue.prepend(element.root);
-                    });
+                    fileUploadQueue.prepend(element.root);
+                });
 
             cachedFiles = [];
         });
