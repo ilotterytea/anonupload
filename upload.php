@@ -1,4 +1,5 @@
 <?php
+include_once "{$_SERVER['DOCUMENT_ROOT']}/vendor/autoload.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/alert.php";
@@ -26,8 +27,12 @@ $status = new FileTrackStatus(
     : "0"
 );
 
-function create_post(string|null $password, DateTime $upload_date, DateTime|null $expiration_date): Post
-{
+function create_post(
+    string|null $password,
+    DateTime $upload_date,
+    DateTime|null $expiration_date,
+    string|null $description
+): Post {
     global $status;
 
     // generating file id
@@ -49,6 +54,7 @@ function create_post(string|null $password, DateTime $upload_date, DateTime|null
     $p->uploaded_at = $upload_date;
     $p->expires_at = $expiration_date;
     $p->password = $password;
+    $p->description = $description;
 
     if (!FILEREGISTRY->put_post($p)) {
         throw new RuntimeException("Failed to save post");
@@ -143,7 +149,14 @@ try {
         default => new DateTime(calculate_expiration_time($expire_in, $format))
     };
 
-    $root_post = $single_url ? create_post($password, $upload_date, $expiration_date) : null;
+    $description = trim($_POST['description'] ?? '');
+
+    if (!empty($description)) {
+        $pdown = new Parsedown();
+        $description = $pdown->text($description);
+    }
+
+    $root_post = $single_url ? create_post($password, $upload_date, $expiration_date, $description) : null;
     $uploaded_posts = $single_url ? [$root_post] : [];
     $file_count = count($files);
 
@@ -192,7 +205,7 @@ try {
                 throw new RuntimeException('Failed to strip EXIF tags.');
             }
 
-            $post = $root_post ?? create_post($password, $upload_date, $expiration_date);
+            $post = $root_post ?? create_post($password, $upload_date, $expiration_date, $description);
 
             // searching for similar file
             $file_hash = hash_file("sha256", $file['tmp_name']);

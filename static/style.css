@@ -1,3 +1,5 @@
+@import "/static/styles/post.css";
+
 :root {
     --background: #ffffff;
     --foreground: #000000;
@@ -274,8 +276,26 @@ fieldset>legend {
 
 #form-upload .options {
     display: flex;
+    flex-direction: column;
+    gap: var(--pad);
+}
+
+#form-upload .options .controls {
+    display: flex;
     flex-direction: row;
     gap: var(--pad);
+}
+
+#form-upload .options .description {
+    display: flex;
+    flex-direction: row;
+}
+
+#form-upload .options .description textarea {
+    display: flex;
+    flex: 1;
+    resize: vertical;
+    min-height: 10vh;
 }
 
 #form-upload:has(> #huge-upload-button[active]) {
@@ -577,121 +597,6 @@ p.error {
     height: 16px;
 }
 
-.unsupported-playback {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: var(--pad);
-}
-
-/** FILES */
-body:has(> .post-preview) {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background: var(--showcase-background);
-}
-
-.post-preview {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.feed {
-    display: flex;
-    flex-direction: row;
-    flex-grow: 1;
-
-    overflow-x: auto;
-    overflow-y: hidden;
-
-    gap: var(--pad);
-
-    scroll-snap-type: x mandatory;
-    scrollbar-color: var(--showcase-control-foreground);
-}
-
-.feed>.preview {
-    flex: 0 0 100%;
-    scroll-snap-align: start;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.file-preview {
-    display: flex;
-    flex-direction: column;
-}
-
-.file-preview>.file-contents>* {
-    max-width: 80vw;
-    max-height: 80vh;
-}
-
-.file-preview>.file-metadata {
-    display: flex;
-    flex-direction: row;
-    justify-content: end;
-    font-size: 0.8em;
-    flex-wrap: 1;
-    color: var(--showcase-control-foreground);
-    gap: var(--pad);
-}
-
-.post-preview>.control-panel {
-    display: flex;
-    flex-direction: row;
-
-    background: var(--showcase-control-background);
-    color: var(--showcase-control-foreground);
-    border-top: 4px solid var(--showcase-control-foreground);
-
-    padding: var(--pad);
-    gap: var(--pad);
-
-    font-size: 0.8em;
-}
-
-.control-panel>.metadata {
-    flex-grow: 1;
-}
-
-.control-panel>.control-buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: var(--pad);
-}
-
-.control-buttons .button {
-    background: var(--showcase-button-background);
-}
-
-.control-buttons .button:hover {
-    background: var(--showcase-button-background-hover);
-}
-
-.disclaimer {
-    color: var(--showcase-control-foreground);
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 0.75em;
-    text-align: right;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.disclaimer a {
-    color: var(--showcase-control-foreground);
-}
-
 /** DROPDOWN */
 .dropdown {
     position: relative;
@@ -748,6 +653,10 @@ body:has(> .post-preview) {
     content: '▲';
 }
 
+.hidden {
+    display: none;
+}
+
 /** ANIMATIONS */
 .shake {
     animation: shaking 0.2s infinite;
@@ -780,12 +689,24 @@ body:has(> .post-preview) {
 }
 
 /** RESPONSIVE MEDIA */
+@media screen and (max-width: 1200px) {
+    :root {
+        --page-width: 75%;
+    }
+}
+
+@media screen and (max-width: 1000px) {
+    :root {
+        --page-width: 85%;
+    }
+}
+
 @media screen and (max-width: 800px) {
     :root {
         --page-width: 95%;
     }
 
-    #form-upload .options {
+    #form-upload .options>.controls {
         flex-direction: column;
     }
 

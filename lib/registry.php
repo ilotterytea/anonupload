@@ -148,13 +148,14 @@ class SQLFileRegistry implements FileRegistry
 
         // saving post data
         $stmt = $this->db->prepare("INSERT IGNORE INTO
-            posts(id, uploaded_at, expires_at, password)
-            VALUES(:id, :uat, :eat, :password)
+            posts(id, uploaded_at, expires_at, description, password)
+            VALUES(:id, :uat, :eat, :des, :password)
         ");
         $stmt->execute([
             ':id' => $post->id,
             ':uat' => $post->uploaded_at?->format('Y-m-d H:i:s'),
             ':eat' => $post->expires_at?->format('Y-m-d H:i:s'),
+            ':des' => $post->description,
             ':password' => $password
         ]);
 

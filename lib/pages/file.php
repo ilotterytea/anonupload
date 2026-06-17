@@ -34,53 +34,88 @@ $single_attachment = $post->single_attachment();
             <?php endforeach; ?>
         </section>
 
-        <section class="control-panel">
-            <div class="icon">
-                <?= html_mini_icon(); ?>
-            </div>
-            <div class="metadata">
-                <?php if ($single_attachment): ?>
-                    <p>
-                        <span id="post-id"><?= $post->id ?></span>.<span
-                            id="file-extension"><?= $single_attachment->extension ?></span>
-                        (<span id="file-mime"><?= $single_attachment->mime ?></span>)
-                    </p>
-                <?php else: ?>
-                    <p>
-                        <span id="post-id"><?= $post->id ?></span>
-                        (multiple attachments)
-                    </p>
-                <?php endif; ?>
-                <p id="post-timestamp" timestamp="<?= $post->uploaded_at->getTimestamp() ?>">uploaded
-                    <?= format_timestamp($post->uploaded_at) ?> ago
-                </p>
-                <p style="display:none" id="post-url"><?= $post->url() ?></p>
-            </div>
-            <div class="control-buttons" id="control-buttons">
-                <?php if (isset($_GET['random'])): ?>
-                    <a href="/?random" class="button">
-                        <img src="/static/img/icons/reroll.png" alt="re-roll" title="re-roll" />
-                    </a>
-                <?php endif; ?>
+        <section class="feed-metadata">
+            <section class="file-metadata">
+                <div class="left">
+                    <div class="icon">
+                        <?= html_mini_icon(); ?>
+                    </div>
+                    <div class="metadata">
+                        <?php if ($single_attachment): ?>
+                            <p>
+                                <span id="post-id"><?= $post->id ?></span>.<span
+                                    id="file-extension"><?= $single_attachment->extension ?></span>
+                                (<span id="file-mime"><?= $single_attachment->mime ?></span>)
+                            </p>
+                        <?php else: ?>
+                            <p>
+                                <span id="post-id"><?= $post->id ?></span>
+                                (<?= count($post->attachments) ?> attachments)
+                            </p>
+                        <?php endif; ?>
+                        <p id="post-timestamp" timestamp="<?= $post->uploaded_at->getTimestamp() ?>">uploaded
+                            <?= format_timestamp($post->uploaded_at) ?> ago
+                        </p>
+                        <p style="display:none" id="post-url"><?= $post->url() ?></p>
+                    </div>
+                </div>
+                <div>
+                    <button class="hidden feed-description-opener"> description omitted. click to expand.</button>
+                </div>
+                <div class="control-buttons" id="control-buttons">
+                    <?php if (isset($_GET['random'])): ?>
+                        <a href="/?random" class="button">
+                            <img src="/static/img/icons/reroll.png" alt="re-roll" title="re-roll" />
+                        </a>
+                    <?php endif; ?>
 
-                <a href="<?= $single_attachment?->raw_url() ?>" download="<?= $file_name ?>"
-                    class="download-button button">
-                    <img src="/static/img/icons/download.png" alt="download" title="download file" />
-                </a>
-                <a href="<?= $single_attachment?->raw_url() ?>" class="full-size-button button" target="_blank">
-                    <img src="/static/img/icons/fullsize.png" alt="full size" title="open in full size" />
-                </a>
-
-                <?php if (CONFIG['report']['mail']): ?>
-                    <a href="<?= sprintf('mailto:%s?subject=%s', CONFIG['report']['mail'], rawurlencode("File Report - $file_name")) ?>"
-                        class="button">
-                        <img src="/static/img/icons/flag.png" alt="report" title="report this file">
+                    <a href="<?= $single_attachment?->raw_url() ?>" download="<?= $file_name ?>"
+                        class="download-button button">
+                        <img src="/static/img/icons/download.png" alt="download" title="download file" />
                     </a>
-                <?php endif; ?>
-            </div>
+                    <a href="<?= $single_attachment?->raw_url() ?>" class="full-size-button button" target="_blank">
+                        <img src="/static/img/icons/fullsize.png" alt="full size" title="open in full size" />
+                    </a>
+
+                    <?php if (CONFIG['report']['mail']): ?>
+                        <a href="<?= sprintf('mailto:%s?subject=%s', CONFIG['report']['mail'], rawurlencode("File Report - $file_name")) ?>"
+                            class="button">
+                            <img src="/static/img/icons/flag.png" alt="report" title="report this file">
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </section>
+
+            <?php if (isset($post->description)): ?>
+                <section class="feed-description">
+                    <?= $post->description ?>
+                </section>
+            <?php endif; ?>
         </section>
     </section>
 </body>
+
+<?php if (isset($post->description)): ?>
+    <script>
+        window.addEventListener("load", () => {
+            const button = document.querySelector(".feed-description-opener");
+            const description = document.querySelector(".feed-description");
+            if (!button || !description) return;
+
+            description.classList.add("hidden");
+            button.classList.remove("hidden");
+
+            button.addEventListener("click", () => {
+                description.classList.remove("hidden");
+                button.remove();
+            });
+
+            // counting description lines
+            const lines = description.textContent.trim().split("\n");
+            button.textContent = `${lines.length} line(s) omitted. click to expand.`;
+        });
+    </script>
+<?php endif; ?>
 
 <script src="/static/scripts/player.js"></script>
 <script src="/static/scripts/favorites.js"></script>

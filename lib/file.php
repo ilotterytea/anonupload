@@ -363,13 +363,14 @@ class Post implements JsonSerializable
     public array $attachments = [];
 
     public DateTime|null $uploaded_at = null, $expires_at = null;
-    public string|null $password = null;
+    public string|null $password = null, $description = null;
 
     public static function from_array(array $res): Post
     {
         $o = new Post();
         $o->id = $res['id'];
         $o->password = $res['password'] ?? null;
+        $o->description = $res['description'] ?? null;
 
         if (isset($res['uploaded_at'])) {
             $o->uploaded_at = new DateTime();

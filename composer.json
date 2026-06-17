@@ -3,7 +3,8 @@
     "description": "a simple file sharing website",
     "type": "project",
     "require": {
-        "aws/aws-sdk-php": "^3.383"
+        "aws/aws-sdk-php": "^3.383",
+        "erusev/parsedown": "^1.8"
     },
     "license": "Apache-2.0",
     "authors": [
