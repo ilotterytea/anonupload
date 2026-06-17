@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </body>
 
 <script>
-    window.addEventListener("load", () => {
+    window.addEventListener("DOMContentLoaded", () => {
         const form = document.querySelector("form");
         if (!form) return;
 

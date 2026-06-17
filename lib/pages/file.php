@@ -97,7 +97,7 @@ $single_attachment = $post->single_attachment();
 
 <?php if (isset($post->description)): ?>
     <script>
-        window.addEventListener("load", () => {
+        window.addEventListener("DOMContentLoaded", () => {
             const button = document.querySelector(".feed-description-opener");
             const description = document.querySelector(".feed-description");
             if (!button || !description) return;
@@ -142,7 +142,7 @@ $single_attachment = $post->single_attachment();
         fullsizeButton.href = url;
     }
 
-    window.addEventListener("load", () => {
+    window.addEventListener("DOMContentLoaded", () => {
         const buttons = document.getElementById("control-buttons");
         const feed = document.querySelector(".feed");
         const files = document.querySelectorAll(".feed .file-preview");
@@ -186,7 +186,7 @@ $single_attachment = $post->single_attachment();
         });
     });
 
-    window.addEventListener("load", () => {
+    window.addEventListener("DOMContentLoaded", () => {
         const feed = document.querySelector(".feed");
         const files = document.querySelectorAll(".feed>.preview");
         const buttons = document.getElementById("control-buttons");
@@ -277,7 +277,7 @@ $single_attachment = $post->single_attachment();
         return `${years} year${years !== 1 ? "s" : ""}`;
     }
 
-    window.addEventListener("load", () => {
+    window.addEventListener("DOMContentLoaded", () => {
         const timestampElement = document.getElementById("post-timestamp");
         if (!timestampElement) return;
 

@@ -161,7 +161,7 @@ unset($_SESSION['recently_uploaded_files']);
 <script>
     let cachedFiles = [];
 
-    window.addEventListener("load", () => {
+    window.addEventListener("DOMContentLoaded", () => {
         initOptions("form-upload");
 
         const form = document.getElementById("form-upload");

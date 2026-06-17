@@ -29,7 +29,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/thumbnails.php';
 
 <script src="/static/scripts/file.js"></script>
 <script>
-    window.addEventListener("load", () => {
+    window.addEventListener("DOMContentLoaded", () => {
         const fileHistory = document.getElementById("file-history");
         if (!fileHistory) {
             return;

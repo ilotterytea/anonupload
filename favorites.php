@@ -38,7 +38,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/thumbnails.php';
         list.append(message);
     }
 
-    window.addEventListener("load", () => {
+    window.addEventListener("DOMContentLoaded", () => {
         const favoriteFiles = document.getElementById("favorite-files");
         if (!favoriteFiles) {
             return;

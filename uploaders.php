@@ -149,7 +149,7 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 </body>
 
 <script>
-    window.addEventListener("load", () => {
+    window.addEventListener("DOMContentLoaded", () => {
         if (navigator.clipboard) {
             const copyButtons = document.querySelectorAll(".copy");
             for (const copyButton of copyButtons) {
