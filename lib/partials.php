@@ -145,6 +145,9 @@ function html_legal()
 {
     echo '' ?>
     <ul class="horizontal links">
+        <?php if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/QA.txt")): ?>
+            <li><a href="/qa">q&a</a></li>
+        <?php endif; ?>
         <?php if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/TOS.txt")): ?>
             <li><a href="/tos">terms of service</a></li>
         <?php endif; ?>
