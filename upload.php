@@ -215,8 +215,8 @@ try {
 
             $base_file = FILEREGISTRY->get_file_by_hash($file_hash);
             if (!$base_file) {
-                $meta = new FileMetadata();
-                $meta->content_type = $file_mime;
+                $opt = new FileOptions();
+                $opt->content_type = $file_mime;
 
                 $status->send('up_save', match (CONFIG['storage']['type']) {
                     'local' => 'writing files to disk...',
@@ -227,11 +227,14 @@ try {
 
                 $snowflake_id = new SnowflakeIdentifier(CONFIG['instance']['machine_id'], CONFIG['instance']['epoch']);
 
-                $base_file = FILESTORAGE->save_file("{$snowflake_id->generate()}.$file_ext", $file['tmp_name'], $meta);
+                $metadata = FileMetadata::from_file_path($file['tmp_name'], $file_mime);
+
+                $base_file = FILESTORAGE->save_file("{$snowflake_id->generate()}.$file_ext", $file['tmp_name'], $opt);
                 if (!$base_file) {
                     throw new HTTPException('Failed to save file. Try again later.');
                 }
                 $base_file->hash = $file_hash;
+                $base_file->metadata = $metadata;
             }
 
             if (!FILEREGISTRY->attach_to_post($post, $base_file)) {

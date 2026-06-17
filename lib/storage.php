@@ -12,7 +12,7 @@ interface FileStorage
 {
     public function has_file(string $name): bool;
     public function get_file(string $name): BaseFile|null;
-    public function save_file(string $name, string $input_path, FileMetadata|null $metadata): BaseFile|null;
+    public function save_file(string $name, string $input_path, FileOptions|null $metadata): BaseFile|null;
     public function delete_file(string $name): bool;
     public function ensure_file(BaseFile &$file): bool;
 }
@@ -51,7 +51,7 @@ class LocalFileStorage implements FileStorage
         return $file;
     }
 
-    public function save_file(string $name, string $input_path, FileMetadata|null $metadata = null): BaseFile|null
+    public function save_file(string $name, string $input_path, FileOptions|null $options = null): BaseFile|null
     {
         if (!is_dir($this->directory) && !mkdir($this->directory, 0770, true)) {
             throw new RuntimeException("Failed to create a directory for files: {$this->directory}");
@@ -130,7 +130,7 @@ class S3FileStorage implements FileStorage
         return $file;
     }
 
-    public function save_file(string $name, string $input_path, FileMetadata|null $metadata = null): BaseFile|null
+    public function save_file(string $name, string $input_path, FileOptions|null $options = null): BaseFile|null
     {
         $m = [
             'Bucket' => $this->bucket,
@@ -138,8 +138,8 @@ class S3FileStorage implements FileStorage
             'Params' => []
         ];
 
-        if ($metadata?->content_type) {
-            $m['Params']['ContentType'] = $metadata->content_type;
+        if ($options?->content_type) {
+            $m['Params']['ContentType'] = $options->content_type;
         }
 
         $uploader = new MultipartUploader($this->s3, $input_path, $m);

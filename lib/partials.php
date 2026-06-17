@@ -280,6 +280,21 @@ function html_file_full(BaseFile $file)
     echo '<div class="file-metadata">';
     echo '<p class="file-size">' . format_filesize($file->size) . '</p>';
     echo "<p class='file-mime'>{$file->mime} (<span class='file-extension'>{$file->extension}</span>)</p>";
+
+    if ($m = $file->metadata) {
+        if ($m->width && $m->height) {
+            echo "<p class='file-resolution'>{$m->width}x{$m->height}</p>";
+        }
+        if ($m->duration) {
+            echo "<p class='file-duration'>";
+            echo format_timestamp((new DateTime())->setTimestamp(time() + $m->duration));
+            echo "</p>";
+        }
+        if ($m->line_count) {
+            echo "<p class='file-line-count'>{$m->line_count} lines</p>";
+        }
+    }
+
     echo '</div>';
 
     echo '</div>';

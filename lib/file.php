@@ -301,9 +301,43 @@ function convert_file(string $input_path, string $output_path)
     }
 }
 
-class FileMetadata
+class FileOptions
 {
     public string|null $content_type;
+}
+
+class FileMetadata
+{
+    public int|null $width = null, $height = null, $duration = null, $line_count = null;
+
+    public static function from_file_path(string $input_path, string $mime): FileMetadata|null
+    {
+        $m = null;
+
+        if (str_starts_with($mime, 'image/') && IMAGEMAGICK_COMMAND) {
+            [$w, $h] = explode('x', trim(shell_exec(IMAGEMAGICK_COMMAND['identify'] . ' -format "%wx%h" ' . escapeshellarg($input_path) . '[0]')));
+
+            $m = new FileMetadata();
+            $m->width = intval($w);
+            $m->height = intval($h);
+        } else if (str_starts_with($mime, 'video/')) {
+            $info = shell_exec('ffprobe -v error -select_streams v:0 -show_entries stream=width,height,duration -of csv=p=0 ' . escapeshellarg($input_path));
+            [$w, $h, $d] = explode(',', trim($info));
+
+            $m = new FileMetadata();
+            $m->width = intval($w);
+            $m->height = intval($h);
+            $m->duration = $d == 'N/A' ? null : intval(round($d, 2));
+        } else if (str_starts_with($mime, 'audio/')) {
+            $m = new FileMetadata();
+            $m->duration = intval(round(trim(shell_exec('ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ' . escapeshellarg($input_path))), 2));
+        } else if (str_starts_with($mime, 'text/')) {
+            $m = new FileMetadata();
+            $m->line_count = intval(trim(shell_exec('wc -l < ' . escapeshellarg($input_path))));
+        }
+
+        return $m;
+    }
 }
 
 class BaseFile implements JsonSerializable
@@ -311,6 +345,7 @@ class BaseFile implements JsonSerializable
     public string $name, $extension, $mime, $hash;
     public int $size;
     public string|null $path = null;
+    public FileMetadata|null $metadata = null;
 
     public static function from_array(array $row): BaseFile
     {
@@ -320,6 +355,21 @@ class BaseFile implements JsonSerializable
         $f->mime = $row['mime'];
         $f->size = $row['size'];
         $f->hash = $row['hash'];
+
+        if (
+            array_key_exists('width', $row) ||
+            array_key_exists('height', $row) ||
+            array_key_exists('duration', $row) ||
+            array_key_exists('line_count', $row)
+        ) {
+            $m = new FileMetadata();
+            $m->width = $row['width'] ?? null;
+            $m->height = $row['height'] ?? null;
+            $m->duration = $row['duration'] ?? null;
+            $m->line_count = $row['line_count'] ?? null;
+            $f->metadata = $m;
+        }
+
         return $f;
     }
 

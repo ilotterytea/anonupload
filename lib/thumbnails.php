@@ -57,6 +57,8 @@ class LocalThumbnailer implements Thumbnailer
             $code = $this->generate_image_thumbnail($input_path, $dst_path, $width, $height);
         } else if (str_starts_with($mime, 'video/')) {
             $code = $this->generate_video_thumbnail($input_path, $dst_path, $width, $height);
+        } else {
+            $code = 0;
         }
 
         if ($code !== 0) {

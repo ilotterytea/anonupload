@@ -176,6 +176,20 @@ class SQLFileRegistry implements FileRegistry
             ':hash' => $file->hash
         ]);
 
+        if ($file->metadata) {
+            $stmt = $this->db->prepare("INSERT IGNORE INTO
+                file_metadata(id, width, height, duration, line_count)
+                VALUES(:id, :w, :h, :d, :l)
+            ");
+            $stmt->execute([
+                ':id' => $file->name,
+                ':w' => $file->metadata->width,
+                ':h' => $file->metadata->height,
+                ':d' => $file->metadata->duration,
+                ':l' => $file->metadata->line_count
+            ]);
+        }
+
         $stmt = $this->db->prepare("INSERT INTO
                 post_attachments(post_id, file_id)
                 VALUES(:pid, :fid)
