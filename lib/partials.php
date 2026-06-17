@@ -262,8 +262,16 @@ function html_file_full(BaseFile $file)
         echo "<audio controls $autoplay>";
         echo "<source src='{$file->raw_url()}' type='{$file->mime}'>";
         echo "</audio>";
+    } else if ($file->is_flash()) {
+        echo '<noscript>JavaScript is required to play Flash</noscript>';
+        echo '<object>';
+        // TODO: change flash resolution
+        echo "<embed src='{$file->raw_url()}' width='800' height='600'>";
+        echo '</object>';
     } else {
+        echo '<div class="unsupported-playback box">';
         echo '<p><i>This file cannot be displayed.</i></p>';
+        echo '</div>';
     }
 
     echo '</div>';

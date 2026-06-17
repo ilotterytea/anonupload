@@ -289,4 +289,8 @@ $single_attachment = $post->single_attachment();
     });
 </script>
 
+<?php if ($post->is_flash()): ?>
+    <script src="<?= CONFIG['driver']['ruffle'] ?>"></script>
+<?php endif; ?>
+
 </html>

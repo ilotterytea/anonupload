@@ -341,6 +341,11 @@ class BaseFile implements JsonSerializable
         };
     }
 
+    public function is_flash(): bool
+    {
+        return !empty(CONFIG['driver']['ruffle']) && $this->mime === 'application/x-shockwave-flash';
+    }
+
     public function jsonSerialize(): mixed
     {
         return [
@@ -429,6 +434,18 @@ class Post implements JsonSerializable
         }
 
         return $d;
+    }
+
+    public function is_flash(): bool
+    {
+        $is_flash = false;
+        foreach ($this->attachments as $a) {
+            $is_flash = $a->is_flash();
+            if ($is_flash) {
+                break;
+            }
+        }
+        return !empty(CONFIG['driver']['ruffle']) && $is_flash;
     }
 
     public function name(): string
