@@ -191,6 +191,10 @@ class SQLFileRegistry implements FileRegistry
 
     public function get_stats(): array|null
     {
+        if ($cached_stats = MEMCACHED?->get(CONFIG['instance']['id'] . "_stats")) {
+            return $cached_stats;
+        }
+
         // -- basic info
         $stmt = $this->db->query("SELECT COUNT(*) AS serving_files, SUM(size) AS active_content, AVG(size) AS average_file_size
                 FROM files
@@ -199,6 +203,20 @@ class SQLFileRegistry implements FileRegistry
         $res = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$res) {
             return null;
+        }
+
+        $stmt = $this->db->query('SELECT
+            COUNT(*) AS serving_posts,
+            COUNT(*) / TIMESTAMPDIFF(MINUTE, MIN(uploaded_at), MAX(uploaded_at)) AS average_upload_rate,
+            MIN(uploaded_at) AS first_uploaded_at,
+            MAX(uploaded_at) AS last_uploaded_at
+            FROM posts
+        ');
+        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $res['serving_posts'] = $row['serving_posts'];
+            $res['average_upload_rate'] = $row['average_upload_rate'];
+            $res['first_uploaded_at'] = $row['first_uploaded_at'];
+            $res['last_uploaded_at'] = $row['last_uploaded_at'];
         }
 
         // calculating the count of future files
@@ -228,6 +246,11 @@ class SQLFileRegistry implements FileRegistry
             array_push($files, Post::from_array($row));
         }
         $res['most_viewed'] = $files;
+
+        if (MEMCACHED) {
+            $res['last_update'] = new DateTime();
+            MEMCACHED->set(CONFIG['instance']['id'] . '_stats', $res, CONFIG['stats']['ttl']);
+        }
 
         return $res;
     }

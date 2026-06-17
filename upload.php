@@ -212,7 +212,7 @@ try {
                     default => 'saving...',
                 } . " ($ic/$file_count)");
 
-                $snowflake_id = new SnowflakeIdentifier(CONFIG['instance']['id'], CONFIG['instance']['epoch']);
+                $snowflake_id = new SnowflakeIdentifier(CONFIG['instance']['machine_id'], CONFIG['instance']['epoch']);
 
                 $base_file = FILESTORAGE->save_file("{$snowflake_id->generate()}.$file_ext", $file['tmp_name'], $meta);
                 if (!$base_file) {

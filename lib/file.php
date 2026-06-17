@@ -432,7 +432,20 @@ class Post implements JsonSerializable
 
     public function name(): string
     {
+        if ($s = $this->single_attachment()) {
+            return "{$this->id}.{$s->extension}";
+        }
         return $this->id;
+    }
+
+    public function mime(): string
+    {
+        return $this->single_attachment()?->mime ?? "application/x-multi-upload";
+    }
+
+    public function thumbnail_url(): string
+    {
+        return $this->single_attachment()?->thumbnail_url() ?? (CONFIG['instance']['url'] . "/static/img/default/multi_upload.webp");
     }
 
     public function single_attachment(): BaseFile|null

@@ -5,12 +5,13 @@ define("CONFIG_FILE_PATH", $_SERVER['DOCUMENT_ROOT'] . '/anonupload.ini');
 $cfg = [
     "instance" => [
         "name" => $_SERVER['HTTP_HOST'],
+        'id' => 'anonupload',
         "mirrors" => [],
         "url" => (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]",
         'linkname' => 'other',
         "links" => [],
         "defaultstyle" => "default",
-        'id' => 1,
+        'machine_id' => 1,
         'epoch' => 1609459200000
     ],
     'storage' => [
@@ -260,7 +261,8 @@ $cfg = [
     ],
     'stats' => [
         'enabled' => false,
-        'disk_size' => 0
+        'disk_size' => 0,
+        'ttl' => 300
     ]
 ];
 

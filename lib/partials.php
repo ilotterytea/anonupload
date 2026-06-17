@@ -204,29 +204,35 @@ function html_debug_info()
     <?php ;
 }
 
-function html_file_brick(BaseFile $file)
+function html_file_brick(Post $post)
 {
-    $name = "{$file->name}.{$file->extension}";
+    $name = $post->name();
+    $mime = $post->mime();
 
-    echo '' ?>
-    <div class="brick<?= isset($file->color) ? " {$file->color}" : '' ?>">
-        <a href="<?= $file->url() ?>">
-            <i title="<?= $name ?>">
-                <?php if (str_starts_with($file->mime, 'image/') || str_starts_with($file->mime, 'video/')): ?>
-                    <img src="<?= $file->thumbnail_url() ?>" alt="<?= $name ?>" loading="lazy">
-                <?php elseif (str_starts_with($file->mime, 'audio/')): ?>
-                    <img src="/static/img/icons/file_audio.png" alt="<?= $name ?>" loading="lazy" class="thumbnail stock">
-                <?php elseif (str_starts_with($file->mime, 'text/')): ?>
-                    <img src="/static/img/icons/file_text.png" alt="<?= $name ?>" loading="lazy" class="thumbnail stock">
-                <?php elseif ($file->mime == 'application/x-shockwave-flash'): ?>
-                    <img src="/static/img/icons/file_flash.png" alt="<?= $name ?>" loading="lazy" class="thumbnail stock">
-                <?php else: ?>
-                    <img src="/static/img/icons/file.png" alt="<?= $name ?>" class="thumbnail stock">
-                <?php endif; ?>
-            </i>
-        </a>
-    </div>
-    <?php ;
+    echo '<div class="box item brick">';
+    echo "<a href='{$post->url()}'>";
+    echo "<i title='$name'>";
+
+    echo match (true) {
+        $mime === "application/x-multi-upload" =>
+        "<img src='/static/img/icons/file_multi.png' alt='$name' loading='lazy' class='thumbnail stock'>",
+
+        $mime === "application/x-shockwave-flash" =>
+        "<img src='/static/img/icons/file_flash.png' alt='$name' class='thumbnail stock'>",
+
+        str_starts_with($mime, 'image/') || str_starts_with($mime, 'video/') =>
+        "<img src='{$post->thumbnail_url()} alt='$name' loading='lazy'>",
+
+        str_starts_with($mime, 'audio/') =>
+        "<img src='/static/img/icons/file_audio.png' alt='$name' class='thumbnail stock'>",
+
+        str_starts_with($mime, 'text/') =>
+        "<img src='/static/img/icons/file_text.png' alt='$name' class='thumbnail stock'>",
+
+        default => "<img src='/static/img/icons/file.png' alt='$name' class='thumbnail stock'>"
+    };
+
+    echo '</i></a></div>';
 }
 
 function html_file_full(BaseFile $file)

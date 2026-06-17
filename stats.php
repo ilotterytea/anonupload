@@ -20,14 +20,24 @@ if (IS_JSON_REQUEST) {
     <header>
         <?php html_header(); ?>
         <h2>statistics</h2>
+        <?php if (isset($stats['last_update'])): ?>
+            <p><i>last updated <?= format_timestamp($stats['last_update']) ?> ago</i></p>
+        <?php endif; ?>
     </header>
     <main class="statistics">
         <section class="box">
             <div class="tab">
-                <h3>about files</h3>
+                <h3>about files & posts</h3>
             </div>
             <div class="content">
                 <table class="vertical left">
+                    <?php if (isset($stats['serving_posts'])): ?>
+                        <tr>
+                            <th>serving posts</th>
+                            <td><?= $stats['serving_posts'] ?></td>
+                        </tr>
+                    <?php endif; ?>
+
                     <?php if (isset($stats['serving_files'])): ?>
                         <tr>
                             <th>serving files</th>
@@ -62,6 +72,24 @@ if (IS_JSON_REQUEST) {
                             <td>~<?= $stats['serving_future_files'] ?></td>
                         </tr>
                     <?php endif; ?>
+
+                    <?php if (isset($stats['first_uploaded_at'])): ?>
+                        <tr>
+                            <th>first uploaded post</th>
+                            <td>
+                                <?= sprintf("%s ago (%s)", format_timestamp(new DateTime($stats['first_uploaded_at'])), $stats['first_uploaded_at']) ?>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+
+                    <?php if (isset($stats['last_uploaded_at'])): ?>
+                        <tr>
+                            <th>last uploaded post</th>
+                            <td>
+                                <?= sprintf("%s ago (%s)", format_timestamp(new DateTime($stats['last_uploaded_at'])), $stats['last_uploaded_at']) ?>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
                 </table>
             </div>
         </section>
@@ -69,7 +97,7 @@ if (IS_JSON_REQUEST) {
         <?php if (isset($stats['timeline'], CONFIG['driver']['chart'])): ?>
             <section class="box">
                 <div class="tab">
-                    <h3>files uploaded &lpar;per quarter&rpar;</h3>
+                    <h3>posts uploaded &lpar;per quarter&rpar;</h3>
                 </div>
                 <div class="content">
                     <noscript>JavaScript is required for bar chart</noscript>
@@ -81,11 +109,11 @@ if (IS_JSON_REQUEST) {
         <?php if (isset($stats['most_viewed'])): ?>
             <section class="box">
                 <div class="tab">
-                    <h3>the most viewed files</h3>
+                    <h3>the most viewed posts</h3>
                 </div>
-                <div class="content wall">
-                    <?php foreach ($stats['most_viewed'] as $file): ?>
-                        <?php html_file_brick($file) ?>
+                <div class="content item-list">
+                    <?php foreach ($stats['most_viewed'] as $post): ?>
+                        <?php html_file_brick($post) ?>
                     <?php endforeach; ?>
                 </div>
             </section>
