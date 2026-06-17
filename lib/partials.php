@@ -150,6 +150,24 @@ function html_legal()
     <?php ;
 }
 
+function html_motd()
+{
+    $path = "{$_SERVER['DOCUMENT_ROOT']}/MOTD.txt";
+    $motd = null;
+
+    if (is_file($path)) {
+        $lines = explode(PHP_EOL, trim(file_get_contents($path)));
+        $count = count($lines);
+        if ($count > 0) {
+            $motd = $lines[intval(date('j')) % $count];
+        }
+    }
+
+    if ($motd) {
+        echo "<p class='motd'>$motd</p>";
+    }
+}
+
 function html_debug_info()
 {
     $compile_time = (floor(microtime(true) * 1000) - GEN_TIMESTAMP) / 1000;

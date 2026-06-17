@@ -121,6 +121,8 @@ if (IS_JSON_REQUEST) {
     </main>
     <footer>
         <?php html_footer(); ?>
+        <?php html_legal(); ?>
+        <?php html_motd(); ?>
     </footer>
 </body>
 

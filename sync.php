@@ -80,6 +80,8 @@ if (CLIENT_REQUIRES_JSON && isset($_GET['id'])) {
     </main>
     <footer>
         <?php html_footer(); ?>
+        <?php html_legal(); ?>
+        <?php html_motd(); ?>
     </footer>
 </body>
 

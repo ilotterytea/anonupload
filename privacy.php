@@ -36,6 +36,7 @@ if ($data['last_updated']->getTimestamp() === 0)
     <footer>
         <?php html_footer(); ?>
         <?php html_legal(); ?>
+        <?php html_motd(); ?>
     </footer>
 </body>
 

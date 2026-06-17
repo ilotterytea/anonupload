@@ -75,6 +75,8 @@ if (is_dir($_SERVER['DOCUMENT_ROOT'] . $folder_path)) {
     </main>
     <footer>
         <?php html_footer(); ?>
+        <?php html_legal(); ?>
+        <?php html_motd(); ?>
     </footer>
 </body>
 

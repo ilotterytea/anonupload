@@ -657,6 +657,18 @@ p.error {
     display: none;
 }
 
+.motd {
+    font-style: italic;
+}
+
+.motd::before {
+    content: '"';
+}
+
+.motd::after {
+    content: '"';
+}
+
 /** ANIMATIONS */
 .shake {
     animation: shaking 0.2s infinite;

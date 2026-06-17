@@ -85,7 +85,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </main>
     <footer>
-        <?php html_footer() ?>
+        <?php html_footer(); ?>
+        <?php html_legal(); ?>
+        <?php html_motd(); ?>
     </footer>
 </body>
 

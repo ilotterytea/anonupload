@@ -152,6 +152,7 @@ unset($_SESSION['recently_uploaded_files']);
     <footer>
         <?php html_footer(); ?>
         <?php html_legal(); ?>
+        <?php html_motd(); ?>
     </footer>
 </body>
 

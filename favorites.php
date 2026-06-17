@@ -22,6 +22,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/lib/thumbnails.php';
     </main>
     <footer>
         <?php html_footer(); ?>
+        <?php html_legal(); ?>
+        <?php html_motd(); ?>
     </footer>
 </body>
 
