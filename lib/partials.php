@@ -37,9 +37,11 @@ function html_head(string|null $title = null, string|null $description = null, B
     }
 
     // themes
-    if (isset($_COOKIE['theme'])) {
-        if (in_array($_COOKIE['theme'], THEME_LIST, true)) {
-            echo "<link rel='stylesheet' href='/static/themes/{$_COOKIE['theme']}/style.css' />";
+    $theme = $_COOKIE['theme'] ?? CONFIG['instance']['defaultstyle'];
+
+    if (isset($theme) && $theme !== 'default') {
+        if (in_array($theme, THEME_LIST, true)) {
+            echo "<link rel='stylesheet' href='/static/themes/$theme/style.css' />";
         } else {
             setcookie("theme", "", 0, "/");
         }
@@ -122,6 +124,9 @@ function html_footer()
             <li><a href="/stats">statistics</a></li>
         <?php endif; ?>
         <li><a href="/preferences">preferences</a></li>
+        <?php if (!empty(CONFIG['contact']['url'])): ?>
+            <li><a href="<?= CONFIG['contact']['url'] ?>" referrerpolicy="origin"><?= CONFIG['contact']['name'] ?></a></li>
+        <?php endif; ?>
         <?php if (!empty($dropdown_links)): ?>
             <li class="dropdown">
                 <button class="drop-button"><?= CONFIG['instance']['linkname'] ?></button>

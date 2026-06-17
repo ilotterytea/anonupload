@@ -245,6 +245,10 @@ $cfg = [
     "report" => [
         'mail' => null
     ],
+    'contact' => [
+        'name' => 'contact',
+        'url' => null
+    ],
     "moderation" => [
         "path" => "{$_SERVER['DOCUMENT_ROOT']}/.anonuploadpasswd",
         "banfiles" => true,
