@@ -362,7 +362,7 @@ class Post implements JsonSerializable
     public string $id;
     public array $attachments = [];
 
-    public DateTime|null $uploaded_at = null;
+    public DateTime|null $uploaded_at = null, $expires_at = null;
     public string|null $password = null;
 
     public static function from_array(array $res): Post
@@ -383,6 +383,20 @@ class Post implements JsonSerializable
             }
         } else {
             $o->uploaded_at = null;
+        }
+
+        if (isset($res['expires_at'])) {
+            $o->expires_at = new DateTime();
+
+            if (is_numeric($res['expires_at'])) {
+                $o->expires_at->setTimestamp(intval($res['expires_at']));
+            } elseif (isset($res['expires_at']['date'])) {
+                $o->expires_at->setTimestamp(strtotime($res['expires_at']['date']));
+            } else {
+                $o->expires_at->setTimestamp(strtotime($res['expires_at']));
+            }
+        } else {
+            $o->expires_at = null;
         }
 
         return $o;

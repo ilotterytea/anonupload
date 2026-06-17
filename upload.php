@@ -26,7 +26,7 @@ $status = new FileTrackStatus(
     : "0"
 );
 
-function create_post(string|null $password): Post
+function create_post(string|null $password, DateTime $upload_date, DateTime|null $expiration_date): Post
 {
     global $status;
 
@@ -46,7 +46,8 @@ function create_post(string|null $password): Post
 
     $p = new Post();
     $p->id = $post_id;
-    $p->uploaded_at = new DateTime();
+    $p->uploaded_at = $upload_date;
+    $p->expires_at = $expiration_date;
     $p->password = $password;
 
     if (!FILEREGISTRY->put_post($p)) {
@@ -111,9 +112,38 @@ try {
 
     $single_url = boolval($_POST['single_url'] ?? '0');
     $strip_exif = boolval($_POST['strip_exif'] ?? '0');
+    $expire_in = $_POST['expires_in'] ?? CONFIG['upload']['default_expiration'];
     $password = $_POST['password'] ?? null;
 
-    $root_post = $single_url ? create_post($password) : null;
+    if (CONFIG['upload']['force_default_expiration'] || !array_key_exists($expire_in, CONFIG['upload']['expiration'])) {
+        $expire_in = CONFIG['upload']['default_expiration'];
+    }
+
+    $format = 'Y-m-d H:i:s';
+    function calculate_expiration_time($e, $format)
+    {
+        $v = intval(substr($e, 0, strlen($e) - 1));
+        $m = substr($e, strlen($e) - 1);
+
+        $secs = match ($m) {
+            'd' => 86400,
+            'h' => 3600,
+            'm' => 60,
+            default => 0
+        };
+
+        $t = time() + $v * $secs;
+        return date($format, $t);
+    }
+
+    $upload_date = new DateTime();
+    $expiration_date = match ($expire_in) {
+        'ne' => null,
+        're' => $upload_date,
+        default => new DateTime(calculate_expiration_time($expire_in, $format))
+    };
+
+    $root_post = $single_url ? create_post($password, $upload_date, $expiration_date) : null;
     $uploaded_posts = $single_url ? [$root_post] : [];
     $file_count = count($files);
 
@@ -162,7 +192,7 @@ try {
                 throw new RuntimeException('Failed to strip EXIF tags.');
             }
 
-            $post = $root_post ?? create_post($password);
+            $post = $root_post ?? create_post($password, $upload_date, $expiration_date);
 
             // searching for similar file
             $file_hash = hash_file("sha256", $file['tmp_name']);

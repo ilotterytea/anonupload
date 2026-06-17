@@ -67,6 +67,13 @@ class SQLFileRegistry implements FileRegistry
                 array_push($post->attachments, BaseFile::from_array($res));
             }
 
+            if ($post->expires_at && $post->expires_at->getTimestamp() <= time()) {
+                if (!$this->delete_post($post)) {
+                    throw new RuntimeException("Failed to delete expired post");
+                }
+                return null;
+            }
+
             return $post;
         }
 
@@ -141,12 +148,13 @@ class SQLFileRegistry implements FileRegistry
 
         // saving post data
         $stmt = $this->db->prepare("INSERT IGNORE INTO
-            posts(id, uploaded_at, password)
-            VALUES(:id, :uat, :password)
+            posts(id, uploaded_at, expires_at, password)
+            VALUES(:id, :uat, :eat, :password)
         ");
         $stmt->execute([
             ':id' => $post->id,
-            ':uat' => $post->uploaded_at->format('Y-m-d H:i:s'),
+            ':uat' => $post->uploaded_at?->format('Y-m-d H:i:s'),
+            ':eat' => $post->expires_at?->format('Y-m-d H:i:s'),
             ':password' => $password
         ]);
 

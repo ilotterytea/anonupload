@@ -210,7 +210,7 @@ $cfg = [
         "zipwebapps" => false,
         "titlelength" => 100,
         "removeletterboxes" => false,
-        "expiration" => [
+        'expiration' => [
             'ne' => 'Never',
             '14d' => '2 weeks',
             '7d' => 'a week',
@@ -221,6 +221,8 @@ $cfg = [
             '5m' => '5 minutes',
             're' => 'Burn after seeing'
         ],
+        'default_expiration' => 'ne',
+        'force_default_expiration' => false
     ],
     "externalupload" => [
         "enable" => true,

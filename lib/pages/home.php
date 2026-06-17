@@ -26,7 +26,12 @@ unset($_SESSION['recently_uploaded_files']);
 <body>
     <header>
         <?php html_header(); ?>
-        <h2>max upload size is <?= get_cfg_var(option: 'upload_max_filesize') ?></h2>
+        <h2>
+            max upload size is <?= get_cfg_var(option: 'upload_max_filesize') ?>
+            <?php if (CONFIG['upload']['force_default_expiration'] && CONFIG['upload']['default_expiration'] !== 'ne'): ?>
+                & files expire after <?= CONFIG['upload']['expiration'][CONFIG['upload']['default_expiration']] ?>
+            <?php endif; ?>
+        </h2>
     </header>
     <main>
         <form action="/upload" method="post" enctype="multipart/form-data" autocomplete="off" id="form-upload">
@@ -49,6 +54,18 @@ unset($_SESSION['recently_uploaded_files']);
                                         title="attach all files to a single link">[?]</sup>:</label></th>
                             <td><input type="checkbox" name="single_url" id="file-singleurl" value="1"></td>
                         </tr>
+                        <?php if (!empty(CONFIG['upload']['expiration']) && !CONFIG['upload']['force_default_expiration']): ?>
+                            <tr>
+                                <th><label for="file-expiration">expires in:</label></th>
+                                <td>
+                                    <select name="expires_in" id="file-expiration">
+                                        <?php foreach (CONFIG['upload']['expiration'] as $v => $t): ?>
+                                            <option value="<?= $v ?>" <?= $v === CONFIG['upload']['default_expiration'] ? 'selected' : '' ?>><?= $t ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
                     </table>
                 </fieldset>
                 <fieldset>
