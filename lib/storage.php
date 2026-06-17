@@ -84,7 +84,7 @@ class LocalFileStorage implements FileStorage
 class S3FileStorage implements FileStorage
 {
     private S3Client $s3;
-    private string $bucket;
+    private string $bucket, $directory;
 
     public function __construct($data)
     {
@@ -99,6 +99,7 @@ class S3FileStorage implements FileStorage
             'use_path_style_endpoint' => $data['use_path_style_endpoint'] ?? false
         ]);
         $this->bucket = $data['bucket'];
+        $this->directory = $data['directory'];
     }
 
     public function has_file(string $name): bool
@@ -111,7 +112,7 @@ class S3FileStorage implements FileStorage
         try {
             $result = $this->s3->headObject([
                 'Bucket' => $this->bucket,
-                'Key' => $name
+                'Key' => "{$this->directory}/$name"
             ]);
         } catch (Exception $e) {
             return null;
@@ -134,7 +135,7 @@ class S3FileStorage implements FileStorage
     {
         $m = [
             'Bucket' => $this->bucket,
-            'Key' => $name,
+            'Key' => "{$this->directory}/$name",
             'Params' => []
         ];
 
@@ -160,7 +161,7 @@ class S3FileStorage implements FileStorage
         try {
             $this->s3->deleteObject([
                 'Bucket' => $this->bucket,
-                'Key' => $name
+                'Key' => "{$this->directory}/$name"
             ]);
         } catch (Exception $e) {
             return false;
