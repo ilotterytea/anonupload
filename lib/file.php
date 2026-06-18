@@ -541,13 +541,13 @@ class FileTrackStatus
 
     public function get(): mixed
     {
-        return MEMCACHED?->get($this->id);
+        return json_decode(MEMCACHED?->get($this->id), true);
     }
 
     public function set(mixed $data)
     {
         if ($this->id)
-            MEMCACHED?->set($this->id, $data, $this->ttl);
+            MEMCACHED?->set($this->id, json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $this->ttl);
     }
 
     public function send(string $stage, string|null $message = null, mixed $data = null)

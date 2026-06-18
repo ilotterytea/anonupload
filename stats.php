@@ -21,7 +21,7 @@ if (IS_JSON_REQUEST) {
         <?php html_header(); ?>
         <h2>statistics</h2>
         <?php if (isset($stats['last_update'])): ?>
-            <p><i>last updated <?= format_timestamp($stats['last_update']) ?> ago</i></p>
+            <p><i>last updated <?= format_timestamp((new DateTime())->setTimestamp($stats['last_update'])) ?> ago</i></p>
         <?php endif; ?>
     </header>
     <main class="statistics">

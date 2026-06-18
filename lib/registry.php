@@ -207,7 +207,15 @@ class SQLFileRegistry implements FileRegistry
     public function get_stats(): array|null
     {
         if ($cached_stats = MEMCACHED?->get(CONFIG['instance']['id'] . "_stats")) {
-            return $cached_stats;
+            $res = json_decode($cached_stats, true);
+
+            $files = [];
+            foreach ($res['most_viewed'] as $row) {
+                array_push($files, Post::from_array($row));
+            }
+            $res['most_viewed'] = $files;
+
+            return $res;
         }
 
         // -- basic info
@@ -263,8 +271,8 @@ class SQLFileRegistry implements FileRegistry
         $res['most_viewed'] = $files;
 
         if (MEMCACHED) {
-            $res['last_update'] = new DateTime();
-            MEMCACHED->set(CONFIG['instance']['id'] . '_stats', $res, CONFIG['stats']['ttl']);
+            $res['last_update'] = time();
+            MEMCACHED->set(CONFIG['instance']['id'] . '_stats', json_encode($res, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), CONFIG['stats']['ttl']);
         }
 
         return $res;

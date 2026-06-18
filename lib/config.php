@@ -39,7 +39,8 @@ $cfg = [
         'use_path_style_endpoint' => true,
     ],
     'memcached' => [
-        'hosts' => null
+        'hosts' => null,
+        'use_redis' => false
     ],
     'metadata' => [
         'type' => 'local',
@@ -328,17 +329,32 @@ define("IMAGEMAGICK_COMMAND", $imagemagick);
 
 define("THEME_LIST", array_map(fn($x) => basename($x), glob("{$_SERVER['DOCUMENT_ROOT']}/static/themes/*", GLOB_ONLYDIR)));
 
+
+// -- setting up cache system
+$mem = null;
+
 if ($cfg['memcached']['hosts']) {
     $hosts = explode("\t", $cfg['memcached']['hosts']);
-    $mem = new Memcached();
+    $hs = [];
     foreach ($hosts as $host) {
         $parts = explode(" ", $host, 3);
         $h = $parts[0];
         $p = $parts[1];
         $w = $parts[2] ?? 0;
-        $mem->addServer($h, $p, $w);
+        array_push($hs, [$h, $p, $w]);
     }
-    define("MEMCACHED", $mem);
-} else {
-    define("MEMCACHED", null);
+
+    if (extension_loaded('memcached') && !$cfg['memcached']['use_redis']) {
+        $mem = new Memcached();
+        foreach ($hs as $h) {
+            $mem->addServer($h[0], $h[1], $h[2]);
+        }
+    } else if (extension_loaded('redis') && count($hs) > 0) {
+        $mem = new Redis();
+        $h = $hs[0];
+        $mem->connect($h[0], $h[1]);
+        $mem->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_PHP);
+    }
 }
+
+define("MEMCACHED", $mem);
