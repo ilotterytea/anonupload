@@ -1,4 +1,5 @@
 <?php
+include_once "{$_SERVER['DOCUMENT_ROOT']}/vendor/autoload.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/partials.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
@@ -9,8 +10,10 @@ if (!file_exists($file_path)) {
     generate_alert('/', 'TOS is not set!', 500);
 }
 
+$markdown = new Parsedown();
+
 $data = [
-    'content' => bbcode_parse(file_get_contents($file_path) ?: "Don't upload anything bad."),
+    'content' => $markdown->text(file_get_contents($file_path) ?: "Don't upload anything bad."),
     'last_updated' => (new DateTime())->setTimestamp(filemtime($file_path) ?: 0)
 ];
 
