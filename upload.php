@@ -261,19 +261,23 @@ try {
         $status->send('up_thumbnail', 'drawing thumbnails...');
         $s3_thumb = THUMBNAILER instanceof S3ProxyThumbnailer;
         $data = [];
-        foreach ($uploaded_posts as &$p) {
+        foreach ($uploaded_posts as $i => $p) {
+            if (is_array($p)) {
+                continue;
+            }
+
             foreach ($p->attachments as &$f) {
-                if (!is_array($f) && ($s3_thumb || $f->path)) {
+                if ($s3_thumb || $f->path) {
                     array_push($data, [
-                        'input_path' => $s3_thumb ? "{$f->id}.{$f->extension}" : $f->path,
+                        'input_path' => $s3_thumb ? "{$f->name}.{$f->extension}" : $f->path,
                         'width' => CONFIG['thumbnails']['width'],
                         'height' => CONFIG['thumbnails']['height'],
                     ]);
                 }
             }
+
             unset($f);
         }
-        unset($p);
 
         $thumbnails = THUMBNAILER->generate_thumbnails($data);
     }

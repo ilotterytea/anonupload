@@ -125,17 +125,15 @@ class LocalThumbnailer implements Thumbnailer
 
 class S3ProxyThumbnailer implements Thumbnailer
 {
-    private string $url, $bucket, $output_bucket, $extension, $prefix;
+    private string $url, $extension, $prefix;
     private string|null $authorization_key;
 
-    public function __construct(string $url, string $prefix, string $extension, string $bucket, string $output_bucket, string|null $authorization_key = null)
+    public function __construct(string $url, string $prefix, string $extension, string|null $authorization_key = null)
     {
         $this->url = $url;
-        $this->bucket = $bucket;
-        $this->output_bucket = $output_bucket;
-        $this->authorization_key = $authorization_key;
         $this->prefix = $prefix;
         $this->extension = $extension;
+        $this->authorization_key = $authorization_key;
     }
 
     public function get_thumbnail_root(): string
@@ -162,8 +160,6 @@ class S3ProxyThumbnailer implements Thumbnailer
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
             [
                 'key' => basename($input_path),
-                'input_bucket' => $this->bucket,
-                'output_bucket' => $this->output_bucket,
                 'width' => $width,
                 'height' => $height,
                 'extension' => $this->extension
@@ -191,8 +187,6 @@ class S3ProxyThumbnailer implements Thumbnailer
             }
             array_push($payload, [
                 'key' => basename($f['input_path']),
-                'input_bucket' => $this->bucket,
-                'output_bucket' => $this->output_bucket,
                 'width' => $f['width'],
                 'height' => $f['height'],
                 'extension' => $this->extension
@@ -228,8 +222,6 @@ define("THUMBNAILER", match (true) {
         CONFIG['thumbnails']['url'],
         CONFIG['thumbnails']['prefix'],
         CONFIG['thumbnails']['extension'],
-        CONFIG['thumbnails']['bucket'],
-        CONFIG['thumbnails']['output_bucket'],
         CONFIG['thumbnails']['authorization_key']
     ),
     CONFIG['thumbnails']['type'] === "local" && CONFIG['storage']['type'] !== "s3" => new LocalThumbnailer(

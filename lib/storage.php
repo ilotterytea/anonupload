@@ -145,10 +145,9 @@ class S3FileStorage implements FileStorage
 
         $uploader = new MultipartUploader($this->s3, $input_path, $m);
 
-        $result = $uploader->upload();
-        $key = $result->get("Key");
+        $uploader->upload();
 
-        $file = $this->get_file($key);
+        $file = $this->get_file($name);
         if (!$file) {
             return null;
         }
