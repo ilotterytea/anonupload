@@ -66,11 +66,37 @@ function deleteUploadedFile(id, element = null) {
         });
 }
 
+function saveFile(file, files, filesId) {
+    for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        if (f.id !== file.id) continue;
+        files[i] = file;
+        break;
+    }
+
+    localStorage.setItem(filesId, JSON.stringify(files));
+}
+
 // -- dom functions
 function createFile(file) {
     let fileName = file.id;
     if (file.extension) {
         fileName += `.${file.extension}`;
+    }
+
+    // -- old file format support
+    let fileDownloadURL = null;
+    let fileThumbnailURL = null;
+    let saveOnFetch = false;
+    if (file.urls) {
+        if (file.urls.download_url) fileDownloadURL = file.urls.download_url;
+        if (file.urls.thumbnail_url) fileThumbnailURL = file.urls.thumbnail_url;
+    }
+
+    if (file.id && !fileDownloadURL) fileDownloadURL = `${window.location.protocol}//${window.location.host}/${file.id}`;
+    if (file.id && !fileThumbnailURL) {
+        fileThumbnailURL = `${window.location.protocol}//${window.location.host}/${file.id}?thumbnail`;
+        saveOnFetch = true;
     }
 
     const root = document.createElement("div");
@@ -80,13 +106,26 @@ function createFile(file) {
     base.classList.add("base");
     root.append(base);
 
-    if (file.urls && file.urls.thumbnail_url) {
+    if (fileThumbnailURL) {
         const img = new Image();
-
-        img.addEventListener("load", () => root.style.backgroundImage = `url('${file.urls.thumbnail_url}')`);
+        img.addEventListener("load", () => root.style.backgroundImage = `url('${fileThumbnailURL}')`);
         img.addEventListener("error", () => root.style.backgroundImage = "url('/static/img/default-thumbnail.webp')");
 
-        img.src = file.urls.thumbnail_url;
+        if (saveOnFetch) {
+            fetch(fileThumbnailURL)
+            .then((r) => {
+                if (r.status !== 200) return;
+                fileThumbnailURL = r.url;
+                img.src = fileThumbnailURL;
+                
+                if (!file.urls) file.urls = {};
+                if (!file.urls.thumbnail_url) file.urls.thumbnail_url = fileThumbnailURL;
+
+                file.save();
+            });
+        } else {
+            img.src = fileThumbnailURL;
+        }
     }
 
     // -- creating name
@@ -117,19 +156,19 @@ function createFile(file) {
     // open button
     const openButton = document.createElement("button");
     openButton.textContent = 'open';
-    openButton.addEventListener("click", () => window.open(file.urls.download_url, '_blank'));
+    openButton.addEventListener("click", () => window.open(fileDownloadURL, '_blank'));
     buttons.append(openButton);
 
     // copy button
     if (navigator.clipboard) {
         const copyButton = document.createElement("button");
         copyButton.innerHTML = '<img src="/static/img/icons/copy.png" alt="copy" title="copy" />';
-        copyButton.addEventListener("click", () => navigator.clipboard.writeText(file.urls.download_url));
+        copyButton.addEventListener("click", () => navigator.clipboard.writeText(fileDownloadURL));
         buttons.append(copyButton);
     }
 
     // delete button
-    if (file.urls.deletion_url) {
+    if (file.urls && file.urls.deletion_url) {
         const deletionButton = document.createElement("button");
         deletionButton.innerHTML = '<img src="/static/img/icons/cross.png" alt="delete" title="delete this file" />';
         deletionButton.addEventListener("click", () => {

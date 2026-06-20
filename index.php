@@ -13,7 +13,17 @@ try {
     if (CONFIG['surpriseme']['enable'] && isset($_GET['random'])) {
         $post = FILEREGISTRY->get_random_post();
     } elseif ($file_name_specified) {
-        $file_name = basename($_GET['i'] ?? $_SERVER['REQUEST_URI']);
+        $get_thumbnail = false;
+        $file_name = null;
+
+        if (isset($_GET['i'])) {
+            $file_name = basename($_GET['i']);
+            $get_thumbnail = isset($_GET['thumbnail']);
+        } else if ($path = parse_url($_SERVER['REQUEST_URI'])) {
+            $file_name = basename($path['path']);
+            $get_thumbnail = str_contains($path['query'], 'thumbnail');
+        }
+
         $post = FILEREGISTRY->get_post($file_name);
 
         if ($post) {
@@ -24,6 +34,23 @@ try {
                 }
             }
             unset($file);
+        }
+
+        // get thumbnail (old format support)
+        if (isset($post) && $get_thumbnail) {
+            $url = null;
+            if ($s = $post->single_attachment()) {
+                $url = $s->thumbnail_url();
+            }
+
+            if ($url) {
+                http_response_code(303);
+                header("Location: $url");
+                die($url);
+            } else {
+                http_response_code(404);
+                die();
+            }
         }
     }
 } catch (Exception $e) {
