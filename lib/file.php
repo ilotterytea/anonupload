@@ -280,6 +280,7 @@ class Post implements JsonSerializable
 
     public DateTime|null $uploaded_at = null, $expires_at = null;
     public string|null $password = null, $description = null;
+    public int|null $views = null;
 
     public static function from_array(array $res): Post
     {
@@ -287,6 +288,10 @@ class Post implements JsonSerializable
         $o->id = $res['id'];
         $o->password = $res['password'] ?? null;
         $o->description = $res['description'] ?? null;
+
+        if (CONFIG['views']['enabled']) {
+            $o->views = $res['views'] ?? null;
+        }
 
         if (isset($res['uploaded_at'])) {
             $o->uploaded_at = new DateTime();
@@ -335,6 +340,10 @@ class Post implements JsonSerializable
             ],
             'attachments' => $this->attachments
         ];
+
+        if ($this->views) {
+            $d['views'] = $this->views;
+        }
 
         if ($this->password && password_get_info($this->password)['algo'] === null) {
             $d['urls']['deletion_url'] = "/delete?id={$this->id}&key={$this->password}";

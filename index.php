@@ -36,21 +36,53 @@ try {
             unset($file);
         }
 
-        // get thumbnail (old format support)
-        if (isset($post) && $get_thumbnail) {
-            $url = null;
-            if ($s = $post->single_attachment()) {
-                $url = $s->thumbnail_url();
+        if (isset($post)) {
+            // get thumbnail (old format support)
+            if ($get_thumbnail) {
+                $url = null;
+                if ($s = $post->single_attachment()) {
+                    $url = $s->thumbnail_url();
+                }
+
+                if ($url) {
+                    http_response_code(303);
+                    header("Location: $url");
+                    die($url);
+                } else {
+                    http_response_code(404);
+                    die();
+                }
             }
 
-            if ($url) {
-                http_response_code(303);
-                header("Location: $url");
-                die($url);
-            } else {
-                http_response_code(404);
-                die();
+            // increment file viewcount
+            if (CONFIG['views']['enabled']) {
+                if (session_status() !== PHP_SESSION_ACTIVE) {
+                    session_start();
+                }
+
+                $viewed_posts = $_SESSION['viewed_posts'] ?? [];
+                if ($post->views !== null && !in_array($post->name(), $viewed_posts)) {
+                    $count_view = true;
+
+                    if (isset($_SERVER['HTTP_USER_AGENT']) && !empty(CONFIG['views']['ignore_user_agents'])) {
+                        foreach (CONFIG['views']['ignore_user_agents'] as $ua) {
+                            $count_view = !preg_match($ua, $_SERVER['HTTP_USER_AGENT']);
+                            if (!$count_view)
+                                break;
+                        }
+                    }
+
+                    if ($count_view) {
+                        $post->views++;
+                        array_push($viewed_posts, $post->name());
+                        if (!FILEREGISTRY->put_post($post)) {
+                            throw new RuntimeException("Failed to save viewcount: {$post->name()}");
+                        }
+                    }
+                }
+                $_SESSION['viewed_posts'] = $viewed_posts;
             }
+
         }
     }
 } catch (Exception $e) {

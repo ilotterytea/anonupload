@@ -241,6 +241,11 @@ $cfg = [
         'directory' => './userdata/thumbnails',
         'prefix' => '/userdata/thumbnails'
     ],
+    'views' => [
+        'enabled' => false,
+        'minimal_display_count' => 0,
+        'ignore_user_agents' => []
+    ],
     "report" => [
         'mail' => null
     ],
@@ -294,6 +299,12 @@ if (file_exists(CONFIG_FILE_PATH)) {
                 }
 
                 $v = $arr;
+            }
+            // value is an array
+            else if (str_starts_with($v, '[') && str_ends_with($v, ']')) {
+                $c = strlen($v);
+                $v = substr($v, 1, $c - 2);
+                $v = explode("\t", $v);
             }
 
             $cfg[$s][$k] = $v;

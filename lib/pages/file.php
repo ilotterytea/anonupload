@@ -41,21 +41,25 @@ $single_attachment = $post->single_attachment();
                         <?= html_mini_icon(); ?>
                     </div>
                     <div class="metadata">
-                        <?php if ($single_attachment): ?>
-                            <p>
+                        <p>
+                            <?php if ($single_attachment): ?>
                                 <span id="post-id"><?= $post->id ?></span>.<span
                                     id="file-extension"><?= $single_attachment->extension ?></span>
                                 (<span id="file-mime"><?= $single_attachment->mime ?></span>)
-                            </p>
-                        <?php else: ?>
-                            <p>
+                            <?php else: ?>
                                 <span id="post-id"><?= $post->id ?></span>
                                 (<?= count($post->attachments) ?> attachments)
-                            </p>
-                        <?php endif; ?>
-                        <p id="post-timestamp" timestamp="<?= $post->uploaded_at->getTimestamp() ?>">uploaded
-                            <?= format_timestamp($post->uploaded_at) ?> ago
+                            <?php endif; ?>
                         </p>
+                        <ul class="horizontal bulletted">
+                            <li id="post-timestamp" timestamp="<?= $post->uploaded_at->getTimestamp() ?>">
+                                uploaded
+                                <?= format_timestamp($post->uploaded_at) ?> ago
+                            </li>
+                            <?php if (isset($post->views) && $post->views >= CONFIG['views']['minimal_display_count']): ?>
+                                <li id="post-views"> <?= $post->views ?> views</li>
+                            <?php endif; ?>
+                        </ul>
                         <p style="display:none" id="post-url"><?= $post->url() ?></p>
                     </div>
                 </div>

@@ -147,16 +147,19 @@ class SQLFileRegistry implements FileRegistry
         $password = $post->password ? password_hash($post->password, PASSWORD_DEFAULT) : null;
 
         // saving post data
-        $stmt = $this->db->prepare("INSERT IGNORE INTO
+        $stmt = $this->db->prepare("INSERT INTO
             posts(id, uploaded_at, expires_at, description, password)
             VALUES(:id, :uat, :eat, :des, :password)
+            ON DUPLICATE KEY UPDATE
+            views = :vc
         ");
         $stmt->execute([
             ':id' => $post->id,
             ':uat' => $post->uploaded_at?->format('Y-m-d H:i:s'),
             ':eat' => $post->expires_at?->format('Y-m-d H:i:s'),
             ':des' => $post->description,
-            ':password' => $password
+            ':password' => $password,
+            ':vc' => $post->views ?? 0
         ]);
 
         return true;

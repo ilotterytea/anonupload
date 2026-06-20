@@ -9,7 +9,9 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/id.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/thumbnails.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
 
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     generate_alert(
@@ -243,6 +245,14 @@ try {
 
             if (!FILEREGISTRY->attach_to_post($post, $base_file)) {
                 throw new HTTPException("Failed to attach file to the post.");
+            }
+
+            if (CONFIG['views']['enabled']) {
+                $viewed_posts = $_SESSION['viewed_posts'] ?? [];
+                if (!in_array($post->name(), $viewed_posts)) {
+                    array_push($viewed_posts, $post->name());
+                }
+                $_SESSION['viewed_posts'] = $viewed_posts;
             }
 
             if (!$single_url) {
