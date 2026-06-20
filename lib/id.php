@@ -9,10 +9,14 @@ class SplitFilename
     public function __construct(string $filename)
     {
         $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        $name = basename($filename);
         $l = strlen($ext);
 
-        $name = basename($filename);
-        $this->name = substr($name, 0, strlen($name) - $l);
+        if ($l > 0) {
+            $name = substr($name, 0, strlen($name) - $l - 1);
+        }
+
+        $this->name = $name;
         $this->extension = $ext ?: null;
     }
 }
