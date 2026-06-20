@@ -87,29 +87,64 @@ function parse_swf_file(string $file_path): array
 
 function verify_mimetype(string $file_path, string $mimetype): bool
 {
-    $path = escapeshellarg($file_path);
-    $output = [];
-    $exitCode = 0;
+    if (str_starts_with($mimetype, 'image/')) {
+        return verify_image($file_path);
+    }
 
-    if (str_starts_with($mimetype, 'image/') && IMAGEMAGICK_COMMAND) {
-        $output = shell_exec(IMAGEMAGICK_COMMAND['identify'] . " -quiet -ping $path");
-        return !empty($output);
-    } else if (str_starts_with($mimetype, 'video/') || str_starts_with($mimetype, 'audio/')) {
-        $cmd = "ffprobe -v error -i $path 2>&1";
-        exec($cmd, $output, $exitCode);
-        return $exitCode === 0;
-    } else if ($mimetype == 'application/x-shockwave-flash') {
+    if (str_starts_with($mimetype, 'video/') || str_starts_with($mimetype, 'audio/')) {
+        return verify_media($file_path);
+    }
+
+    if ($mimetype === 'application/x-shockwave-flash') {
         return is_swf_file($file_path);
     }
 
     throw new RuntimeException("Illegal type for MIME verifications: $mimetype");
 }
 
-function strip_exif(string $file_path)
+function verify_image(string $file_path): bool
 {
-    $file_path = escapeshellarg($file_path);
-    $output = shell_exec("exiftool -q -EXIF= $file_path $file_path");
-    return empty($output);
+    try {
+        $img = new Imagick($file_path);
+        $format = $img->getImageFormat();
+        return !empty($format);
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+function verify_media(string $file_path): bool
+{
+    try {
+        $getID3 = new getID3();
+        $info = $getID3->analyze($file_path);
+
+        if (!empty($info['error'])) {
+            return false;
+        }
+
+        return isset($info['fileformat']) && $info['fileformat'] !== '';
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+
+function strip_exif(string $file_path): bool
+{
+    try {
+        $img = new Imagick($file_path);
+
+        $img->stripImage();
+        $img->writeImage($file_path);
+
+        $img->clear();
+        $img->destroy();
+
+        return true;
+    } catch (Exception $e) {
+        return false;
+    }
 }
 
 class FileOptions

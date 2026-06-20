@@ -176,60 +176,6 @@ function html_motd()
     }
 }
 
-function html_debug_info()
-{
-    $compile_time = (floor(microtime(true) * 1000) - GEN_TIMESTAMP) / 1000;
-
-    $commit = null;
-
-    if ($_SERVER['REQUEST_URI'] === '/') {
-        $commit = explode(' ', trim(shell_exec('git show -s --format="%h %ct %s" HEAD')), 3);
-        $commit = [
-            'sha' => $commit[0],
-            'timestamp' => (int) $commit[1],
-            'message' => $commit[2]
-        ];
-    }
-
-    $new_tos = false;
-    $tos_exists = false;
-    if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/TOS.txt")) {
-        $new_tos = time() - filemtime("{$_SERVER['DOCUMENT_ROOT']}/TOS.txt") < 86400 * 3;
-        $tos_exists = true;
-    }
-
-    $new_privacy = false;
-    $privacy_exists = false;
-    if (file_exists("{$_SERVER['DOCUMENT_ROOT']}/PRIVACY.txt")) {
-        $new_privacy = time() - filemtime("{$_SERVER['DOCUMENT_ROOT']}/PRIVACY.txt") < 86400 * 3;
-        $privacy_exists = true;
-    }
-
-    echo '' ?>
-    <div class="debug-info">
-        <p>Page generated in <?= $compile_time ?>s</p>
-        <?php if (isset($commit) && !empty($commit['sha'])): ?>
-            <p>
-                Last updated
-                <?= format_timestamp((new DateTime())->setTimestamp($commit['timestamp'])) ?> ago
-                <a href="https://git.ilt.su/services/anonupload.git/commit/?id=<?= $commit['sha'] ?>"
-                    title="<?= $commit['message'] ?>">
-                    (commit <?= $commit['sha'] ?>)
-                </a>
-            </p>
-        <?php endif; ?>
-        <?php if ($tos_exists): ?>
-            <a href="/tos.php">Terms of Service<?= $new_tos ? " (NEW)" : "" ?></a>
-        <?php endif; ?>
-        <?php if ($privacy_exists): ?>
-            <a href="/privacy.php">Privacy Policy<?= $new_privacy ? " (NEW)" : "" ?></a>
-        <?php endif; ?>
-        <p><a href="/preferences.php"><img src="/static/img/icons/preferences.png" alt="Preferences"
-                    title="Customize your experience" height="12"></a></p>
-    </div>
-    <?php ;
-}
-
 function html_file_brick(Post $post)
 {
     $name = $post->name();

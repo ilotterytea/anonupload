@@ -5,7 +5,9 @@
     "require": {
         "aws/aws-sdk-php": "^3.383",
         "erusev/parsedown": "^1.8",
-        "james-heinrich/getid3": "^1.9"
+        "james-heinrich/getid3": "^1.9",
+        "php-ffmpeg/php-ffmpeg": "^1.4",
+        "czproject/git-php": "^4.6"
     },
     "license": "Apache-2.0",
     "authors": [
