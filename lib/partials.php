@@ -268,6 +268,7 @@ function html_file_full(BaseFile $file)
 
     echo '<div class="file-preview" ';
     echo "file-name='{$file->name}' ";
+    echo "file-pathname='{$file->file_name()}' ";
     echo "file-size='{$file->size}' ";
     echo "file-mime='{$file->mime}' ";
     echo "file-ext='{$file->extension}' ";

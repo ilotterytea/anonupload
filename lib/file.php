@@ -163,7 +163,7 @@ class BaseFile implements JsonSerializable
 {
     public string $name, $extension, $mime, $hash;
     public int $size;
-    public string|null $path = null;
+    public string|null $path = null, $original_filename = null;
     public FileMetadata|null $metadata = null;
 
     public static function from_array(array $row): BaseFile
@@ -174,6 +174,7 @@ class BaseFile implements JsonSerializable
         $f->mime = $row['mime'];
         $f->size = $row['size'];
         $f->hash = $row['hash'];
+        $f->original_filename = $row['original_filename'] ?? null;
 
         if (
             array_key_exists('width', $row) ||
@@ -190,6 +191,11 @@ class BaseFile implements JsonSerializable
         }
 
         return $f;
+    }
+
+    public function file_name(): string
+    {
+        return $this->original_filename ?? "{$this->name}.{$this->extension}";
     }
 
     public function raw_url(): string|null
@@ -219,6 +225,7 @@ class BaseFile implements JsonSerializable
     {
         return [
             'id' => $this->name,
+            'name' => $this->original_filename,
             'extension' => $this->extension,
             'mime' => $this->mime,
             'size' => $this->size,

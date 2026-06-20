@@ -118,6 +118,7 @@ try {
 
     $single_url = boolval($_POST['single_url'] ?? '0');
     $strip_exif = boolval($_POST['strip_exif'] ?? '0');
+    $preserve_original_name = boolval($_POST['preserve_original_name'] ?? '0');
     $expire_in = $_POST['expires_in'] ?? CONFIG['upload']['default_expiration'];
     $password = $_POST['password'] ?? null;
 
@@ -236,6 +237,9 @@ try {
                 $base_file->hash = $file_hash;
                 $base_file->metadata = $metadata;
             }
+
+            $original_filename = $preserve_original_name ? str_safe($file['name'], null) : null;
+            $base_file->original_filename = $original_filename;
 
             if (!FILEREGISTRY->attach_to_post($post, $base_file)) {
                 throw new HTTPException("Failed to attach file to the post.");

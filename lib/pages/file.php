@@ -138,7 +138,9 @@ $single_attachment = $post->single_attachment();
         if (!downloadButton || !fullsizeButton) return;
 
         const url = file.getAttribute("file-raw-url");
+        const pathName = file.getAttribute("file-pathname");
         downloadButton.href = url;
+        downloadButton.download = pathName;
         fullsizeButton.href = url;
     }
 

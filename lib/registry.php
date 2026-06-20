@@ -55,7 +55,7 @@ class SQLFileRegistry implements FileRegistry
 
             // fetching attachments
             $stmt = $this->db->prepare('SELECT
-                fm.*, f.*
+                fm.*, f.*, pa.original_filename
             FROM files f
             JOIN post_attachments pa ON pa.post_id = ?
             LEFT JOIN file_metadata fm ON fm.id = f.id
@@ -191,12 +191,13 @@ class SQLFileRegistry implements FileRegistry
         }
 
         $stmt = $this->db->prepare("INSERT INTO
-                post_attachments(post_id, file_id)
-                VALUES(:pid, :fid)
+                post_attachments(post_id, file_id, original_filename)
+                VALUES(:pid, :fid, :ofn)
             ");
         $stmt->execute([
             ':pid' => $post->id,
-            ':fid' => $file->name
+            ':fid' => $file->name,
+            ':ofn' => $file->original_filename
         ]);
 
         array_push($post->attachments, $file);
@@ -244,7 +245,7 @@ class SQLFileRegistry implements FileRegistry
 
         // calculating the count of future files
         $serving_future_files = null;
-        if (CONFIG['stats']['disk_size'] > 0) {
+        if (CONFIG['stats']['disk_size'] > 0 && $res['average_file_size'] > 0) {
             $size = CONFIG['stats']['disk_size'];
             $serving_future_files = floor($size / $res['average_file_size']);
         }

@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS files (
     mime TEXT NOT NULL,
     extension TEXT NOT NULL,
     size BIGINT NOT NULL,
-    hash BINARY(64) NOT NULL
+    hash BINARY(64) NOT NULL,
+    UNIQUE (hash)
 );
 
 CREATE TABLE IF NOT EXISTS file_metadata (
@@ -26,7 +27,8 @@ CREATE TABLE IF NOT EXISTS posts (
 CREATE TABLE IF NOT EXISTS post_attachments (
     id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     post_id CHAR(32) NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-    file_id BIGINT NOT NULL REFERENCES files(id) ON DELETE CASCADE
+    file_id BIGINT NOT NULL REFERENCES files(id) ON DELETE CASCADE,
+    original_filename TEXT
 );
 
 CREATE TABLE IF NOT EXISTS storages (
