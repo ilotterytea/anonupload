@@ -157,6 +157,8 @@ try {
     if (!empty($description)) {
         $pdown = new Parsedown();
         $description = $pdown->text($description);
+    } else {
+        $description = null;
     }
 
     $root_post = $single_url ? create_post($password, $upload_date, $expiration_date, $description) : null;
