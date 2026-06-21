@@ -3,6 +3,27 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 
+function get_big_icon(): string
+{
+    $brand_url = '/static/img/brand/big.webp';
+    $folder_path = '/static/instances/' . CONFIG['instance']['name'] . '/img/brand/big';
+
+    if (!is_dir($_SERVER['DOCUMENT_ROOT'] . $folder_path)) {
+        $folder_path = '/static/img/brand/big';
+    }
+
+    if (is_dir($_SERVER['DOCUMENT_ROOT'] . $folder_path)) {
+        $files = glob($_SERVER['DOCUMENT_ROOT'] . "$folder_path/*.*");
+
+        if (!empty($files)) {
+            $file = basename($files[random_int(0, count($files) - 1)]);
+            $brand_url = "$folder_path/$file";
+        }
+    }
+
+    return CONFIG['instance']['url'] . $brand_url;
+}
+
 function html_head(string $title = "", string|null $description = null, Post|null $post = null)
 {
     if (!$description) {
@@ -21,11 +42,17 @@ function html_head(string $title = "", string|null $description = null, Post|nul
     echo "<meta property=\"og:description\" content=\"$description\" />";
     echo "<meta property=\"description\" content=\"$description\" />";
 
+    $image_url = null;
+
     if (isset($post)) {
         echo "<meta property=\"og:url\" content=\"{$post->url()}\" />";
-        if ($image_url = $post->thumbnail_url()) {
+        $image_url = $image_url = $post->thumbnail_url();
+    } else {
+        $image_url = get_big_icon();
+    }
+
+    if ($image_url) {
             echo "<meta property=\"og:image\" content=\"$image_url\" />";
-        }
     }
 
     echo '<meta name="viewport" content="width=device-width, initial-scale=1" />';
@@ -75,21 +102,7 @@ function html_mini_icon()
 
 function html_header()
 {
-    $brand_url = '/static/img/brand/big.webp';
-    $folder_path = '/static/instances/' . CONFIG['instance']['name'] . '/img/brand/big';
-
-    if (!is_dir($_SERVER['DOCUMENT_ROOT'] . $folder_path)) {
-        $folder_path = '/static/img/brand/big';
-    }
-
-    if (is_dir($_SERVER['DOCUMENT_ROOT'] . $folder_path)) {
-        $files = glob($_SERVER['DOCUMENT_ROOT'] . "$folder_path/*.*");
-
-        if (!empty($files)) {
-            $file = basename($files[random_int(0, count($files) - 1)]);
-            $brand_url = "$folder_path/$file";
-        }
-    }
+    $brand_url = get_big_icon();
 
     echo '<a href="/">';
     echo "<img src='$brand_url' alt='" . CONFIG['instance']['name'] . "'/>";
