@@ -3,24 +3,28 @@ include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/config.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/file.php";
 include_once "{$_SERVER['DOCUMENT_ROOT']}/lib/utils.php";
 
-function html_head(string|null $title = null, string|null $description = null, BaseFile|null $file = null)
+function html_head(string $title = "", string|null $description = null, Post|null $post = null)
 {
-    $ititle = CONFIG['instance']['name'];
     if (!$description) {
-        $description = "$ititle is a simple, free and anonymous file sharing site. We do not store anything other than the files you upload.";
+        $description = CONFIG['instance']['name'] . " is a simple, free and anonymous file sharing site. We do not store anything other than the files you upload.";
     }
 
-    $title = ($title ? "$title - " : '') . $ititle;
-    echo "<title>$title</title>";
-    echo "<meta property='og:title' content='$title' />";
-    echo '<meta property="og:type" content="website" />';
-    echo "<meta property='og:description' content='$description' />";
-    echo "<meta property='description' content='$description' />";
+    if ($title) {
+        $title .= ' - ';
+    }
 
-    if (isset($file)) {
-        echo '<meta property="og:url" content="' . sprintf("%s/%s.%s", CONFIG["instance"]["url"], $file->id, $file->extension) . '" />';
-        if (CONFIG['thumbnails']['enable']) {
-            echo '<meta property="og:image" content="' . sprintf("%s%s/%s.webp", CONFIG["instance"]["url"], CONFIG["thumbnails"]["url"], $file->id) . '" />';
+    $title .= CONFIG['instance']['name'] . ' - file sharing website';
+
+    echo "<title>$title</title>";
+    echo "<meta property=\"og:title\" content=\"$title\" />";
+    echo '<meta property="og:type" content="website" />';
+    echo "<meta property=\"og:description\" content=\"$description\" />";
+    echo "<meta property=\"description\" content=\"$description\" />";
+
+    if (isset($post)) {
+        echo "<meta property=\"og:url\" content=\"{$post->url()}\" />";
+        if ($image_url = $post->thumbnail_url()) {
+            echo "<meta property=\"og:image\" content=\"$image_url\" />";
         }
     }
 

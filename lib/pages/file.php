@@ -8,12 +8,43 @@ if (IS_JSON_REQUEST) {
 }
 
 $single_attachment = $post->single_attachment();
+
+$description = null;
+if ($single_attachment) {
+    $description = "{$single_attachment->mime} - {$single_attachment->extension}";
+
+    if (isset($post->views)) {
+        $description .= " - {$post->views} views";
+    }
+
+    if (isset($post->uploaded_at)) {
+        $description .= " - uploaded " . format_timestamp($post->uploaded_at) . " ago";
+    }
+
+    if (isset($single_attachment->metadata)) {
+        $m = $single_attachment->metadata;
+        if (isset($m->width, $m->height)) {
+            $description .= " - {$m->width}x{$m->height}";
+        }
+
+        if (isset($m->duration)) {
+            $dur = format_timestamp((new DateTime())->setTimestamp(time() + $m->duration));
+            $description .= " - $dur";
+        }
+
+        if (isset($m->line_count)) {
+            $description .= " - {$m->line_count} lines";
+        }
+    }
+} else {
+    $description = 'Post with multiple attachments';
+}
 ?>
 <!DOCTYPE html>
 <html>
 
 <head>
-    <?php html_head($post->id); ?>
+    <?php html_head($post->name(), $description, $post); ?>
 </head>
 
 <body>
