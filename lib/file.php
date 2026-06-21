@@ -383,7 +383,7 @@ class Post implements JsonSerializable
 
     public function thumbnail_url(): string
     {
-        return $this->single_attachment()?->thumbnail_url() ?? (CONFIG['instance']['url'] . "/static/img/default/multi_upload.webp");
+        return $this->single_attachment()?->thumbnail_url() ?? (CONFIG['instance']['url'] . "/static/img/default/multi-upload.webp");
     }
 
     public function single_attachment(): BaseFile|null

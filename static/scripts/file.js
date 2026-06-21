@@ -109,7 +109,7 @@ function createFile(file) {
     if (fileThumbnailURL) {
         const img = new Image();
         img.addEventListener("load", () => root.style.backgroundImage = `url('${fileThumbnailURL}')`);
-        img.addEventListener("error", () => root.style.backgroundImage = "url('/static/img/default-thumbnail.webp')");
+        img.addEventListener("error", () => root.style.backgroundImage = "url('/static/img/default/default-thumbnail.webp')");
 
         if (saveOnFetch) {
             fetch(fileThumbnailURL)

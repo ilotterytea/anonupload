@@ -478,7 +478,7 @@ fieldset>legend {
     color: var(--file-foreground);
 
     background-color: #000;
-    background-image: url('/static/img/default-thumbnail.webp');
+    background-image: url('/static/img/default/default-thumbnail.webp');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
