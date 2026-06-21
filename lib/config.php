@@ -57,8 +57,8 @@ $cfg = [
         'pass' => "default",
     ],
     "driver" => [
-        "ruffle" => false,
-        "chart" => false
+        "ruffle" => null,
+        "chart" => null
     ],
     "filecatalog" => [
         "public" => true,

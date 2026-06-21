@@ -52,7 +52,7 @@ function html_head(string $title = "", string|null $description = null, Post|nul
     }
 
     if ($image_url) {
-            echo "<meta property=\"og:image\" content=\"$image_url\" />";
+        echo "<meta property=\"og:image\" content=\"$image_url\" />";
     }
 
     echo '<meta name="viewport" content="width=device-width, initial-scale=1" />';
@@ -198,30 +198,31 @@ function html_file_brick(Post $post)
     $name = $post->name();
     $mime = $post->mime();
 
-    echo '<div class="box item brick">';
-    echo "<a href='{$post->url()}'>";
-    echo "<i title='$name'>";
-
+    echo '<div class="file item brick" style="background-image: url(\'';
     echo match (true) {
-        $mime === "application/x-multi-upload" =>
-        "<img src='/static/img/icons/file_multi.png' alt='$name' loading='lazy' class='thumbnail stock'>",
-
-        $mime === "application/x-shockwave-flash" =>
-        "<img src='/static/img/icons/file_flash.png' alt='$name' class='thumbnail stock'>",
-
-        str_starts_with($mime, 'image/') || str_starts_with($mime, 'video/') =>
-        "<img src='{$post->thumbnail_url()} alt='$name' loading='lazy'>",
-
-        str_starts_with($mime, 'audio/') =>
-        "<img src='/static/img/icons/file_audio.png' alt='$name' class='thumbnail stock'>",
-
-        str_starts_with($mime, 'text/') =>
-        "<img src='/static/img/icons/file_text.png' alt='$name' class='thumbnail stock'>",
-
-        default => "<img src='/static/img/icons/file.png' alt='$name' class='thumbnail stock'>"
+        $mime === "application/x-multi-upload" => "/static/img/icons/file_multi.png",
+        $mime === "application/x-shockwave-flash" => "/static/img/icons/file_flash.png",
+        str_starts_with($mime, 'image/') || str_starts_with($mime, 'video/') => $post->thumbnail_url(),
+        str_starts_with($mime, 'audio/') => "/static/img/icons/file_audio.png",
+        str_starts_with($mime, 'text/') => "/static/img/icons/file_text.png",
+        default => "/static/img/icons/file.png"
     };
+    echo '\')"><div class="base">';
 
-    echo '</i></a></div>';
+    echo "<p class='name'>$name</p>";
+    echo '<ul class="details">';
+    if ($s = $post->single_attachment()) {
+        echo '<li>' . format_filesize($s->size) . '</li>';
+    } else {
+        echo '<li>multiple attachments</li>';
+    }
+    echo '</ul>';
+
+    echo '<div class="buttons">';
+    echo "<a href='{$post->url()}' target='_blank' class='button'>open</a>";
+    echo '</div>';
+
+    echo '</div></div>';
 }
 
 function html_file_full(BaseFile $file)

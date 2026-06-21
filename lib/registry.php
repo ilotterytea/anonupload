@@ -266,11 +266,13 @@ class SQLFileRegistry implements FileRegistry
         // -- the most viewed files
         $stmt = $this->db->query("SELECT p.id
         FROM posts p
-        ORDER BY views DESC LIMIT 5");
+        ORDER BY views DESC LIMIT 9");
 
         $files = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            array_push($files, Post::from_array($row));
+            if ($post = $this->get_post($row['id'])) {
+                array_push($files, $post);
+            }
         }
         $res['most_viewed'] = $files;
 
